@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate assets
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Validate expected files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -f usr/share/backgrounds/argvus/default.png
+          test -f usr/share/backgrounds/argvus/argvus-dark-silver.png
+          test -f usr/share/backgrounds/argvus/argvus-light.png
+          test -f usr/share/backgrounds/argvus/argvus-slate.png
+          test -f usr/share/fonts/TerminusTTF.ttf
+          test -f usr/share/fonts/Font\ Awesome\ 7\ Free-Solid-900.otf
+
+      - name: Validate Makefile install
+        run: make DESTDIR="$RUNNER_TEMP/pkg" PREFIX=/usr install

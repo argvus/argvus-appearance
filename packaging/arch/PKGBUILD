@@ -1,0 +1,25 @@
+# Maintainer: William C. Canin
+pkgname=argvus-appearance
+pkgver=0.0.0
+pkgrel=1
+pkgdesc="Shared wallpapers and bundled fonts for the Argvus desktop"
+arch=('any')
+url="https://github.com/argvus/argvus-appearance"
+license=('GPL-3.0-only')
+options=('!debug')
+depends=(
+  'fontconfig'
+)
+source=(
+  "${pkgname}-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz"
+)
+sha256sums=('SKIP')
+
+package() {
+  cd "${pkgname}-${pkgver}"
+
+  make DESTDIR="${pkgdir}" PREFIX=/usr install
+
+  install -Dm644 LICENSE \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
