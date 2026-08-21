@@ -1,6 +1,6 @@
 # Maintainer: William C. Canin
 pkgname=argvus-appearance
-pkgver=0.0.0
+pkgver=0.1.1
 pkgrel=1
 pkgdesc="Shared wallpapers and bundled fonts for the Argvus desktop"
 arch=('any')
