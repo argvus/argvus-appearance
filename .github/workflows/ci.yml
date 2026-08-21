@@ -27,8 +27,9 @@ jobs:
 
           test -f usr/share/backgrounds/argvus/default.png
           test -f usr/share/backgrounds/argvus/argvus-dark-silver.png
-          test -f usr/share/backgrounds/argvus/argvus-light.png
-          test -f usr/share/backgrounds/argvus/argvus-slate.png
+          test -f usr/share/backgrounds/argvus/argvus-dark-universe.png
+          test -f usr/share/backgrounds/argvus/argvus-light-veil.png
+          test -f usr/share/backgrounds/argvus/argvus-dark-slate.png
           test -f usr/share/fonts/TerminusTTF.ttf
           test -f usr/share/fonts/Font\ Awesome\ 7\ Free-Solid-900.otf
 
