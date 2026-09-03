@@ -49,24 +49,71 @@ EOF
   esac
 fi
 
-HYPR_THEMES="$(paths_config hypr/themes)"
-WAYBAR_THEMES="$(paths_config waybar/themes)"
-QS_THEMES="$(paths_config quickshell/argvus-control-panel/themes)"
-ROFI_THEMES="$(paths_config rofi/themes)"
+ensure_theme_parent() {
+  _relative="$1"
+  _theme="$2"
+  _target="$(paths_user_config "${_relative}/${_theme}")"
+
+  if [ -d "$_target" ]; then
+    dirname "$_target"
+    return 0
+  fi
+
+  for _source in \
+    "$(paths_override_config "${_relative}/${_theme}")" \
+    "$(paths_generated_config "${_relative}/${_theme}")" \
+    "$(paths_system_config "${_relative}/${_theme}")"; do
+    [ "$_source" = "$_target" ] && continue
+    if [ -d "$_source" ]; then
+      mkdir -p "$_target"
+      cp -R "$_source/." "$_target/"
+      dirname "$_target"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+required_theme_parent() {
+  _relative="$1"
+  _theme="$2"
+
+  if ! ensure_theme_parent "$_relative" "$_theme"; then
+    printf 'Error: theme directory not found: %s\n' "$(paths_system_config "${_relative}/${_theme}")" >&2
+    exit 1
+  fi
+}
+
+optional_theme_parent() {
+  _relative="$1"
+  _theme="$2"
+
+  if ensure_theme_parent "$_relative" "$_theme"; then
+    return 0
+  fi
+
+  paths_config "$_relative"
+}
+
+HYPR_THEMES="$(required_theme_parent hypr/themes "$THEME")"
+WAYBAR_THEMES="$(optional_theme_parent waybar/themes "$THEME")"
+QS_THEMES="$(optional_theme_parent quickshell/argvus-control-panel/themes "$THEME")"
+ROFI_THEMES="$(optional_theme_parent rofi/themes "$THEME")"
 ROFI_CONFIG="$(paths_config rofi/config.rasi)"
 ROFI_THEME="$(paths_config rofi/theme.rasi)"
 ROFI_MODE="$(paths_config rofi/mode.rasi)"
-DUNST_THEMES="$(paths_config dunst/themes)"
-KITTY_THEMES="$(paths_config kitty/themes)"
+DUNST_THEMES="$(optional_theme_parent dunst/themes "$THEME")"
+KITTY_THEMES="$(optional_theme_parent kitty/themes "$THEME")"
 FOOT_CONFIG="$(paths_config foot/foot.ini)"
-FOOT_THEMES="$(paths_config foot/themes)"
+FOOT_THEMES="$(optional_theme_parent foot/themes "$THEME")"
 FOOT_SYSTEM_THEMES="$(paths_system_config foot/themes)"
-BTOP_THEMES="$(paths_config btop/themes)"
+BTOP_THEMES="$(optional_theme_parent btop/themes "$THEME")"
 BTOP_SYSTEM_THEMES="$(paths_system_config btop/themes)"
 BOTTOM_THEMES="$(paths_config bottom/themes)"
 YAZI_CONFIG_ROOT="$(paths_config yazi)"
 YAZI_SYSTEM_ROOT="$(paths_system_config yazi)"
-SNAPPY_THEMES="$(paths_config snappy-switcher/themes)"
+SNAPPY_THEMES="$(optional_theme_parent snappy-switcher/themes "$THEME")"
 SUPERFILE_CONFIG_ROOT="$(paths_config superfile)"
 SUPERFILE_THEMES="$(paths_config superfile/theme)"
 QT6CT_COLORS="$(paths_config qt6ct/colors)"
@@ -363,22 +410,6 @@ if [ -z "$THEME" ]; then
   printf 'Usage: theme-switch <theme-name>\n' >&2
   exit 1
 fi
-
-for _dir in \
-  "$HYPR_THEMES/$THEME" \
-  "$WAYBAR_THEMES/$THEME" \
-  "$QS_THEMES/$THEME" \
-  "$ROFI_THEMES/$THEME" \
-  "$DUNST_THEMES/$THEME" \
-  "$KITTY_THEMES/$THEME" \
-  "$FOOT_THEMES/$THEME" \
-  "$BTOP_THEMES/$THEME" \
-  "$SNAPPY_THEMES/$THEME"; do
-  if [ ! -d "$_dir" ]; then
-    printf 'Error: theme directory not found: %s\n' "$_dir" >&2
-    exit 1
-  fi
- done
 
 if [ ! -f "$SUPERFILE_THEMES/$THEME.toml" ]; then
   printf 'Warning: superfile theme not found: %s\n' "$SUPERFILE_THEMES/$THEME.toml" >&2
