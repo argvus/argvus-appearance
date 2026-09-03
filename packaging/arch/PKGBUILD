@@ -1,7 +1,7 @@
 # Maintainer: William C. Canin
 pkgname=argvus-appearance
 pkgver=0.1.2
-pkgrel=2
+pkgrel=3
 pkgdesc="Shared wallpapers, fonts, themes and appearance integration for the Argvus desktop"
 arch=('any')
 url="https://github.com/argvus/argvus-appearance"
