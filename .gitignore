@@ -1,1 +1,3 @@
 /.release/
+*.zst
+argvus*.tar.gz

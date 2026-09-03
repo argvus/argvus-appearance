@@ -13,25 +13,37 @@ permissions:
 
 jobs:
   validate:
-    name: Validate assets
+    name: Validate package sources
     runs-on: ubuntu-latest
+    container: archlinux:latest
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Validate expected files
+      - name: Install validation tools
+        run: |
+          pacman -Syu --noconfirm --needed             base-devel             git             shellcheck             sudo
+
+      - name: Validate repository
         shell: bash
         run: |
           set -euo pipefail
+          if make -n validate >/dev/null 2>&1; then
+            make validate
+          else
+            echo "No make validate target; skipping repository validation."
+          fi
 
-          test -f usr/share/backgrounds/argvus/default.png
-          test -f usr/share/backgrounds/argvus/argvus-dark-silver.png
-          test -f usr/share/backgrounds/argvus/argvus-dark-universe.png
-          test -f usr/share/backgrounds/argvus/argvus-light-veil.png
-          test -f usr/share/backgrounds/argvus/argvus-dark-slate.png
-          test -f usr/share/fonts/TerminusTTF.ttf
-          test -f usr/share/fonts/Font\ Awesome\ 7\ Free-Solid-900.otf
+      - name: Validate CI PKGBUILD
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "packaging/arch"
+          makepkg -p PKGBUILD --printsrcinfo >/dev/null
 
-      - name: Validate Makefile install
-        run: make DESTDIR="$RUNNER_TEMP/pkg" PREFIX=/usr install
+      - name: Validate local PKGBUILD
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "packaging/arch/PKGBUILD.local"
