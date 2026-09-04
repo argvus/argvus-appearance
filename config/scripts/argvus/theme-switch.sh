@@ -190,6 +190,8 @@ apply_gtk_runtime_settings() {
   command -v gsettings >/dev/null 2>&1 || return 0
 
   gsettings set org.gnome.desktop.interface color-scheme "$_scheme" 2>/dev/null || true
+  gsettings set org.gnome.desktop.interface font-name "Terminus (TTF) 11" 2>/dev/null || true
+  gsettings set org.gnome.desktop.interface document-font-name "Terminus (TTF) 11" 2>/dev/null || true
   _current_theme="$(gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null || true)"
   if [ "$_current_theme" = "'${_theme_name}'" ]; then
     gsettings set org.gnome.desktop.interface gtk-theme "$_fallback_theme" 2>/dev/null || true
@@ -224,7 +226,7 @@ apply_gtk_theme_files() {
       replace_or_append_ini_setting "$_settings" gtk-theme-name "$_gtk_theme_name"
       replace_or_append_ini_setting "$_settings" gtk-application-prefer-dark-theme "$_prefer_dark"
       replace_or_append_ini_setting "$_settings" gtk-icon-theme-name "Argvus Icons"
-      replace_or_append_ini_setting "$_settings" gtk-font-name "Adwaita Sans 11"
+      replace_or_append_ini_setting "$_settings" gtk-font-name "Terminus (TTF) 11"
       replace_or_append_ini_setting "$_settings" gtk-cursor-theme-name Adwaita
       replace_or_append_ini_setting "$_settings" gtk-cursor-theme-size 24
     done

@@ -12,11 +12,15 @@ if [ "$current" = "'prefer-dark'" ]; then
   gsettings set org.gnome.desktop.interface color-scheme prefer-light
   gsettings set org.gnome.desktop.interface gtk-theme "Argvus Light Veil"
   gsettings set org.gnome.desktop.interface icon-theme "Argvus Icons"
+  gsettings set org.gnome.desktop.interface font-name "Terminus (TTF) 11"
+  gsettings set org.gnome.desktop.interface document-font-name "Terminus (TTF) 11"
   MODE="light"
 else
   gsettings set org.gnome.desktop.interface color-scheme prefer-dark
   gsettings set org.gnome.desktop.interface gtk-theme "Argvus Dark Aether"
   gsettings set org.gnome.desktop.interface icon-theme "Argvus Icons"
+  gsettings set org.gnome.desktop.interface font-name "Terminus (TTF) 11"
+  gsettings set org.gnome.desktop.interface document-font-name "Terminus (TTF) 11"
   MODE="dark"
 fi
 
