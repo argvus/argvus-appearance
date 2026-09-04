@@ -146,6 +146,60 @@ replace_or_append_setting() {
   fi
 }
 
+replace_or_append_ini_setting() {
+  _file="$1"
+  _key="$2"
+  _value="$3"
+  mkdir -p "${_file%/*}"
+  [ -f "$_file" ] || printf '[Settings]\n' > "$_file"
+
+  if ! grep -q '^\[Settings\]' "$_file"; then
+    _tmp="${_file}.argvus.$$"
+    { printf '[Settings]\n'; cat "$_file"; } > "$_tmp"
+    mv "$_tmp" "$_file"
+  fi
+
+  if grep -q "^[[:space:]]*${_key}[[:space:]]*=" "$_file"; then
+    sed -i "s|^[[:space:]]*${_key}[[:space:]]*=.*|${_key}=${_value}|" "$_file"
+  else
+    printf '%s=%s\n' "$_key" "$_value" >> "$_file"
+  fi
+}
+
+apply_gtk_theme_files() {
+  _gtk_mode="$1"
+  _gtk_theme_name="$2"
+  _prefer_dark="$3"
+
+  for _gtk_version in gtk-3.0 gtk-4.0; do
+    _theme_dir="$(optional_theme_parent "${_gtk_version}/themes" "$THEME")"
+    [ -f "${_theme_dir}/${THEME}/gtk.css" ] || continue
+
+    _argvus_gtk_dir="$(paths_user_config "$_gtk_version")"
+    _native_gtk_dir="${ARGVUS_CONFIG_HOME}/${_gtk_version}"
+    mkdir -p "$_argvus_gtk_dir" "$_native_gtk_dir"
+
+    cp "${_theme_dir}/${THEME}/gtk.css" "${_argvus_gtk_dir}/gtk.css"
+    cp "${_theme_dir}/${THEME}/gtk.css" "${_native_gtk_dir}/gtk.css"
+
+    if [ -f "${_theme_dir}/${THEME}/gtk-dark.css" ]; then
+      cp "${_theme_dir}/${THEME}/gtk-dark.css" "${_argvus_gtk_dir}/gtk-dark.css"
+      cp "${_theme_dir}/${THEME}/gtk-dark.css" "${_native_gtk_dir}/gtk-dark.css"
+    fi
+
+    for _settings in "${_argvus_gtk_dir}/settings.ini" "${_native_gtk_dir}/settings.ini"; do
+      replace_or_append_ini_setting "$_settings" gtk-theme-name "$_gtk_theme_name"
+      replace_or_append_ini_setting "$_settings" gtk-application-prefer-dark-theme "$_prefer_dark"
+      replace_or_append_ini_setting "$_settings" gtk-icon-theme-name Yaru-prussiangreen-dark
+      replace_or_append_ini_setting "$_settings" gtk-font-name "Adwaita Sans 11"
+      replace_or_append_ini_setting "$_settings" gtk-cursor-theme-name Adwaita
+      replace_or_append_ini_setting "$_settings" gtk-cursor-theme-size 24
+    done
+  done
+
+  printf '%s\n' "$_gtk_mode" > "$GTK_MODE_FILE"
+}
+
 HYPR_THEMES="$(required_theme_parent hypr/themes "$THEME")"
 WAYBAR_THEMES="$(optional_theme_parent waybar/themes "$THEME")"
 QS_THEMES="$(optional_theme_parent quickshell/argvus-control-panel/themes "$THEME")"
@@ -738,14 +792,14 @@ GTK_MODE_FILE="${ARGVUS_CONFIG_HOME}/argvus/.gtk-mode"
 mkdir -p "$(dirname "$GTK_MODE_FILE")"
 case "$THEME" in
   argvus-light-veil | argvus-light-veil-float)
-    printf 'light\n' > "$GTK_MODE_FILE"
+    apply_gtk_theme_files light Adwaita 0
     if command -v gsettings >/dev/null 2>&1; then
       gsettings set org.gnome.desktop.interface color-scheme prefer-light 2>/dev/null || true
       gsettings set org.gnome.desktop.interface gtk-theme Adwaita 2>/dev/null || true
     fi
     ;;
   *)
-    printf 'dark\n' > "$GTK_MODE_FILE"
+    apply_gtk_theme_files dark Adwaita-dark 1
     if command -v gsettings >/dev/null 2>&1; then
       gsettings set org.gnome.desktop.interface color-scheme prefer-dark 2>/dev/null || true
       gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark 2>/dev/null || true
