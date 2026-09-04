@@ -10,11 +10,13 @@ current="$(gsettings get org.gnome.desktop.interface color-scheme)"
 
 if [ "$current" = "'prefer-dark'" ]; then
   gsettings set org.gnome.desktop.interface color-scheme prefer-light
-  gsettings set org.gnome.desktop.interface gtk-theme Adwaita
+  gsettings set org.gnome.desktop.interface gtk-theme "Argvus Light Veil"
+  gsettings set org.gnome.desktop.interface icon-theme "Argvus Icons"
   MODE="light"
 else
   gsettings set org.gnome.desktop.interface color-scheme prefer-dark
-  gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark
+  gsettings set org.gnome.desktop.interface gtk-theme "Argvus Dark Aether"
+  gsettings set org.gnome.desktop.interface icon-theme "Argvus Icons"
   MODE="dark"
 fi
 

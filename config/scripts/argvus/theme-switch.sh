@@ -166,6 +166,39 @@ replace_or_append_ini_setting() {
   fi
 }
 
+gtk_theme_name_for_theme() {
+  case "$1" in
+    argvus-dark-aether) printf '%s\n' "Argvus Dark Aether" ;;
+    argvus-dark-aether-float) printf '%s\n' "Argvus Dark Aether Float" ;;
+    argvus-dark-slate) printf '%s\n' "Argvus Dark Slate" ;;
+    argvus-dark-slate-float) printf '%s\n' "Argvus Dark Slate Float" ;;
+    argvus-dark-silver) printf '%s\n' "Argvus Dark Silver" ;;
+    argvus-dark-silver-float) printf '%s\n' "Argvus Dark Silver Float" ;;
+    argvus-dark-universe) printf '%s\n' "Argvus Dark Universe" ;;
+    argvus-dark-universe-float) printf '%s\n' "Argvus Dark Universe Float" ;;
+    argvus-light-veil) printf '%s\n' "Argvus Light Veil" ;;
+    argvus-light-veil-float) printf '%s\n' "Argvus Light Veil Float" ;;
+    *) return 1 ;;
+  esac
+}
+
+apply_gtk_runtime_settings() {
+  _scheme="$1"
+  _theme_name="$2"
+  _fallback_theme="$3"
+
+  command -v gsettings >/dev/null 2>&1 || return 0
+
+  gsettings set org.gnome.desktop.interface color-scheme "$_scheme" 2>/dev/null || true
+  _current_theme="$(gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null || true)"
+  if [ "$_current_theme" = "'${_theme_name}'" ]; then
+    gsettings set org.gnome.desktop.interface gtk-theme "$_fallback_theme" 2>/dev/null || true
+    sleep 0.05
+  fi
+  gsettings set org.gnome.desktop.interface gtk-theme "$_theme_name" 2>/dev/null || true
+  gsettings set org.gnome.desktop.interface icon-theme "Argvus Icons" 2>/dev/null || true
+}
+
 apply_gtk_theme_files() {
   _gtk_mode="$1"
   _gtk_theme_name="$2"
@@ -190,7 +223,7 @@ apply_gtk_theme_files() {
     for _settings in "${_argvus_gtk_dir}/settings.ini" "${_native_gtk_dir}/settings.ini"; do
       replace_or_append_ini_setting "$_settings" gtk-theme-name "$_gtk_theme_name"
       replace_or_append_ini_setting "$_settings" gtk-application-prefer-dark-theme "$_prefer_dark"
-      replace_or_append_ini_setting "$_settings" gtk-icon-theme-name Yaru-prussiangreen-dark
+      replace_or_append_ini_setting "$_settings" gtk-icon-theme-name "Argvus Icons"
       replace_or_append_ini_setting "$_settings" gtk-font-name "Adwaita Sans 11"
       replace_or_append_ini_setting "$_settings" gtk-cursor-theme-name Adwaita
       replace_or_append_ini_setting "$_settings" gtk-cursor-theme-size 24
@@ -792,18 +825,14 @@ GTK_MODE_FILE="${ARGVUS_CONFIG_HOME}/argvus/.gtk-mode"
 mkdir -p "$(dirname "$GTK_MODE_FILE")"
 case "$THEME" in
   argvus-light-veil | argvus-light-veil-float)
-    apply_gtk_theme_files light Adwaita 0
-    if command -v gsettings >/dev/null 2>&1; then
-      gsettings set org.gnome.desktop.interface color-scheme prefer-light 2>/dev/null || true
-      gsettings set org.gnome.desktop.interface gtk-theme Adwaita 2>/dev/null || true
-    fi
+    _gtk_theme_name="$(gtk_theme_name_for_theme "$THEME")"
+    apply_gtk_theme_files light "$_gtk_theme_name" 0
+    apply_gtk_runtime_settings prefer-light "$_gtk_theme_name" Adwaita
     ;;
   *)
-    apply_gtk_theme_files dark Adwaita-dark 1
-    if command -v gsettings >/dev/null 2>&1; then
-      gsettings set org.gnome.desktop.interface color-scheme prefer-dark 2>/dev/null || true
-      gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark 2>/dev/null || true
-    fi
+    _gtk_theme_name="$(gtk_theme_name_for_theme "$THEME")"
+    apply_gtk_theme_files dark "$_gtk_theme_name" 1
+    apply_gtk_runtime_settings prefer-dark "$_gtk_theme_name" Adwaita-dark
     ;;
 esac
 
