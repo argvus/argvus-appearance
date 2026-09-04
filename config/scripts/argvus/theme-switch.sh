@@ -96,6 +96,56 @@ optional_theme_parent() {
   paths_config "$_relative"
 }
 
+ensure_theme_file_parent() {
+  _relative="$1"
+  _file="$2"
+  _target="$(paths_user_config "${_relative}/${_file}")"
+
+  if [ -f "$_target" ]; then
+    dirname "$_target"
+    return 0
+  fi
+
+  for _source in \
+    "$(paths_override_config "${_relative}/${_file}")" \
+    "$(paths_generated_config "${_relative}/${_file}")" \
+    "$(paths_system_config "${_relative}/${_file}")"; do
+    [ "$_source" = "$_target" ] && continue
+    if [ -f "$_source" ]; then
+      mkdir -p "${_target%/*}"
+      cp "$_source" "$_target"
+      dirname "$_target"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+optional_theme_file_parent() {
+  _relative="$1"
+  _file="$2"
+
+  if ensure_theme_file_parent "$_relative" "$_file"; then
+    return 0
+  fi
+
+  paths_config "$_relative"
+}
+
+replace_or_append_setting() {
+  _file="$1"
+  _key="$2"
+  _value="$3"
+  [ -f "$_file" ] || return 0
+
+  if grep -q "^[[:space:]]*${_key}[[:space:]]*=" "$_file"; then
+    sed -i "s|^[[:space:]]*${_key}[[:space:]]*=.*|${_key} = ${_value}|" "$_file"
+  else
+    printf '\n%s = %s\n' "$_key" "$_value" >> "$_file"
+  fi
+}
+
 HYPR_THEMES="$(required_theme_parent hypr/themes "$THEME")"
 WAYBAR_THEMES="$(optional_theme_parent waybar/themes "$THEME")"
 QS_THEMES="$(optional_theme_parent quickshell/argvus-control-panel/themes "$THEME")"
@@ -110,12 +160,12 @@ FOOT_THEMES="$(optional_theme_parent foot/themes "$THEME")"
 FOOT_SYSTEM_THEMES="$(paths_system_config foot/themes)"
 BTOP_THEMES="$(optional_theme_parent btop/themes "$THEME")"
 BTOP_SYSTEM_THEMES="$(paths_system_config btop/themes)"
-BOTTOM_THEMES="$(paths_config bottom/themes)"
+BOTTOM_THEMES="$(optional_theme_parent bottom/themes "$THEME")"
 YAZI_CONFIG_ROOT="$(paths_config yazi)"
 YAZI_SYSTEM_ROOT="$(paths_system_config yazi)"
 SNAPPY_THEMES="$(optional_theme_parent snappy-switcher/themes "$THEME")"
 SUPERFILE_CONFIG_ROOT="$(paths_config superfile)"
-SUPERFILE_THEMES="$(paths_config superfile/theme)"
+SUPERFILE_THEMES="$(optional_theme_file_parent superfile/theme "${THEME}.toml")"
 QT6CT_COLORS="$(paths_config qt6ct/colors)"
 HYPRPAPER_FILE="$(paths_config hypr/hyprpaper.conf)"
 HYPRPAPER_DIR="$(paths_backgrounds argvus)"
@@ -212,6 +262,75 @@ should_manage_foot_config() {
   _conf="$1"
   [ -f "$_conf" ] || return 0
   grep -q 'argvus.*/foot/themes' "$_conf"
+}
+
+toml_color_value() {
+  _file="$1"
+  _key="$2"
+  sed -n "s|^[[:space:]]*${_key}[[:space:]]*=[[:space:]]*\"\\([^\"]*\\)\".*|\\1|p" "$_file" | head -n1
+}
+
+replace_style_color() {
+  _file="$1"
+  _key="$2"
+  _value="$3"
+  [ -f "$_file" ] || return 0
+  if sed -n "/^[[:space:]]*${_key}[[:space:]]*=/p" "$_file" | grep -q 'bold[[:space:]]*=[[:space:]]*true'; then
+    sed -i "s|^[[:space:]]*${_key}[[:space:]]*=.*|${_key} = {color = \"${_value}\", bold = true}|" "$_file"
+  else
+    sed -i "s|^[[:space:]]*${_key}[[:space:]]*=.*|${_key} = {color = \"${_value}\"}|" "$_file"
+  fi
+}
+
+replace_plain_color() {
+  _file="$1"
+  _key="$2"
+  _value="$3"
+  [ -f "$_file" ] || return 0
+  sed -i "s|^[[:space:]]*${_key}[[:space:]]*=.*|${_key} = \"${_value}\"|" "$_file"
+}
+
+apply_bottom_theme_to_profile() {
+  _profile="$1"
+  _theme_file="$2"
+  [ -f "$_profile" ] && [ -f "$_theme_file" ] || return 0
+
+  _accent="$(toml_color_value "$_theme_file" border)"
+  _fg="$(toml_color_value "$_theme_file" foreground)"
+  _bg="$(toml_color_value "$_theme_file" background)"
+  _selected_bg="$(toml_color_value "$_theme_file" selected_bg)"
+  _selected_fg="$(toml_color_value "$_theme_file" selected_text)"
+  _mem="$(toml_color_value "$_theme_file" mem_color)"
+  _swap="$(toml_color_value "$_theme_file" swap_color)"
+  _rx="$(toml_color_value "$_theme_file" rx_color)"
+  _tx="$(toml_color_value "$_theme_file" tx_color)"
+
+  [ -n "$_accent" ] || return 0
+  [ -n "$_fg" ] || _fg="$_accent"
+  [ -n "$_bg" ] || _bg="#111316"
+  [ -n "$_selected_bg" ] || _selected_bg="$_accent"
+  [ -n "$_selected_fg" ] || _selected_fg="$_bg"
+  [ -n "$_mem" ] || _mem="$_accent"
+  [ -n "$_swap" ] || _swap="$_mem"
+  [ -n "$_rx" ] || _rx="$_fg"
+  [ -n "$_tx" ] || _tx="$_accent"
+
+  replace_plain_color "$_profile" all_entry_color "$_accent"
+  replace_plain_color "$_profile" avg_entry_color "$_fg"
+  sed -i "s|^[[:space:]]*cpu_core_colors[[:space:]]*=.*|cpu_core_colors = [\"${_accent}\", \"${_mem}\", \"${_swap}\", \"${_fg}\", \"${_rx}\", \"${_accent}\", \"${_mem}\", \"${_swap}\"]|" "$_profile"
+  replace_plain_color "$_profile" ram_color "$_accent"
+  replace_plain_color "$_profile" swap_color "$_swap"
+  replace_plain_color "$_profile" rx_color "$_rx"
+  replace_plain_color "$_profile" tx_color "$_tx"
+  replace_style_color "$_profile" headers "$_accent"
+  replace_plain_color "$_profile" graph_color "$_fg"
+  replace_style_color "$_profile" legend_text "$_fg"
+  replace_plain_color "$_profile" border_color "$_swap"
+  replace_plain_color "$_profile" selected_border_color "$_accent"
+  replace_style_color "$_profile" widget_title "$_accent"
+  replace_style_color "$_profile" text "$_fg"
+  sed -i "s|^[[:space:]]*selected_text[[:space:]]*=.*|selected_text = {color = \"${_selected_fg}\", bg_color = \"${_selected_bg}\"}|" "$_profile"
+  replace_style_color "$_profile" disabled_text "$_swap"
 }
 
 foot_color_value() {
@@ -548,12 +667,14 @@ if [ -f "$BTOP_THEMES/$THEME/theme.theme" ]; then
   _btop_conf="$(paths_config btop/btop.conf)"
   sed -i "s|color_theme = .*|color_theme = \"${BTOP_THEMES}/${THEME}/theme.theme\"|" "$_btop_conf"
   _native_btop="${ARGVUS_CONFIG_HOME}/btop/btop.conf"
-  if should_manage_btop_config "$_native_btop"; then
+  if [ -d "${ARGVUS_CONFIG_HOME}/btop" ] || should_manage_btop_config "$_native_btop"; then
     mkdir -p "${_native_btop%/*}"
+    mkdir -p "${ARGVUS_CONFIG_HOME}/btop/themes/${THEME}"
+    cp "$BTOP_THEMES/$THEME/theme.theme" "${ARGVUS_CONFIG_HOME}/btop/themes/${THEME}/theme.theme"
     if [ ! -f "$_native_btop" ]; then
       cp "$_btop_conf" "$_native_btop"
     fi
-    sed -i "s|color_theme = .*|color_theme = \"${BTOP_THEMES}/${THEME}/theme.theme\"|" "$_native_btop"
+    sed -i "s|color_theme = .*|color_theme = \"${ARGVUS_CONFIG_HOME}/btop/themes/${THEME}/theme.theme\"|" "$_native_btop"
   fi
 fi
 
@@ -563,7 +684,26 @@ if [ -f "$SNAPPY_THEMES/$THEME/theme.ini" ]; then
 fi
 
 if [ -f "$BOTTOM_THEMES/$THEME/bottom.toml" ]; then
-  cp "$BOTTOM_THEMES/$THEME/bottom.toml" "$(paths_config bottom/bottom.toml)"
+  _bottom_theme="$BOTTOM_THEMES/$THEME/bottom.toml"
+  _bottom_conf="$(paths_config bottom/bottom.toml)"
+  cp "$_bottom_theme" "$_bottom_conf"
+  for _profile in cpu mem; do
+    _profile_conf="$(paths_config "bottom/${_profile}.toml")"
+    apply_bottom_theme_to_profile "$_profile_conf" "$_bottom_theme"
+  done
+
+  _native_bottom="${ARGVUS_CONFIG_HOME}/bottom"
+  if [ -d "$_native_bottom" ]; then
+    mkdir -p "$_native_bottom"
+    cp "$_bottom_theme" "$_native_bottom/bottom.toml"
+    for _profile in cpu mem; do
+      _native_profile="$_native_bottom/${_profile}.toml"
+      if [ ! -f "$_native_profile" ]; then
+        cp "$(paths_config "bottom/${_profile}.toml")" "$_native_profile"
+      fi
+      apply_bottom_theme_to_profile "$_native_profile" "$_bottom_theme"
+    done
+  fi
 fi
 
 if [ -d "$YAZI_SYSTEM_ROOT/flavors/$THEME.yazi" ]; then
@@ -579,7 +719,16 @@ fi
 
 _superfile_conf="$SUPERFILE_CONFIG_ROOT/config.toml"
 if [ -f "$_superfile_conf" ] && [ -f "$SUPERFILE_THEMES/$THEME.toml" ]; then
-  sed -i "s|^theme = .*|theme = \"${THEME}\"|" "$_superfile_conf"
+  replace_or_append_setting "$_superfile_conf" theme "\"${THEME}\""
+  _native_superfile="${ARGVUS_CONFIG_HOME}/superfile"
+  if [ -d "$_native_superfile" ]; then
+    mkdir -p "$_native_superfile/theme"
+    cp "$SUPERFILE_THEMES/$THEME.toml" "$_native_superfile/theme/$THEME.toml"
+    if [ ! -f "$_native_superfile/config.toml" ]; then
+      cp "$_superfile_conf" "$_native_superfile/config.toml"
+    fi
+    replace_or_append_setting "$_native_superfile/config.toml" theme "\"${THEME}\""
+  fi
 fi
 
 # Reset GTK mode to match the selected theme.
