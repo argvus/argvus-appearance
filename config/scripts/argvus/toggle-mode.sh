@@ -5,6 +5,19 @@ ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}
 . "$ARGVUS_BOOTSTRAP"
 ARGVUS_MUTABLE_CONFIG=1
 
+font_state_value() {
+  _key="$1"
+  _fallback="$2"
+  _fonts_file="${ARGVUS_CONFIG_HOME}/argvus/fonts.conf"
+  if [ -f "$_fonts_file" ]; then
+    _value="$(sed -n "s|^${_key}=||p" "$_fonts_file" | head -n1)"
+    [ -n "$_value" ] && { printf '%s\n' "$_value"; return 0; }
+  fi
+  printf '%s\n' "$_fallback"
+}
+
+ARGVUS_APPS_FONT="$(font_state_value apps_name "$(font_state_value default_name "Terminus (TTF) Bold")") $(font_state_value apps_size "$(font_state_value default_size 13)")"
+
 # Toggle GTK dark/light mode
 current="$(gsettings get org.gnome.desktop.interface color-scheme)"
 
@@ -12,15 +25,15 @@ if [ "$current" = "'prefer-dark'" ]; then
   gsettings set org.gnome.desktop.interface color-scheme prefer-light
   gsettings set org.gnome.desktop.interface gtk-theme "Argvus Light Veil"
   gsettings set org.gnome.desktop.interface icon-theme "Argvus Icons"
-  gsettings set org.gnome.desktop.interface font-name "Terminus (TTF) 11"
-  gsettings set org.gnome.desktop.interface document-font-name "Terminus (TTF) 11"
+  gsettings set org.gnome.desktop.interface font-name "$ARGVUS_APPS_FONT"
+  gsettings set org.gnome.desktop.interface document-font-name "$ARGVUS_APPS_FONT"
   MODE="light"
 else
   gsettings set org.gnome.desktop.interface color-scheme prefer-dark
   gsettings set org.gnome.desktop.interface gtk-theme "Argvus Dark Aether"
   gsettings set org.gnome.desktop.interface icon-theme "Argvus Icons"
-  gsettings set org.gnome.desktop.interface font-name "Terminus (TTF) 11"
-  gsettings set org.gnome.desktop.interface document-font-name "Terminus (TTF) 11"
+  gsettings set org.gnome.desktop.interface font-name "$ARGVUS_APPS_FONT"
+  gsettings set org.gnome.desktop.interface document-font-name "$ARGVUS_APPS_FONT"
   MODE="dark"
 fi
 

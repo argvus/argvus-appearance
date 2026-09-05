@@ -200,11 +200,17 @@ write_managed_css_block() {
   fi
 }
 
-ARGVUS_DEFAULT_FONT="$(font_state_value default_name "Terminus (TTF)") $(font_state_value default_size 11)"
-ARGVUS_DEFAULT_FAMILY="$(font_state_value default_family "Terminus (TTF)")"
-ARGVUS_DEFAULT_SIZE="$(font_state_value default_size 11)"
-ARGVUS_MONO_FAMILY="$(font_state_value monospace_family "Terminus (TTF)")"
-ARGVUS_MONO_SIZE="$(font_state_value monospace_size 11)"
+ARGVUS_APPS_NAME="$(font_state_value apps_name "$(font_state_value default_name "Terminus (TTF) Bold")")"
+ARGVUS_APPS_SIZE="$(font_state_value apps_size "$(font_state_value default_size 13)")"
+ARGVUS_APPS_FONT="${ARGVUS_APPS_NAME} ${ARGVUS_APPS_SIZE}"
+ARGVUS_TASKBAR_FAMILY="$(font_state_value taskbar_family "$(font_state_value default_family "Terminus (TTF)")")"
+ARGVUS_TASKBAR_SIZE="$(font_state_value taskbar_size "$(font_state_value default_size 14)")"
+ARGVUS_SYSINFO_FAMILY="$(font_state_value sysinfo_family "$(font_state_value monospace_family "Terminus (TTF)")")"
+ARGVUS_SYSINFO_SIZE="$(font_state_value sysinfo_size "$(font_state_value monospace_size 15)")"
+ARGVUS_SYSTEM_FAMILY="$(font_state_value system_family "$(font_state_value default_family "Terminus (TTF)")")"
+ARGVUS_SYSTEM_SIZE="$(font_state_value system_size "$(font_state_value default_size 13)")"
+ARGVUS_TERMINAL_FAMILY="$(font_state_value terminal_family "$(font_state_value monospace_family "JetBrainsMono Nerd Font")")"
+ARGVUS_TERMINAL_SIZE="$(font_state_value terminal_size "$(font_state_value monospace_size 13)")"
 
 gtk_theme_name_for_theme() {
   case "$1" in
@@ -230,8 +236,8 @@ apply_gtk_runtime_settings() {
   command -v gsettings >/dev/null 2>&1 || return 0
 
   gsettings set org.gnome.desktop.interface color-scheme "$_scheme" 2>/dev/null || true
-  gsettings set org.gnome.desktop.interface font-name "$ARGVUS_DEFAULT_FONT" 2>/dev/null || true
-  gsettings set org.gnome.desktop.interface document-font-name "$ARGVUS_DEFAULT_FONT" 2>/dev/null || true
+  gsettings set org.gnome.desktop.interface font-name "$ARGVUS_APPS_FONT" 2>/dev/null || true
+  gsettings set org.gnome.desktop.interface document-font-name "$ARGVUS_APPS_FONT" 2>/dev/null || true
   _current_theme="$(gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null || true)"
   if [ "$_current_theme" = "'${_theme_name}'" ]; then
     gsettings set org.gnome.desktop.interface gtk-theme "$_fallback_theme" 2>/dev/null || true
@@ -266,7 +272,7 @@ apply_gtk_theme_files() {
       replace_or_append_ini_setting "$_settings" gtk-theme-name "$_gtk_theme_name"
       replace_or_append_ini_setting "$_settings" gtk-application-prefer-dark-theme "$_prefer_dark"
       replace_or_append_ini_setting "$_settings" gtk-icon-theme-name "Argvus Icons"
-      replace_or_append_ini_setting "$_settings" gtk-font-name "$ARGVUS_DEFAULT_FONT"
+      replace_or_append_ini_setting "$_settings" gtk-font-name "$ARGVUS_APPS_FONT"
       replace_or_append_ini_setting "$_settings" gtk-cursor-theme-name Adwaita
       replace_or_append_ini_setting "$_settings" gtk-cursor-theme-size 24
     done
@@ -736,20 +742,20 @@ sed -i "s|@import url(\"./themes/.*/sysinfo-theme.css\");|@import url(\"./themes
   "$(paths_config waybar/argvus-sysinfo.css)"
 
 write_managed_css_block "$(paths_config waybar/argvus-taskbar.css)" "* {
-  font-family: \"${ARGVUS_DEFAULT_FAMILY}\", \"Font Awesome 7 Free\", monospace;
-  font-size: ${ARGVUS_DEFAULT_SIZE}px;
+  font-family: \"${ARGVUS_TASKBAR_FAMILY}\", \"Font Awesome 7 Free\", monospace;
+  font-size: ${ARGVUS_TASKBAR_SIZE}px;
 }"
 
 write_managed_css_block "$(paths_config waybar/argvus-sysinfo.css)" "* {
-  font-family: \"${ARGVUS_MONO_FAMILY}\", \"Symbols Nerd Font Mono\", monospace;
-  font-size: ${ARGVUS_MONO_SIZE}px;
+  font-family: \"${ARGVUS_SYSINFO_FAMILY}\", \"Symbols Nerd Font Mono\", monospace;
+  font-size: ${ARGVUS_SYSINFO_SIZE}px;
 }"
 
 sed -i "s|rofi -config [^ ]* -show drun|rofi -config ${ROFI_CONFIG} -show drun|" \
   "$_waybar_cfg"
 
 sed -i "s|@theme \".*/rofi/theme.rasi\"|@theme \"${ROFI_THEME}\"|" "$ROFI_CONFIG"
-sed -i "s|font: \".*\";|font: \"${ARGVUS_DEFAULT_FONT}\";|" "$ROFI_CONFIG"
+sed -i "s|font: \".*\";|font: \"${ARGVUS_APPS_FONT}\";|" "$ROFI_CONFIG"
 
 sed -i "s|@import \".*/rofi/themes/.*/theme.rasi\"|@import \"${ROFI_THEMES}/${THEME}/theme.rasi\"|" \
   "$ROFI_THEME"
@@ -757,6 +763,10 @@ sed -i "s|@import \".*/rofi/themes/.*/theme.rasi\"|@import \"${ROFI_THEMES}/${TH
 sed -i "s|@import \".*/rofi/mode.rasi\"|@import \"${ROFI_MODE}\"|" "$ROFI_THEME"
 
 sed -i "s|include .*/kitty/themes/.*/theme.conf|include ${KITTY_THEMES}/${THEME}/theme.conf|" \
+  "$(paths_config kitty/kitty.conf)"
+sed -i "s|^[[:space:]]*font_family[[:space:]].*|font_family      ${ARGVUS_TERMINAL_FAMILY}|" \
+  "$(paths_config kitty/kitty.conf)"
+sed -i "s|^[[:space:]]*font_size[[:space:]].*|font_size        ${ARGVUS_TERMINAL_SIZE}.0|" \
   "$(paths_config kitty/kitty.conf)"
 
 if [ -f "$FOOT_SYSTEM_THEMES/$THEME/theme.ini" ]; then
@@ -766,6 +776,7 @@ fi
 
 if [ -f "$FOOT_THEMES/$THEME/theme.ini" ]; then
   sed -i "s|^include = .*/foot/themes/.*/theme.ini|include = ${FOOT_THEMES}/${THEME}/theme.ini|" "$FOOT_CONFIG"
+  sed -i "s|^font=.*|font=${ARGVUS_TERMINAL_FAMILY}:size=${ARGVUS_TERMINAL_SIZE}, Noto Color Emoji:size=12|" "$FOOT_CONFIG"
   _native_foot="${ARGVUS_CONFIG_HOME}/foot/foot.ini"
   if should_manage_foot_config "$_native_foot"; then
     mkdir -p "${_native_foot%/*}"
@@ -773,6 +784,7 @@ if [ -f "$FOOT_THEMES/$THEME/theme.ini" ]; then
       cp "$FOOT_CONFIG" "$_native_foot"
     fi
     sed -i "s|^include = .*/foot/themes/.*/theme.ini|include = ${FOOT_THEMES}/${THEME}/theme.ini|" "$_native_foot"
+    sed -i "s|^font=.*|font=${ARGVUS_TERMINAL_FAMILY}:size=${ARGVUS_TERMINAL_SIZE}, Noto Color Emoji:size=12|" "$_native_foot"
   fi
   apply_running_foot_theme "$FOOT_THEMES/$THEME/theme.ini"
 fi
@@ -781,6 +793,8 @@ apply_dunst_theme
 
 if [ -f "$HYPR_THEMES/$THEME/hyprtoolkit.conf" ]; then
   cp "$HYPR_THEMES/$THEME/hyprtoolkit.conf" "$(paths_config hypr/hyprtoolkit.conf)"
+  replace_or_append_setting "$(paths_config hypr/hyprtoolkit.conf)" font_family "\"$ARGVUS_SYSTEM_FAMILY\""
+  replace_or_append_setting "$(paths_config hypr/hyprtoolkit.conf)" font_size "$ARGVUS_SYSTEM_SIZE"
 fi
 
 if [ -f "$HYPR_THEMES/$THEME/application-style.conf" ]; then
