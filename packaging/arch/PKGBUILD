@@ -14,7 +14,6 @@ depends=(
   'gtk3'
   'gtk4'
   'argvus-icons'
-  'argvus-theme-nautilus'
   'hyprland'
   'hyprpaper'
   'hyprpicker'
