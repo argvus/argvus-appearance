@@ -23,7 +23,9 @@ get_active_monitor() {
 }
 
 if command -v argvus >/dev/null 2>&1; then
-  "$TERM" -e argvus --yazy --chooser-file="$SELECTED_FILE" "$WALLPAPERS_DIR"
+  "$TERM" -e argvus --spf --chooser-file="$SELECTED_FILE" "$WALLPAPERS_DIR"
+elif command -v spf >/dev/null 2>&1; then
+  "$TERM" -e spf --chooser-file="$SELECTED_FILE" "$WALLPAPERS_DIR"
 else
   "$TERM" -e yazi --chooser-file="$SELECTED_FILE" "$WALLPAPERS_DIR"
 fi
