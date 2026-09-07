@@ -21,6 +21,7 @@ depends=(
   'procps-ng'
   'qt6ct'
   'swaybg'
+  'nwg-look'
 )
 optdepends=(
   'argvus-app-profiles: terminal and TUI app theme integration'
