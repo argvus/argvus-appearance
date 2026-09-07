@@ -24,7 +24,8 @@ depends=(
   'nwg-look'
 )
 optdepends=(
-  'argvus-app-profiles: terminal and TUI app theme integration'
+  'argvus-app-profiles: TUI app wrappers and non-Kitty app theme integration'
+  'argvus-terminal: Kitty terminal theme integration'
   'argvus-calendar: calendar theme integration'
   'argvus-lock: Hyprlock theme integration'
   'argvus-notifications: Dunst theme integration'

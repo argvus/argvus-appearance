@@ -18,13 +18,13 @@ install:
 	install -dm755 "$(DESTDIR)$(PREFIX)/share/backgrounds/argvus"
 	install -dm755 "$(DESTDIR)$(PREFIX)/share/fonts"
 	if [ -d config ]; then \
-		cp -a config/. "$(DESTDIR)$(PREFIX)/share/argvus/"; \
+		cp -R --no-preserve=ownership config/. "$(DESTDIR)$(PREFIX)/share/argvus/"; \
 		find "$(DESTDIR)$(PREFIX)/share/argvus/hypr/themes" -type f -name 'hyprlock.conf' -delete 2>/dev/null || true; \
 		rm -f "$(DESTDIR)$(PREFIX)/share/argvus/hypr/hyprlock.conf"; \
 		find "$(DESTDIR)$(PREFIX)/share/argvus/scripts" -type f -name '*.sh' -exec chmod 755 {} \; 2>/dev/null || true; \
 	fi
-	cp -a usr/share/backgrounds/argvus/. "$(DESTDIR)$(PREFIX)/share/backgrounds/argvus/"
-	cp -a usr/share/fonts/. "$(DESTDIR)$(PREFIX)/share/fonts/"
+	cp -R --no-preserve=ownership usr/share/backgrounds/argvus/. "$(DESTDIR)$(PREFIX)/share/backgrounds/argvus/"
+	cp -R --no-preserve=ownership usr/share/fonts/. "$(DESTDIR)$(PREFIX)/share/fonts/"
 	@if [ -z "$(DESTDIR)" ] && command -v fc-cache >/dev/null 2>&1; then fc-cache -f "$(PREFIX)/share/fonts" || true; fi
 
 uninstall:

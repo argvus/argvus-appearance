@@ -289,7 +289,6 @@ ROFI_CONFIG="$(paths_config rofi/config.rasi)"
 ROFI_THEME="$(paths_config rofi/theme.rasi)"
 ROFI_MODE="$(paths_config rofi/mode.rasi)"
 DUNST_THEMES="$(optional_theme_parent dunst/themes "$THEME")"
-KITTY_THEMES="$(optional_theme_parent kitty/themes "$THEME")"
 FOOT_CONFIG="$(paths_config foot/foot.ini)"
 FOOT_THEMES="$(optional_theme_parent foot/themes "$THEME")"
 FOOT_SYSTEM_THEMES="$(paths_system_config foot/themes)"
@@ -762,12 +761,7 @@ sed -i "s|@import \".*/rofi/themes/.*/theme.rasi\"|@import \"${ROFI_THEMES}/${TH
 
 sed -i "s|@import \".*/rofi/mode.rasi\"|@import \"${ROFI_MODE}\"|" "$ROFI_THEME"
 
-sed -i "s|include .*/kitty/themes/.*/theme.conf|include ${KITTY_THEMES}/${THEME}/theme.conf|" \
-  "$(paths_config kitty/kitty.conf)"
-sed -i "s|^[[:space:]]*font_family[[:space:]].*|font_family      ${ARGVUS_TERMINAL_FAMILY}|" \
-  "$(paths_config kitty/kitty.conf)"
-sed -i "s|^[[:space:]]*font_size[[:space:]].*|font_size        ${ARGVUS_TERMINAL_SIZE}.0|" \
-  "$(paths_config kitty/kitty.conf)"
+command -v argvus-terminal >/dev/null 2>&1 && argvus-terminal --apply "$THEME" >/dev/null 2>&1 || true
 
 if [ -f "$FOOT_SYSTEM_THEMES/$THEME/theme.ini" ]; then
   mkdir -p "$FOOT_THEMES/$THEME"

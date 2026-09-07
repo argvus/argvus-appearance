@@ -116,7 +116,6 @@ apply_theme_references() {
   _rofi_theme_file="$(paths_config rofi/theme.rasi)"
   _rofi_mode="$(paths_config rofi/mode.rasi)"
   _rofi_theme="$(paths_config "rofi/themes/${THEME}/theme.rasi")"
-  _kitty_theme="$(paths_config "kitty/themes/${THEME}/theme.conf")"
 
   sed -i "s|@import url(\"./themes/.*/theme.css\");|@import url(\"./themes/${THEME}/theme.css\");|" \
     "$(paths_config waybar/argvus-taskbar.css)" 2>/dev/null || true
@@ -128,8 +127,7 @@ apply_theme_references() {
     "$_rofi_theme_file" 2>/dev/null || true
   sed -i "s|@import \".*/rofi/mode.rasi\"|@import \"${_rofi_mode}\"|" \
     "$_rofi_theme_file" 2>/dev/null || true
-  sed -i "s|include .*/kitty/themes/.*/theme.conf|include ${_kitty_theme}|" \
-    "$(paths_config kitty/kitty.conf)" 2>/dev/null || true
+  command -v argvus-terminal >/dev/null 2>&1 && argvus-terminal --apply "$THEME" >/dev/null 2>&1 || true
   replace_setting "$(paths_config snappy-switcher/config.ini)" name "${THEME}/theme.ini"
   replace_setting "$_superfile_config/config.toml" theme "\"${THEME}\""
   replace_setting "$(paths_config qt6ct/qt6ct.conf)" color_scheme_path "$(paths_config "qt6ct/colors/${THEME}.conf")"
@@ -209,7 +207,6 @@ apply_application_colors() {
   _hyprlock="$(paths_config hypr/hyprlock.conf)"
   _hyprtoolkit="$(paths_config hypr/hyprtoolkit.conf)"
   _dunst="$(paths_config dunst/dunstrc)"
-  _kitty="$(paths_config "kitty/themes/${THEME}/theme.conf")"
   _snappy="$(paths_config "snappy-switcher/themes/${THEME}/theme.ini")"
   _bottom="$(paths_config bottom/bottom.toml)"
   _btop="$(paths_config "btop/themes/${THEME}/theme.theme")"
@@ -226,7 +223,6 @@ apply_application_colors() {
       set_dunst_section_value "$_dunst" "$_section" highlight "$COLOR"
     done
   fi
-  [ -f "$_kitty" ] && sed -i "s|^active_tab_foreground .*|active_tab_foreground   ${COLOR}|" "$_kitty"
   [ -f "$_snappy" ] && sed -i \
     -e "s|^border_color .*|border_color  = ${COLOR}ff|" \
     -e "s|^badge_bg .*|badge_bg      = ${COLOR}ff|" "$_snappy"
@@ -249,6 +245,7 @@ apply_application_colors() {
 
 refresh_runtime() {
   command -v hyprctl >/dev/null 2>&1 && hyprctl reload >/dev/null 2>&1 || true
+  command -v argvus-terminal >/dev/null 2>&1 && argvus-terminal --apply "$THEME" >/dev/null 2>&1 || true
   argvus-sessionctl restart waybar dunst snappy-switcher shell >/dev/null 2>&1 || true
   # Signal running kitty instances to reload config (SIGUSR1)
   for _pid in $(pgrep -x kitty 2>/dev/null); do
