@@ -26,6 +26,7 @@ depends=(
 optdepends=(
   'argvus-app-profiles: TUI app wrappers and non-Kitty app theme integration'
   'argvus-terminal: Kitty terminal theme integration'
+  'argvus-system-monitor: btop system monitor theme integration'
   'argvus-calendar: calendar theme integration'
   'argvus-lock: Hyprlock theme integration'
   'argvus-notifications: Dunst theme integration'

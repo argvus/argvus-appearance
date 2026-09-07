@@ -287,8 +287,6 @@ DUNST_THEMES="$(optional_theme_parent dunst/themes "$THEME")"
 FOOT_CONFIG="$(paths_config foot/foot.ini)"
 FOOT_THEMES="$(optional_theme_parent foot/themes "$THEME")"
 FOOT_SYSTEM_THEMES="$(paths_system_config foot/themes)"
-BTOP_THEMES="$(optional_theme_parent btop/themes "$THEME")"
-BTOP_SYSTEM_THEMES="$(paths_system_config btop/themes)"
 BOTTOM_THEMES="$(optional_theme_parent bottom/themes "$THEME")"
 YAZI_CONFIG_ROOT="$(paths_config yazi)"
 YAZI_SYSTEM_ROOT="$(paths_system_config yazi)"
@@ -375,16 +373,6 @@ set_dunst_section_value() {
     }
     { print }
   ' "$_file" > "$_tmp" && mv "$_tmp" "$_file"
-}
-
-should_manage_btop_config() {
-  _conf="$1"
-  [ -f "$_conf" ] || return 0
-  _theme="$(sed -n 's/^[[:space:]]*color_theme[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' "$_conf" | head -n1)"
-  case "$_theme" in
-    ''|Default|*argvus*) return 0 ;;
-    *) return 1 ;;
-  esac
 }
 
 should_manage_foot_config() {
@@ -801,25 +789,7 @@ if [ "$RUNTIME" -eq 1 ] && { [ -f "$HYPR_THEMES/$THEME/hyprtoolkit.conf" ] || [ 
   systemctl --user restart hyprpolkitagent 2>/dev/null || true
 fi
 
-if [ -f "$BTOP_SYSTEM_THEMES/$THEME/theme.theme" ]; then
-  mkdir -p "$BTOP_THEMES/$THEME"
-  cp "$BTOP_SYSTEM_THEMES/$THEME/theme.theme" "$BTOP_THEMES/$THEME/theme.theme"
-fi
-
-if [ -f "$BTOP_THEMES/$THEME/theme.theme" ]; then
-  _btop_conf="$(paths_config btop/btop.conf)"
-  sed -i "s|color_theme = .*|color_theme = \"${BTOP_THEMES}/${THEME}/theme.theme\"|" "$_btop_conf"
-  _native_btop="${ARGVUS_CONFIG_HOME}/btop/btop.conf"
-  if [ -d "${ARGVUS_CONFIG_HOME}/btop" ] || should_manage_btop_config "$_native_btop"; then
-    mkdir -p "${_native_btop%/*}"
-    mkdir -p "${ARGVUS_CONFIG_HOME}/btop/themes/${THEME}"
-    cp "$BTOP_THEMES/$THEME/theme.theme" "${ARGVUS_CONFIG_HOME}/btop/themes/${THEME}/theme.theme"
-    if [ ! -f "$_native_btop" ]; then
-      cp "$_btop_conf" "$_native_btop"
-    fi
-    sed -i "s|color_theme = .*|color_theme = \"${ARGVUS_CONFIG_HOME}/btop/themes/${THEME}/theme.theme\"|" "$_native_btop"
-  fi
-fi
+command -v argvus-system-monitor >/dev/null 2>&1 && argvus-system-monitor --apply "$THEME" >/dev/null 2>&1 || true
 
 if [ -f "$SNAPPY_THEMES/$THEME/theme.ini" ]; then
   _snappy_conf="$(paths_config snappy-switcher/config.ini)"

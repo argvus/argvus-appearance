@@ -128,12 +128,10 @@ apply_theme_references() {
   sed -i "s|@import \".*/rofi/mode.rasi\"|@import \"${_rofi_mode}\"|" \
     "$_rofi_theme_file" 2>/dev/null || true
   command -v argvus-terminal >/dev/null 2>&1 && argvus-terminal --apply "$THEME" >/dev/null 2>&1 || true
+  command -v argvus-system-monitor >/dev/null 2>&1 && argvus-system-monitor --apply "$THEME" >/dev/null 2>&1 || true
   replace_setting "$(paths_config snappy-switcher/config.ini)" name "${THEME}/theme.ini"
   replace_setting "$_superfile_config/config.toml" theme "\"${THEME}\""
   replace_setting "$(paths_config qt6ct/qt6ct.conf)" color_scheme_path "$(paths_config "qt6ct/colors/${THEME}.conf")"
-  if [ -f "$(paths_config "btop/themes/${THEME}/theme.theme")" ]; then
-    replace_setting "$(paths_config btop/btop.conf)" color_theme "\"$(paths_config "btop/themes/${THEME}/theme.theme")\""
-  fi
   if [ -f "$_yazi_config/flavors/${THEME}.yazi/flavor.toml" ]; then
     printf '[flavor]\ndark = "%s"\n' "$THEME" > "$_yazi_config/theme.toml"
   fi
@@ -209,7 +207,6 @@ apply_application_colors() {
   _dunst="$(paths_config dunst/dunstrc)"
   _snappy="$(paths_config "snappy-switcher/themes/${THEME}/theme.ini")"
   _bottom="$(paths_config bottom/bottom.toml)"
-  _btop="$(paths_config "btop/themes/${THEME}/theme.theme")"
   _superfile="$(paths_config "superfile/theme/${THEME}.toml")"
 
   [ -f "$_hyprlock" ] && sed -i "s|^[[:space:]]*outer_color = .*|  outer_color = rgb(${HEX})|" "$_hyprlock"
@@ -231,9 +228,7 @@ apply_application_colors() {
   replace_toml_color "$_bottom" selected_text
   [ -f "$_bottom" ] && sed -i "s|^selected_text = .*|selected_text = \"${ACCENT_TEXT}\"|" "$_bottom"
 
-  for _key in title hi_fg proc_misc cpu_box mem_box net_box proc_box temp_start; do
-    [ -f "$_btop" ] && sed -i "s|^theme\\[${_key}\\]=.*|theme[${_key}]=\"${COLOR}\"|" "$_btop"
-  done
+  command -v argvus-system-monitor >/dev/null 2>&1 && argvus-system-monitor --apply "$THEME" >/dev/null 2>&1 || true
 
   for _key in file_panel_border_active file_panel_top_directory_icon footer_border_active sidebar_title sidebar_border_active modal_border_active modal_confirm_bg help_menu_hotkey correct hint; do
     replace_toml_color "$_superfile" "$_key"
