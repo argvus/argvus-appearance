@@ -18,23 +18,67 @@ font_state_value() {
 
 ARGVUS_APPS_FONT="$(font_state_value apps_name "$(font_state_value default_name "Terminus (TTF) Bold")") $(font_state_value apps_size "$(font_state_value default_size 13)")"
 
+native_config_home() {
+  printf '%s\n' "${XDG_CONFIG_HOME:-$HOME/.config}"
+}
+
+replace_or_append_ini_setting() {
+  _file="$1"
+  _key="$2"
+  _value="$3"
+
+  mkdir -p "$(dirname "$_file")"
+  [ -f "$_file" ] || printf '[Settings]\n' > "$_file"
+
+  if grep -q "^${_key}=" "$_file"; then
+    sed -i "s|^${_key}=.*|${_key}=${_value}|" "$_file"
+  else
+    printf '%s=%s\n' "$_key" "$_value" >> "$_file"
+  fi
+}
+
+apply_gtk_settings_files() {
+  _mode="$1"
+  _theme="$2"
+  _prefer_dark="$3"
+
+  for _gtk_version in gtk-3.0 gtk-4.0; do
+    for _settings in \
+      "$(paths_user_config "$_gtk_version")/settings.ini" \
+      "$(native_config_home)/${_gtk_version}/settings.ini"; do
+      replace_or_append_ini_setting "$_settings" gtk-theme-name "$_theme"
+      replace_or_append_ini_setting "$_settings" gtk-application-prefer-dark-theme "$_prefer_dark"
+      replace_or_append_ini_setting "$_settings" gtk-icon-theme-name "Argvus Icons"
+      replace_or_append_ini_setting "$_settings" gtk-font-name "$ARGVUS_APPS_FONT"
+      replace_or_append_ini_setting "$_settings" gtk-cursor-theme-name Adwaita
+      replace_or_append_ini_setting "$_settings" gtk-cursor-theme-size 24
+    done
+  done
+
+  GTK_MODE_FILE="$ARGVUS_CONFIG_HOME/argvus/.gtk-mode"
+  mkdir -p "$(dirname "$GTK_MODE_FILE")"
+  printf '%s\n' "$_mode" > "$GTK_MODE_FILE"
+}
+
 # Toggle GTK dark/light mode
 current="$(gsettings get org.gnome.desktop.interface color-scheme)"
 
 if [ "$current" = "'prefer-dark'" ]; then
   gsettings set org.gnome.desktop.interface color-scheme prefer-light
-  gsettings set org.gnome.desktop.interface gtk-theme "Argvus Light Veil"
+  gsettings set org.gnome.desktop.interface gtk-theme "Adwaita"
   gsettings set org.gnome.desktop.interface icon-theme "Argvus Icons"
   gsettings set org.gnome.desktop.interface font-name "$ARGVUS_APPS_FONT"
   gsettings set org.gnome.desktop.interface document-font-name "$ARGVUS_APPS_FONT"
   MODE="light"
+  apply_gtk_settings_files "$MODE" Adwaita 0
 else
   gsettings set org.gnome.desktop.interface color-scheme prefer-dark
-  gsettings set org.gnome.desktop.interface gtk-theme "Argvus Dark Aether"
+  gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
   gsettings set org.gnome.desktop.interface icon-theme "Argvus Icons"
   gsettings set org.gnome.desktop.interface font-name "$ARGVUS_APPS_FONT"
   gsettings set org.gnome.desktop.interface document-font-name "$ARGVUS_APPS_FONT"
   MODE="dark"
+  apply_gtk_settings_files "$MODE" Adwaita-dark 1
 fi
 
 # Read current theme
@@ -171,6 +215,3 @@ fi
 # ==============================================================================
 # QUICKSHELL — .gtk-mode flag
 # ==============================================================================
-GTK_MODE_FILE="$ARGVUS_CONFIG_HOME/argvus/.gtk-mode"
-mkdir -p "$(dirname "$GTK_MODE_FILE")"
-printf '%s\n' "$MODE" > "$GTK_MODE_FILE"

@@ -212,18 +212,14 @@ ARGVUS_SYSTEM_SIZE="$(font_state_value system_size "$(font_state_value default_s
 ARGVUS_TERMINAL_FAMILY="$(font_state_value terminal_family "$(font_state_value monospace_family "JetBrainsMono Nerd Font")")"
 ARGVUS_TERMINAL_SIZE="$(font_state_value terminal_size "$(font_state_value monospace_size 13)")"
 
+native_config_home() {
+  printf '%s\n' "${XDG_CONFIG_HOME:-$HOME/.config}"
+}
+
 gtk_theme_name_for_theme() {
   case "$1" in
-    argvus-dark-aether) printf '%s\n' "Argvus Dark Aether" ;;
-    argvus-dark-aether-float) printf '%s\n' "Argvus Dark Aether Float" ;;
-    argvus-dark-slate) printf '%s\n' "Argvus Dark Slate" ;;
-    argvus-dark-slate-float) printf '%s\n' "Argvus Dark Slate Float" ;;
-    argvus-dark-silver) printf '%s\n' "Argvus Dark Silver" ;;
-    argvus-dark-silver-float) printf '%s\n' "Argvus Dark Silver Float" ;;
-    argvus-dark-universe) printf '%s\n' "Argvus Dark Universe" ;;
-    argvus-dark-universe-float) printf '%s\n' "Argvus Dark Universe Float" ;;
-    argvus-light-veil) printf '%s\n' "Argvus Light Veil" ;;
-    argvus-light-veil-float) printf '%s\n' "Argvus Light Veil Float" ;;
+    argvus-light-veil|argvus-light-veil-float) printf '%s\n' "Adwaita" ;;
+    argvus-dark-*) printf '%s\n' "Adwaita-dark" ;;
     *) return 1 ;;
   esac
 }
@@ -254,18 +250,17 @@ apply_gtk_theme_files() {
 
   for _gtk_version in gtk-3.0 gtk-4.0; do
     _theme_dir="$(optional_theme_parent "${_gtk_version}/themes" "$THEME")"
-    [ -f "${_theme_dir}/${THEME}/gtk.css" ] || continue
 
     _argvus_gtk_dir="$(paths_user_config "$_gtk_version")"
-    _native_gtk_dir="${ARGVUS_CONFIG_HOME}/${_gtk_version}"
+    _native_gtk_dir="$(native_config_home)/${_gtk_version}"
     mkdir -p "$_argvus_gtk_dir" "$_native_gtk_dir"
 
-    cp "${_theme_dir}/${THEME}/gtk.css" "${_argvus_gtk_dir}/gtk.css"
-    cp "${_theme_dir}/${THEME}/gtk.css" "${_native_gtk_dir}/gtk.css"
+    if [ -f "${_theme_dir}/${THEME}/gtk.css" ]; then
+      cp "${_theme_dir}/${THEME}/gtk.css" "${_argvus_gtk_dir}/gtk.css"
+    fi
 
     if [ -f "${_theme_dir}/${THEME}/gtk-dark.css" ]; then
       cp "${_theme_dir}/${THEME}/gtk-dark.css" "${_argvus_gtk_dir}/gtk-dark.css"
-      cp "${_theme_dir}/${THEME}/gtk-dark.css" "${_native_gtk_dir}/gtk-dark.css"
     fi
 
     for _settings in "${_argvus_gtk_dir}/settings.ini" "${_native_gtk_dir}/settings.ini"; do
@@ -888,12 +883,12 @@ case "$THEME" in
   argvus-light-veil | argvus-light-veil-float)
     _gtk_theme_name="$(gtk_theme_name_for_theme "$THEME")"
     apply_gtk_theme_files light "$_gtk_theme_name" 0
-    apply_gtk_runtime_settings prefer-light "$_gtk_theme_name" Adwaita
+    apply_gtk_runtime_settings prefer-light "$_gtk_theme_name" Adwaita-dark
     ;;
   *)
     _gtk_theme_name="$(gtk_theme_name_for_theme "$THEME")"
     apply_gtk_theme_files dark "$_gtk_theme_name" 1
-    apply_gtk_runtime_settings prefer-dark "$_gtk_theme_name" Adwaita-dark
+    apply_gtk_runtime_settings prefer-dark "$_gtk_theme_name" Adwaita
     ;;
 esac
 
