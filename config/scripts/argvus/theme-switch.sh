@@ -180,14 +180,23 @@ font_state_value() {
 write_managed_css_block() {
   _file="$1"
   _block="$2"
-  _start="/* argvus-settings-fonts:start */"
-  _end="/* argvus-settings-fonts:end */"
+  _start="/* argvus-control-center-fonts:start */"
+  _end="/* argvus-control-center-fonts:end */"
+  _legacy_start="/* argvus-settings-fonts:start */"
+  _legacy_end="/* argvus-settings-fonts:end */"
   [ -f "$_file" ] || return 0
 
   if grep -qF "$_start" "$_file"; then
     awk -v start="$_start" -v end="$_end" -v block="$_block" '
       $0 == start { print start; print block; skip = 1; next }
       $0 == end { print end; skip = 0; next }
+      skip { next }
+      { print }
+    ' "$_file" > "${_file}.argvus-fonts.$$" && mv "${_file}.argvus-fonts.$$" "$_file"
+  elif grep -qF "$_legacy_start" "$_file"; then
+    awk -v start="$_legacy_start" -v end="$_legacy_end" -v new_start="$_start" -v new_end="$_end" -v block="$_block" '
+      $0 == start { print new_start; print block; skip = 1; next }
+      $0 == end { print new_end; skip = 0; next }
       skip { next }
       { print }
     ' "$_file" > "${_file}.argvus-fonts.$$" && mv "${_file}.argvus-fonts.$$" "$_file"
