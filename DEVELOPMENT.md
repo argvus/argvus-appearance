@@ -1,11 +1,11 @@
 # Development
 
-Argvus Appearance contains shared wallpapers and bundled fonts for Argvus.
+Argvus Appearance contains shared themes and appearance integration for Argvus.
 
 ## Requirements
 
-This repository is asset-only. Local validation requires `make` and standard
-POSIX install tools.
+This repository is config-only. Local validation requires `make`, a POSIX
+shell and standard POSIX install tools.
 
 On Arch Linux, the package recipe lives at `packaging/arch/PKGBUILD`.
 
@@ -14,13 +14,12 @@ On Arch Linux, the package recipe lives at `packaging/arch/PKGBUILD`.
 Validate the expected asset layout:
 
 ```sh
-test -f usr/share/backgrounds/argvus/default.png
-test -f usr/share/backgrounds/argvus/argvus-dark-silver.png
-test -f usr/share/backgrounds/argvus/argvus-dark-universe.png
-test -f usr/share/backgrounds/argvus/argvus-light-veil.png
-test -f usr/share/backgrounds/argvus/argvus-dark-slate.png
-test -f usr/share/fonts/TerminusTTF.ttf
-test -f "usr/share/fonts/Font Awesome 7 Free-Solid-900.otf"
+test -f config/hypr/hyprpaper.conf
+test -f config/hypr/application-style.conf
+test -f config/hypr/hyprtoolkit.conf
+test -f config/gtk-3.0/settings.ini
+test -f config/gtk-4.0/settings.ini
+test -d config/qt6ct
 ```
 
 Validate installation into a staging directory:
@@ -34,10 +33,12 @@ make DESTDIR=/tmp/argvus-appearance-pkg PREFIX=/usr install
 The Arch package installs:
 
 ```text
-/usr/share/backgrounds/argvus/
-/usr/share/fonts/
+/usr/share/argvus/config/
 /usr/share/licenses/argvus-appearance/LICENSE
 ```
+
+Wallpapers and fonts live in the `argvus-wallpapers` and `argvus-fonts`
+packages.
 
 The package is architecture-independent, so `makepkg` produces a file named
 `argvus-appearance-X.Y.Z-1-any.pkg.tar.zst`. It is still published under

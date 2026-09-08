@@ -1,24 +1,27 @@
 # Argvus Appearance
 
-Argvus Appearance contains shared visual assets for the Argvus Desktop
-Environment.
+Argvus Appearance contains shared appearance configuration for the Argvus
+Desktop Environment.
 
 It currently ships:
 
-- Argvus wallpapers under `/usr/share/backgrounds/argvus`
-- Argvus bundled fonts under `/usr/share/fonts`
+- GTK / Qt theme integration under `/usr/share/argvus/gtk-3.0`,
+  `/usr/share/argvus/gtk-4.0` and `/usr/share/argvus/qt6ct`
+- Hyprland appearance integration under `/usr/share/argvus/hypr`
+- Toggle, accent and brightness scripts under `/usr/share/argvus/scripts`
 
-Keeping these assets in a separate package avoids duplicating wallpapers and
-fonts inside the main `argvus` desktop configuration package.
+Wallpapers and fonts are provided by the separate `argvus-wallpapers` and
+`argvus-fonts` packages.
 
 ## Layout
 
 ```text
-usr/
-  share/
-    backgrounds/
-      argvus/
-    fonts/
+config/
+  gtk-3.0/
+  gtk-4.0/
+  qt6ct/
+  hypr/
+  scripts/
 ```
 
 ## Installation

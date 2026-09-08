@@ -2,13 +2,15 @@
 pkgname=argvus-appearance
 pkgver=0.2.0
 pkgrel=1
-pkgdesc="Shared wallpapers, fonts, themes and appearance integration for the Argvus desktop"
+pkgdesc="Shared themes and appearance integration for the Argvus desktop"
 arch=('any')
 url="https://github.com/argvus/argvus-appearance"
 license=('GPL-3.0-only')
 options=('!debug')
 depends=(
   'argvus-session'
+  'argvus-fonts'
+  'argvus-wallpapers'
   'brightnessctl'
   'fontconfig'
   'gtk3'

@@ -16,7 +16,7 @@ font_state_value() {
   printf '%s\n' "$_fallback"
 }
 
-ARGVUS_APPS_FONT="$(font_state_value apps_name "$(font_state_value default_name "Terminus (TTF) Bold")") $(font_state_value apps_size "$(font_state_value default_size 13)")"
+ARGVUS_APPS_FONT="$(font_state_value apps_name "$(font_state_value default_name "IBM Plex Mono")") $(font_state_value apps_size "$(font_state_value default_size 12)")"
 
 native_config_home() {
   printf '%s\n' "${XDG_CONFIG_HOME:-$HOME/.config}"

@@ -200,16 +200,16 @@ write_managed_css_block() {
   fi
 }
 
-ARGVUS_APPS_NAME="$(font_state_value apps_name "$(font_state_value default_name "Terminus (TTF) Bold")")"
-ARGVUS_APPS_SIZE="$(font_state_value apps_size "$(font_state_value default_size 13)")"
+ARGVUS_APPS_NAME="$(font_state_value apps_name "$(font_state_value default_name "IBM Plex Mono")")"
+ARGVUS_APPS_SIZE="$(font_state_value apps_size "$(font_state_value default_size 12)")"
 ARGVUS_APPS_FONT="${ARGVUS_APPS_NAME} ${ARGVUS_APPS_SIZE}"
-ARGVUS_TASKBAR_FAMILY="$(font_state_value taskbar_family "$(font_state_value default_family "Terminus (TTF)")")"
-ARGVUS_TASKBAR_SIZE="$(font_state_value taskbar_size "$(font_state_value default_size 14)")"
-ARGVUS_SYSINFO_FAMILY="$(font_state_value sysinfo_family "$(font_state_value monospace_family "Terminus (TTF)")")"
-ARGVUS_SYSINFO_SIZE="$(font_state_value sysinfo_size "$(font_state_value monospace_size 15)")"
-ARGVUS_SYSTEM_FAMILY="$(font_state_value system_family "$(font_state_value default_family "Terminus (TTF)")")"
+ARGVUS_TASKBAR_FAMILY="$(font_state_value taskbar_family "$(font_state_value default_family "IBM Plex Mono")")"
+ARGVUS_TASKBAR_SIZE="$(font_state_value taskbar_size "$(font_state_value default_size 13)")"
+ARGVUS_SYSINFO_FAMILY="$(font_state_value sysinfo_family "$(font_state_value monospace_family "IBM Plex Mono")")"
+ARGVUS_SYSINFO_SIZE="$(font_state_value sysinfo_size "$(font_state_value monospace_size 14)")"
+ARGVUS_SYSTEM_FAMILY="$(font_state_value system_family "$(font_state_value default_family "IBM Plex Mono")")"
 ARGVUS_SYSTEM_SIZE="$(font_state_value system_size "$(font_state_value default_size 13)")"
-ARGVUS_TERMINAL_FAMILY="$(font_state_value terminal_family "$(font_state_value monospace_family "JetBrainsMono Nerd Font")")"
+ARGVUS_TERMINAL_FAMILY="$(font_state_value terminal_family "$(font_state_value monospace_family "IBM Plex Mono")")"
 ARGVUS_TERMINAL_SIZE="$(font_state_value terminal_size "$(font_state_value monospace_size 13)")"
 
 native_config_home() {
@@ -682,7 +682,7 @@ case "$THEME" in
     sed -i '/^#workspaces button/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config waybar/argvus-taskbar.css)"
     sed -i '/^#workspaces button\.active,/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config waybar/argvus-taskbar.css)"
     sed -i '/^tooltip {/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config waybar/argvus-taskbar.css)"
-    sed -i '/#right-0, #right-1, #right-2, #right-search, #mpris {/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config waybar/argvus-taskbar.css)"
+    sed -i '/^#right-0, #right-1, #right-2, #right-search, #mpris/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config waybar/argvus-taskbar.css)"
     sed -i '/^window#waybar {/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$_sysinfo_css"
     _rofi_cfg="$(paths_config rofi/theme.rasi)"
     sed -i '/^window {/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$_rofi_cfg"
@@ -700,7 +700,7 @@ case "$THEME" in
     sed -i '/^#workspaces button/,/^}/s/border-radius: [0-9]*px;/border-radius: 5px;/' "$(paths_config waybar/argvus-taskbar.css)"
     sed -i '/^#workspaces button\.active,/,/^}/s/border-radius: [0-9]*px;/border-radius: 4px;/' "$(paths_config waybar/argvus-taskbar.css)"
     sed -i '/^tooltip {/,/^}/s/border-radius: [0-9]*px;/border-radius: 8px;/' "$(paths_config waybar/argvus-taskbar.css)"
-    sed -i '/#right-0, #right-1, #right-2, #right-search, #mpris {/,/^}/s/border-radius: [0-9]*px;/border-radius: 5px;/' "$(paths_config waybar/argvus-taskbar.css)"
+    sed -i '/^#right-0, #right-1, #right-2, #right-search, #mpris/,/^}/s/border-radius: [0-9]*px;/border-radius: 5px;/' "$(paths_config waybar/argvus-taskbar.css)"
     sed -i '/^window#waybar {/,/^}/s/border-radius: [0-9]*px;/border-radius: 8px;/' "$_sysinfo_css"
     _rofi_cfg="$(paths_config rofi/theme.rasi)"
     sed -i '/^window {/,/^}/s/border-radius: [0-9]*px;/border-radius: 6px;/' "$_rofi_cfg"
@@ -738,6 +738,10 @@ sed -i "s|rofi -config [^ ]* -show drun|rofi -config ${ROFI_CONFIG} -show drun|"
 
 sed -i "s|@theme \".*/rofi/theme.rasi\"|@theme \"${ROFI_THEME}\"|" "$ROFI_CONFIG"
 sed -i "s|font: \".*\";|font: \"${ARGVUS_APPS_FONT}\";|" "$ROFI_CONFIG"
+
+if [ "$RUNTIME" -eq 1 ]; then
+  trap 'argvus-sessionctl restart waybar >/dev/null 2>&1 || true' EXIT
+fi
 
 sed -i "s|@import \".*/rofi/themes/.*/theme.rasi\"|@import \"${ROFI_THEMES}/${THEME}/theme.rasi\"|" \
   "$ROFI_THEME"
@@ -903,9 +907,6 @@ esac
 if [ "$RUNTIME" -eq 1 ]; then
   # Reload Hyprland config
   hyprctl reload
-
-  # Restart waybar with new theme CSS (mode.css is now clean/dark)
-  argvus-sessionctl restart waybar >/dev/null 2>&1 || true
 fi
 
 # Set wallpaper for the new theme
