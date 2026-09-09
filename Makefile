@@ -29,6 +29,7 @@ uninstall:
 	rm -f "$(DESTDIR)$(PREFIX)/share/argvus/scripts/argvus/hypr.sh"
 	rm -f "$(DESTDIR)$(PREFIX)/share/argvus/scripts/argvus/theme-switch.sh"
 	rm -f "$(DESTDIR)$(PREFIX)/share/argvus/scripts/argvus/toggle-mode.sh"
+	rm -f "$(DESTDIR)$(PREFIX)/share/argvus/waybar/mode.css"
 	rm -rf "$(DESTDIR)$(PREFIX)/share/argvus/gtk-3.0"
 	rm -rf "$(DESTDIR)$(PREFIX)/share/argvus/gtk-4.0"
 	rm -rf "$(DESTDIR)$(PREFIX)/share/argvus/qt6ct"
@@ -51,7 +52,8 @@ validate:
 	fi; \
 	test -f config/hypr/hyprpaper.conf; \
 	test -f config/hypr/application-style.conf; \
-	test -f config/qt6ct/qt6ct.conf
+	test -f config/qt6ct/qt6ct.conf; \
+	test -f config/waybar/mode.css
 	@echo "argvus-appearance validation ok"
 
 release-archive:

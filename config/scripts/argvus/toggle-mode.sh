@@ -167,7 +167,7 @@ if [ "$MODE" = "light" ] && [ "$THEME" = "argvus-dark-aether" ]; then
 @define-color th-mpris-border    rgba(153, 153, 153, 0.5);
 @define-color th-mpris-fg-anim   #181818;
 
-/* -- waybar/argvus-sysinfo.css variables -- */
+/* -- waybar/argvus-widget-telemetry.css variables -- */
 @define-color th-header          #181818;
 @define-color th-window-bg       #b0b0b0;
 @define-color th-border          #181818;

@@ -119,8 +119,8 @@ apply_theme_references() {
 
   sed -i "s|@import url(\"./themes/.*/theme.css\");|@import url(\"./themes/${THEME}/theme.css\");|" \
     "$(paths_config waybar/argvus-taskbar.css)" 2>/dev/null || true
-  sed -i "s|@import url(\"./themes/.*/sysinfo-theme.css\");|@import url(\"./themes/${THEME}/sysinfo-theme.css\");|" \
-    "$(paths_config waybar/argvus-sysinfo.css)" 2>/dev/null || true
+  sed -i "s|@import url(\"./themes/.*/widget-telemetry-theme.css\");|@import url(\"./themes/${THEME}/widget-telemetry-theme.css\");|" \
+    "$(paths_config waybar/argvus-widget-telemetry.css)" 2>/dev/null || true
   sed -i "s|@theme \".*/rofi/theme.rasi\"|@theme \"${_rofi_theme_file}\"|" \
     "$_rofi_config" 2>/dev/null || true
   sed -i "s|@import \".*/rofi/themes/.*/theme.rasi\"|@import \"${_rofi_theme}\"|" \
@@ -139,7 +139,7 @@ apply_theme_references() {
 
 apply_waybar() {
   _theme_css="$(paths_config "waybar/themes/${THEME}/theme.css")"
-  _sysinfo_css="$(paths_config "waybar/themes/${THEME}/sysinfo-theme.css")"
+  _widget_telemetry_css="$(paths_config "waybar/themes/${THEME}/widget-telemetry-theme.css")"
   [ -f "$_theme_css" ] && sed -i \
     -e "s|^@define-color th-decorate .*|@define-color th-decorate        ${COLOR};|" \
     -e "s|^@define-color th-decorate-rgba .*|@define-color th-decorate-rgba   rgba(${RED}, ${GREEN}, ${BLUE}, 0.45);|" \
@@ -147,11 +147,11 @@ apply_waybar() {
     -e "s|^@define-color th-power .*|@define-color th-power           ${COLOR};|" \
     -e "s|^@define-color th-mpris-border .*|@define-color th-mpris-border    rgba(${RED}, ${GREEN}, ${BLUE}, 0.25);|" \
     "$_theme_css"
-  [ -f "$_sysinfo_css" ] && sed -i \
+  [ -f "$_widget_telemetry_css" ] && sed -i \
     -e "s|^@define-color th-header .*|@define-color th-header        ${COLOR};|" \
     -e "s|^@define-color th-border .*|@define-color th-border        rgba(${RED}, ${GREEN}, ${BLUE}, 0.15);|" \
     -e "s|^@define-color th-border-header .*|@define-color th-border-header rgba(${RED}, ${GREEN}, ${BLUE}, 0.20);|" \
-    "$_sysinfo_css"
+    "$_widget_telemetry_css"
 }
 
 apply_rofi() {
@@ -206,7 +206,6 @@ apply_application_colors() {
   _hyprtoolkit="$(paths_config hypr/hyprtoolkit.conf)"
   _dunst="$(paths_config dunst/dunstrc)"
   _snappy="$(paths_config "snappy-switcher/themes/${THEME}/theme.ini")"
-  _bottom="$(paths_config bottom/bottom.toml)"
   _superfile="$(paths_config "superfile/theme/${THEME}.toml")"
 
   [ -f "$_hyprlock" ] && sed -i "s|^[[:space:]]*outer_color = .*|  outer_color = rgb(${HEX})|" "$_hyprlock"
@@ -223,10 +222,6 @@ apply_application_colors() {
   [ -f "$_snappy" ] && sed -i \
     -e "s|^border_color .*|border_color  = ${COLOR}ff|" \
     -e "s|^badge_bg .*|badge_bg      = ${COLOR}ff|" "$_snappy"
-
-  for _key in border selected_bg cpu_color; do replace_toml_color "$_bottom" "$_key"; done
-  replace_toml_color "$_bottom" selected_text
-  [ -f "$_bottom" ] && sed -i "s|^selected_text = .*|selected_text = \"${ACCENT_TEXT}\"|" "$_bottom"
 
   command -v argvus-system-monitor >/dev/null 2>&1 && argvus-system-monitor --apply "$THEME" >/dev/null 2>&1 || true
 

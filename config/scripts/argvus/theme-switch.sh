@@ -296,7 +296,6 @@ DUNST_THEMES="$(optional_theme_parent dunst/themes "$THEME")"
 FOOT_CONFIG="$(paths_config foot/foot.ini)"
 FOOT_THEMES="$(optional_theme_parent foot/themes "$THEME")"
 FOOT_SYSTEM_THEMES="$(paths_system_config foot/themes)"
-BOTTOM_THEMES="$(optional_theme_parent bottom/themes "$THEME")"
 YAZI_CONFIG_ROOT="$(paths_config yazi)"
 YAZI_SYSTEM_ROOT="$(paths_system_config yazi)"
 SNAPPY_THEMES="$(optional_theme_parent snappy-switcher/themes "$THEME")"
@@ -388,75 +387,6 @@ should_manage_foot_config() {
   _conf="$1"
   [ -f "$_conf" ] || return 0
   grep -q 'argvus.*/foot/themes' "$_conf"
-}
-
-toml_color_value() {
-  _file="$1"
-  _key="$2"
-  sed -n "s|^[[:space:]]*${_key}[[:space:]]*=[[:space:]]*\"\\([^\"]*\\)\".*|\\1|p" "$_file" | head -n1
-}
-
-replace_style_color() {
-  _file="$1"
-  _key="$2"
-  _value="$3"
-  [ -f "$_file" ] || return 0
-  if sed -n "/^[[:space:]]*${_key}[[:space:]]*=/p" "$_file" | grep -q 'bold[[:space:]]*=[[:space:]]*true'; then
-    sed -i "s|^[[:space:]]*${_key}[[:space:]]*=.*|${_key} = {color = \"${_value}\", bold = true}|" "$_file"
-  else
-    sed -i "s|^[[:space:]]*${_key}[[:space:]]*=.*|${_key} = {color = \"${_value}\"}|" "$_file"
-  fi
-}
-
-replace_plain_color() {
-  _file="$1"
-  _key="$2"
-  _value="$3"
-  [ -f "$_file" ] || return 0
-  sed -i "s|^[[:space:]]*${_key}[[:space:]]*=.*|${_key} = \"${_value}\"|" "$_file"
-}
-
-apply_bottom_theme_to_profile() {
-  _profile="$1"
-  _theme_file="$2"
-  [ -f "$_profile" ] && [ -f "$_theme_file" ] || return 0
-
-  _accent="$(toml_color_value "$_theme_file" border)"
-  _fg="$(toml_color_value "$_theme_file" foreground)"
-  _bg="$(toml_color_value "$_theme_file" background)"
-  _selected_bg="$(toml_color_value "$_theme_file" selected_bg)"
-  _selected_fg="$(toml_color_value "$_theme_file" selected_text)"
-  _mem="$(toml_color_value "$_theme_file" mem_color)"
-  _swap="$(toml_color_value "$_theme_file" swap_color)"
-  _rx="$(toml_color_value "$_theme_file" rx_color)"
-  _tx="$(toml_color_value "$_theme_file" tx_color)"
-
-  [ -n "$_accent" ] || return 0
-  [ -n "$_fg" ] || _fg="$_accent"
-  [ -n "$_bg" ] || _bg="#111316"
-  [ -n "$_selected_bg" ] || _selected_bg="$_accent"
-  [ -n "$_selected_fg" ] || _selected_fg="$_bg"
-  [ -n "$_mem" ] || _mem="$_accent"
-  [ -n "$_swap" ] || _swap="$_mem"
-  [ -n "$_rx" ] || _rx="$_fg"
-  [ -n "$_tx" ] || _tx="$_accent"
-
-  replace_plain_color "$_profile" all_entry_color "$_accent"
-  replace_plain_color "$_profile" avg_entry_color "$_fg"
-  sed -i "s|^[[:space:]]*cpu_core_colors[[:space:]]*=.*|cpu_core_colors = [\"${_accent}\", \"${_mem}\", \"${_swap}\", \"${_fg}\", \"${_rx}\", \"${_accent}\", \"${_mem}\", \"${_swap}\"]|" "$_profile"
-  replace_plain_color "$_profile" ram_color "$_accent"
-  replace_plain_color "$_profile" swap_color "$_swap"
-  replace_plain_color "$_profile" rx_color "$_rx"
-  replace_plain_color "$_profile" tx_color "$_tx"
-  replace_style_color "$_profile" headers "$_accent"
-  replace_plain_color "$_profile" graph_color "$_fg"
-  replace_style_color "$_profile" legend_text "$_fg"
-  replace_plain_color "$_profile" border_color "$_swap"
-  replace_plain_color "$_profile" selected_border_color "$_accent"
-  replace_style_color "$_profile" widget_title "$_accent"
-  replace_style_color "$_profile" text "$_fg"
-  sed -i "s|^[[:space:]]*selected_text[[:space:]]*=.*|selected_text = {color = \"${_selected_fg}\", bg_color = \"${_selected_bg}\"}|" "$_profile"
-  replace_style_color "$_profile" disabled_text "$_swap"
 }
 
 foot_color_value() {
@@ -675,8 +605,8 @@ printf '%s' "$THEME" > "$ACTIVE_FILE"
 
 # ----- Per-theme waybar layout -----
 _waybar_cfg="$(paths_config waybar/argvus-taskbar.jsonc)"
-_waybar_cfg_sysinfo="$(paths_config waybar/argvus-sysinfo.jsonc)"
-_sysinfo_css="$(paths_config waybar/argvus-sysinfo.css)"
+_waybar_cfg_widget_telemetry="$(paths_config waybar/argvus-widget-telemetry.jsonc)"
+_widget_telemetry_css="$(paths_config waybar/argvus-widget-telemetry.css)"
 
 case "$THEME" in
   argvus-dark-aether | argvus-dark-silver | argvus-light-veil | argvus-dark-slate | argvus-dark-universe)
@@ -684,15 +614,15 @@ case "$THEME" in
     sed -i "s|\"margin-left\": [0-9]*|\"margin-left\": 0|" "$_waybar_cfg"
     sed -i "s|\"margin-right\": [0-9]*|\"margin-right\": 0|" "$_waybar_cfg"
     sed -i "s|\"margin-bottom\": -\?[0-9]*|\"margin-bottom\": 3|" "$_waybar_cfg"
-    sed -i "s|\"margin-top\": -\?[0-9]*|\"margin-top\": 1|" "$_waybar_cfg_sysinfo"
-    sed -i "s|\"margin-left\": -\?[0-9]*|\"margin-left\": 1|" "$_waybar_cfg_sysinfo"
-    sed -i "s|\"margin-bottom\": -\?[0-9]*|\"margin-bottom\": 1|" "$_waybar_cfg_sysinfo"
+    sed -i "s|\"margin-top\": -\?[0-9]*|\"margin-top\": 1|" "$_waybar_cfg_widget_telemetry"
+    sed -i "s|\"margin-left\": -\?[0-9]*|\"margin-left\": 1|" "$_waybar_cfg_widget_telemetry"
+    sed -i "s|\"margin-bottom\": -\?[0-9]*|\"margin-bottom\": 1|" "$_waybar_cfg_widget_telemetry"
     sed -i '/^window#waybar {/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config waybar/argvus-taskbar.css)"
     sed -i '/^#workspaces button/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config waybar/argvus-taskbar.css)"
     sed -i '/^#workspaces button\.active,/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config waybar/argvus-taskbar.css)"
     sed -i '/^tooltip {/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config waybar/argvus-taskbar.css)"
     sed -i '/^#right-0, #right-1, #right-2, #right-search, #mpris/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config waybar/argvus-taskbar.css)"
-    sed -i '/^window#waybar {/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$_sysinfo_css"
+    sed -i '/^window#waybar {/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$_widget_telemetry_css"
     _rofi_cfg="$(paths_config rofi/theme.rasi)"
     sed -i '/^window {/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$_rofi_cfg"
     sed -i '/^element selected.normal {/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$_rofi_cfg"
@@ -702,15 +632,15 @@ case "$THEME" in
     sed -i "s|\"margin-left\": [0-9]*|\"margin-left\": 20|" "$_waybar_cfg"
     sed -i "s|\"margin-right\": [0-9]*|\"margin-right\": 20|" "$_waybar_cfg"
     sed -i "s|\"margin-bottom\": -\?[0-9]*|\"margin-bottom\": -8|" "$_waybar_cfg"
-    sed -i "s|\"margin-top\": -\?[0-9]*|\"margin-top\": 15|" "$_waybar_cfg_sysinfo"
-    sed -i "s|\"margin-left\": -\?[0-9]*|\"margin-left\": 20|" "$_waybar_cfg_sysinfo"
-    sed -i "s|\"margin-bottom\": -\?[0-9]*|\"margin-bottom\": 15|" "$_waybar_cfg_sysinfo"
+    sed -i "s|\"margin-top\": -\?[0-9]*|\"margin-top\": 15|" "$_waybar_cfg_widget_telemetry"
+    sed -i "s|\"margin-left\": -\?[0-9]*|\"margin-left\": 20|" "$_waybar_cfg_widget_telemetry"
+    sed -i "s|\"margin-bottom\": -\?[0-9]*|\"margin-bottom\": 15|" "$_waybar_cfg_widget_telemetry"
     sed -i '/^window#waybar {/,/^}/s/border-radius: [0-9]*px;/border-radius: 4px;/' "$(paths_config waybar/argvus-taskbar.css)"
     sed -i '/^#workspaces button/,/^}/s/border-radius: [0-9]*px;/border-radius: 5px;/' "$(paths_config waybar/argvus-taskbar.css)"
     sed -i '/^#workspaces button\.active,/,/^}/s/border-radius: [0-9]*px;/border-radius: 4px;/' "$(paths_config waybar/argvus-taskbar.css)"
     sed -i '/^tooltip {/,/^}/s/border-radius: [0-9]*px;/border-radius: 8px;/' "$(paths_config waybar/argvus-taskbar.css)"
     sed -i '/^#right-0, #right-1, #right-2, #right-search, #mpris/,/^}/s/border-radius: [0-9]*px;/border-radius: 5px;/' "$(paths_config waybar/argvus-taskbar.css)"
-    sed -i '/^window#waybar {/,/^}/s/border-radius: [0-9]*px;/border-radius: 8px;/' "$_sysinfo_css"
+    sed -i '/^window#waybar {/,/^}/s/border-radius: [0-9]*px;/border-radius: 8px;/' "$_widget_telemetry_css"
     _rofi_cfg="$(paths_config rofi/theme.rasi)"
     sed -i '/^window {/,/^}/s/border-radius: [0-9]*px;/border-radius: 6px;/' "$_rofi_cfg"
     sed -i '/^element selected.normal {/,/^}/s/border-radius: [0-9]*px;/border-radius: 5px;/' "$_rofi_cfg"
@@ -729,15 +659,15 @@ esac
 sed -i "s|@import url(\"./themes/.*/theme.css\");|@import url(\"./themes/${THEME}/theme.css\");|" \
   "$(paths_config waybar/argvus-taskbar.css)"
 
-sed -i "s|@import url(\"./themes/.*/sysinfo-theme.css\");|@import url(\"./themes/${THEME}/sysinfo-theme.css\");|" \
-  "$(paths_config waybar/argvus-sysinfo.css)"
+sed -i "s|@import url(\"./themes/.*/widget-telemetry-theme.css\");|@import url(\"./themes/${THEME}/widget-telemetry-theme.css\");|" \
+  "$(paths_config waybar/argvus-widget-telemetry.css)"
 
 write_managed_css_block "$(paths_config waybar/argvus-taskbar.css)" "* {
   font-family: \"${ARGVUS_TASKBAR_FAMILY}\", \"Font Awesome 7 Free\", monospace;
   font-size: ${ARGVUS_TASKBAR_SIZE}px;
 }"
 
-write_managed_css_block "$(paths_config waybar/argvus-sysinfo.css)" "* {
+write_managed_css_block "$(paths_config waybar/argvus-widget-telemetry.css)" "* {
   font-family: \"${ARGVUS_SYSINFO_FAMILY}\", \"Symbols Nerd Font Mono\", monospace;
   font-size: ${ARGVUS_SYSINFO_SIZE}px;
 }"
@@ -807,29 +737,6 @@ command -v argvus-system-monitor >/dev/null 2>&1 && argvus-system-monitor --appl
 if [ -f "$SNAPPY_THEMES/$THEME/theme.ini" ]; then
   _snappy_conf="$(paths_config snappy-switcher/config.ini)"
   sed -i "s|^name = .*|name = ${THEME}/theme.ini|" "$_snappy_conf"
-fi
-
-if [ -f "$BOTTOM_THEMES/$THEME/bottom.toml" ]; then
-  _bottom_theme="$BOTTOM_THEMES/$THEME/bottom.toml"
-  _bottom_conf="$(paths_config bottom/bottom.toml)"
-  cp "$_bottom_theme" "$_bottom_conf"
-  for _profile in cpu mem; do
-    _profile_conf="$(paths_config "bottom/${_profile}.toml")"
-    apply_bottom_theme_to_profile "$_profile_conf" "$_bottom_theme"
-  done
-
-  _native_bottom="${ARGVUS_CONFIG_HOME}/bottom"
-  if [ -d "$_native_bottom" ]; then
-    mkdir -p "$_native_bottom"
-    cp "$_bottom_theme" "$_native_bottom/bottom.toml"
-    for _profile in cpu mem; do
-      _native_profile="$_native_bottom/${_profile}.toml"
-      if [ ! -f "$_native_profile" ]; then
-        cp "$(paths_config "bottom/${_profile}.toml")" "$_native_profile"
-      fi
-      apply_bottom_theme_to_profile "$_native_profile" "$_bottom_theme"
-    done
-  fi
 fi
 
 if [ -d "$YAZI_SYSTEM_ROOT/flavors/$THEME.yazi" ]; then
