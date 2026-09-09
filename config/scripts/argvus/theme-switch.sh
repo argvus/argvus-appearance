@@ -677,6 +677,21 @@ sed -i "s|@import url(\"./themes/.*/widget-telemetry-theme.css\");|@import url(\
 write_managed_css_block "$(paths_config waybar/argvus-taskbar.css)" "* {
   font-family: \"${ARGVUS_TASKBAR_FAMILY}\", \"Symbols Nerd Font Mono\", monospace;
   font-size: ${ARGVUS_TASKBAR_SIZE}px;
+}
+
+#custom-icon-window,
+#network,
+#bluetooth,
+#custom-bluetooth,
+#custom-expand-icon,
+#custom-storage,
+#custom-recording,
+#custom-search,
+#pulseaudio,
+#power-profiles-daemon,
+#custom-settings,
+#custom-power {
+  font-family: \"Symbols Nerd Font Mono\";
 }"
 
 write_managed_css_block "$(paths_config waybar/argvus-widget-telemetry.css)" "* {
