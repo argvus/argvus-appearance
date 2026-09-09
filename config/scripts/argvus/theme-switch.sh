@@ -225,6 +225,16 @@ native_config_home() {
   printf '%s\n' "${XDG_CONFIG_HOME:-$HOME/.config}"
 }
 
+refresh_managed_waybar_file() {
+  _relative_path="$1"
+  _system_path="$(paths_system_config "$_relative_path")"
+  _managed_path="$(paths_user_config "$_relative_path")"
+
+  [ -f "$_system_path" ] || return 0
+  mkdir -p "${_managed_path%/*}"
+  cp "$_system_path" "$_managed_path"
+}
+
 gtk_theme_name_for_theme() {
   case "$1" in
     argvus-light-veil|argvus-light-veil-float) printf '%s\n' "Adwaita" ;;
@@ -604,6 +614,8 @@ fi
 printf '%s' "$THEME" > "$ACTIVE_FILE"
 
 # ----- Per-theme waybar layout -----
+refresh_managed_waybar_file waybar/argvus-taskbar.jsonc
+refresh_managed_waybar_file waybar/argvus-taskbar.css
 _waybar_cfg="$(paths_config waybar/argvus-taskbar.jsonc)"
 _waybar_cfg_widget_telemetry="$(paths_config waybar/argvus-widget-telemetry.jsonc)"
 _widget_telemetry_css="$(paths_config waybar/argvus-widget-telemetry.css)"
@@ -663,7 +675,7 @@ sed -i "s|@import url(\"./themes/.*/widget-telemetry-theme.css\");|@import url(\
   "$(paths_config waybar/argvus-widget-telemetry.css)"
 
 write_managed_css_block "$(paths_config waybar/argvus-taskbar.css)" "* {
-  font-family: \"${ARGVUS_TASKBAR_FAMILY}\", \"Font Awesome 7 Free\", monospace;
+  font-family: \"${ARGVUS_TASKBAR_FAMILY}\", \"Symbols Nerd Font Mono\", monospace;
   font-size: ${ARGVUS_TASKBAR_SIZE}px;
 }"
 
