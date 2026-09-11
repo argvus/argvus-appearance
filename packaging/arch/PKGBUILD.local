@@ -36,7 +36,7 @@ optdepends=(
   'argvus-launcher: Rofi theme integration'
   'argvus-taskbar: Waybar taskbar theme integration'
   'argvus-widget-telemetry: Waybar widget telemetry theme integration'
-  'argvus-storage: removable storage theme integration'
+  'argvus-taskbar-storage: removable storage theme integration'
   'ddcutil: external monitor brightness control'
   'rofi: interactive theme, accent and brightness menus'
 )

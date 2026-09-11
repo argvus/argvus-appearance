@@ -512,15 +512,15 @@ apply_wallpaper() {
   apply_wallpaper_runtime "$_wall"
 }
 
-# Sincroniza o tema do argvus-storage com o tema ativo.
+# Sincroniza o tema do argvus-taskbar-storage com o tema ativo.
 # Mapeia: dark -> argvus-dark-aether.css, silver -> argvus-dark-silver.css, slate -> argvus-dark-slate.css, light -> argvus-light-veil.css
 apply_argvus_storage_theme() {
-  _storage_theme_dir="$(paths_config argvus-storage/themes)"
-  _storage_theme_dest="$(paths_config argvus-storage/theme.css)"
+  _storage_theme_dir="$(paths_config argvus/taskbar/storage/themes)"
+  _storage_theme_dest="$(paths_config argvus/taskbar/storage/theme.css)"
 
   # Tenta encontrar os arquivos de tema em ordem de prioridade:
-  # 1. Diretório do usuário (~/.config/argvus-storage/themes)
-  # 2. Diretório do sistema (/etc/argvus-storage/themes)
+  # 1. Diretório do usuário (~/.config/argvus/taskbar/storage/themes)
+  # 2. Diretório do sistema (/etc/argvus/taskbar/storage/themes)
   # 3. Diretório do projeto (para desenvolvimento)
   _theme_src=""
   case "$THEME" in
@@ -542,14 +542,14 @@ apply_argvus_storage_theme() {
   if [ -f "${_storage_theme_dir}/${_theme_name}" ]; then
     _theme_src="${_storage_theme_dir}/${_theme_name}"
   # Tenta o sistema
-  elif [ -f "/etc/argvus-storage/themes/${_theme_name}" ]; then
-    _theme_src="/etc/argvus-storage/themes/${_theme_name}"
-  # Tenta o diretório do projeto argvus-storage (desenvolvimento)
-  elif [ -f "$(dirname "$0")/../../../../argvus-storage/themes/${_theme_name}" ]; then
-    _theme_src="$(dirname "$0")/../../../../argvus-storage/themes/${_theme_name}"
+  elif [ -f "/etc/argvus/taskbar/storage/themes/${_theme_name}" ]; then
+    _theme_src="/etc/argvus/taskbar/storage/themes/${_theme_name}"
+  # Tenta o diretório do projeto argvus-taskbar-storage (desenvolvimento)
+  elif [ -f "$(dirname "$0")/../../../../argvus-taskbar-storage/themes/${_theme_name}" ]; then
+    _theme_src="$(dirname "$0")/../../../../argvus-taskbar-storage/themes/${_theme_name}"
   # Tenta o diretório legado, caso exista em uma instalação antiga.
-  elif [ -f "$(paths_config argvus-storage/themes/${_theme_name})" ]; then
-    _theme_src="$(paths_config argvus-storage/themes/${_theme_name})"
+  elif [ -f "$(paths_config argvus/taskbar/storage/themes/${_theme_name})" ]; then
+    _theme_src="$(paths_config argvus/taskbar/storage/themes/${_theme_name})"
   else
     return 0
   fi
