@@ -558,10 +558,10 @@ apply_argvus_storage_theme() {
   cp "$_theme_src" "$_storage_theme_dest"
 }
 
-# Sincroniza o tema do argvus-calendar com o tema ativo.
+# Sincroniza o tema do argvus-taskbar-calendar com o tema ativo.
 # O destino fica no cache do usuário para a troca de tema não precisar de sudo.
 apply_argvus_calendar_theme() {
-  _calendar_theme_cache="${XDG_CACHE_HOME:-$HOME/.cache}/argvus-calendar/theme.css"
+  _calendar_theme_cache="${XDG_CACHE_HOME:-$HOME/.cache}/argvus-taskbar-calendar/theme.css"
   _calendar_theme_name=""
 
   case "$THEME" in
@@ -576,19 +576,19 @@ apply_argvus_calendar_theme() {
   esac
 
   _calendar_theme_src=""
-  if [ -f "$(paths_config "argvus-calendar/themes/${_calendar_theme_name}")" ]; then
-    _calendar_theme_src="$(paths_config "argvus-calendar/themes/${_calendar_theme_name}")"
-  elif [ -f "/etc/argvus-calendar/themes/${_calendar_theme_name}" ]; then
-    _calendar_theme_src="/etc/argvus-calendar/themes/${_calendar_theme_name}"
-  elif [ -f "$(dirname "$0")/../../../../argvus-calendar/resources/themes/${_calendar_theme_name}" ]; then
-    _calendar_theme_src="$(dirname "$0")/../../../../argvus-calendar/resources/themes/${_calendar_theme_name}"
+  if [ -f "$(paths_config "argvus-taskbar-calendar/themes/${_calendar_theme_name}")" ]; then
+    _calendar_theme_src="$(paths_config "argvus-taskbar-calendar/themes/${_calendar_theme_name}")"
+  elif [ -f "/etc/argvus/taskbar/calendar/themes/${_calendar_theme_name}" ]; then
+    _calendar_theme_src="/etc/argvus/taskbar/calendar/themes/${_calendar_theme_name}"
+  elif [ -f "$(dirname "$0")/../../../../argvus-taskbar-calendar/resources/themes/${_calendar_theme_name}" ]; then
+    _calendar_theme_src="$(dirname "$0")/../../../../argvus-taskbar-calendar/resources/themes/${_calendar_theme_name}"
   else
     return 0
   fi
 
   mkdir -p "$(dirname "$_calendar_theme_cache")"
   cp "$_calendar_theme_src" "$_calendar_theme_cache"
-  command -v argvus-calendar >/dev/null 2>&1 && argvus-calendar reload >/dev/null 2>&1 || true
+  command -v argvus-taskbar-calendar >/dev/null 2>&1 && argvus-taskbar-calendar reload >/dev/null 2>&1 || true
 }
 
 if [ -z "$THEME" ]; then
