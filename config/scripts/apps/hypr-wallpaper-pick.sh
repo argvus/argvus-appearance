@@ -6,7 +6,8 @@ ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}
 ARGVUS_MUTABLE_CONFIG=1
 HYPRPAPER_FILE="$(paths_config hypr/hyprpaper.conf)"
 
-WALLPAPERS_DIR="/usr/share/backgrounds/argvus"
+# Start in the user's HOME so the chooser can select any supported image.
+WALLPAPERS_DIR="${HOME:?}"
 SELECTED_FILE=$(mktemp)
 
 apply_wallpaper_runtime() {
