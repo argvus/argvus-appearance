@@ -824,28 +824,15 @@ if [ -f "$_hyprlock_theme_script" ]; then
   fi
 fi
 
-# Re-apply or reset spaces override depending on theme type (float vs non-float).
+# Re-apply the user's spaces override after the theme has rewritten its
+# generated Waybar files. Spacing is a user preference for every theme type.
 _spaces_script="$(paths_config scripts/argvus/spaces-switch.sh)"
-case "$THEME" in
-  *-float)
-    # Float themes: re-apply user's spaces override on top of theme defaults.
-    if [ -f "$_spaces_script" ]; then
-      if ! sh "$_spaces_script" --apply-static; then
-        printf 'Error: could not re-apply the spaces override for %s.\n' "$THEME" >&2
-        exit 1
-      fi
-    fi
-    ;;
-  *)
-    # Non-float themes: reset spaces to theme defaults (clear user overrides).
-    if [ -f "$_spaces_script" ]; then
-      if ! sh "$_spaces_script" --reset all; then
-        printf 'Error: could not reset spaces for %s.\n' "$THEME" >&2
-        exit 1
-      fi
-    fi
-    ;;
-esac
+if [ -f "$_spaces_script" ]; then
+  if ! sh "$_spaces_script" --apply-static; then
+    printf 'Error: could not re-apply the spaces override for %s.\n' "$THEME" >&2
+    exit 1
+  fi
+fi
 
 if [ "$RUNTIME" -eq 1 ]; then
   # Reload Hyprland config
