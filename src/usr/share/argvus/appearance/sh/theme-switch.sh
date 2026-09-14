@@ -13,6 +13,7 @@ ARGVUS_HYPR_HELPER="${ARGVUS_SYSTEM_CONFIG}/appearance/sh/hypr.sh"
 [ -r "$ARGVUS_HYPR_HELPER" ] && . "$ARGVUS_HYPR_HELPER"
 
 ARGVUS_MUTABLE_CONFIG=1
+export ARGVUS_THEME_SWITCH=1
 
 THEME="${1:-}"
 ACTIVE_FILE="${ARGVUS_CONFIG_HOME}/argvus/.active-theme"
@@ -232,6 +233,51 @@ native_config_home() {
   printf '%s\n' "${XDG_CONFIG_HOME:-$HOME/.config}"
 }
 
+# A theme switch rewrites several live surfaces and also reloads applications
+# such as Kitty.  DPMS is the compositor-level blackout: it hides existing
+# windows as well as ARGVUS layers, so no intermediate palette is visible.
+# Services are stopped while the display is blank and restarted only after all
+# configuration, wallpaper, and runtime reloads have completed.
+THEME_TRANSITION_ACTIVE=0
+
+theme_transition_cleanup() {
+  _status="${1:-0}"
+  trap - EXIT HUP INT TERM
+
+  if [ "$THEME_TRANSITION_ACTIVE" -eq 1 ]; then
+    for _component in wallpaper waybar dunst control-panel snappy-switcher; do
+      argvus-sessionctl restart "$_component" >/dev/null 2>&1 || true
+    done
+    sleep 0.25
+    hyprctl dispatch dpms on >/dev/null 2>&1 || true
+    THEME_TRANSITION_ACTIVE=0
+  fi
+
+  exit "$_status"
+}
+
+theme_transition_begin() {
+  [ "$RUNTIME" -eq 1 ] || return 0
+  command -v hyprctl >/dev/null 2>&1 || return 0
+
+  trap 'theme_transition_cleanup "$?"' EXIT HUP INT TERM
+  if ! hyprctl dispatch dpms off >/dev/null 2>&1; then
+    trap - EXIT HUP INT TERM
+    return 0
+  fi
+
+  THEME_TRANSITION_ACTIVE=1
+  for _unit in \
+    argvus-taskbar.service \
+    argvus-widget-telemetry.service \
+    argvus-control-panel.service \
+    argvus-dunst.service \
+    argvus-snappy-switcher.service \
+    argvus-wallpaper.service; do
+    systemctl --user stop "$_unit" >/dev/null 2>&1 || true
+  done
+}
+
 refresh_managed_waybar_file() {
   _relative_path="$1"
   _system_path="$(paths_system_config "$_relative_path")"
@@ -318,7 +364,7 @@ YAZI_CONFIG_ROOT="$(paths_config app-profiles/config/yazi)"
 YAZI_SYSTEM_ROOT="$(paths_system_config app-profiles/config/yazi)"
 SNAPPY_THEMES="$(optional_theme_parent snappy-switcher/themes "$THEME")"
 SUPERFILE_CONFIG_ROOT="$(paths_config app-profiles/config/superfile)"
-SUPERFILE_THEMES="$(optional_theme_file_parent superfile/theme "${THEME}.toml")"
+SUPERFILE_THEMES="$(optional_theme_file_parent app-profiles/config/superfile/theme "${THEME}.toml")"
 QT6CT_COLORS="$(paths_config appearance/config/qt6ct/colors)"
 HYPRPAPER_FILE="$(paths_config appearance/config/hypr/hyprpaper.conf)"
 HYPRPAPER_DIR="$(paths_backgrounds argvus)"
@@ -619,6 +665,8 @@ if ! _theme_wallpaper="$(find_theme_wallpaper "$THEME")"; then
   _theme_wallpaper=""
 fi
 
+theme_transition_begin
+
 printf '%s' "$THEME" > "$ACTIVE_FILE"
 
 # ----- Per-theme waybar layout -----
@@ -724,17 +772,13 @@ write_managed_css_block "$(paths_config widget-telemetry/config/argvus-widget-te
 sed -i "s|rofi -config [^ ]* -show drun|rofi -config ${ROFI_CONFIG} -show drun|" \
   "$_waybar_cfg"
 
-sed -i "s|@theme \".*/rofi/theme.rasi\"|@theme \"${ROFI_THEME}\"|" "$ROFI_CONFIG"
+sed -i "s|^@theme \".*theme.rasi\"$|@theme \"${ROFI_THEME}\"|" "$ROFI_CONFIG"
 sed -i "s|font: \".*\";|font: \"${ARGVUS_APPS_FONT}\";|" "$ROFI_CONFIG"
 
-if [ "$RUNTIME" -eq 1 ]; then
-  trap 'argvus-sessionctl restart waybar >/dev/null 2>&1 || true' EXIT
-fi
-
-sed -i "s|@import \".*/rofi/themes/.*/theme.rasi\"|@import \"${ROFI_THEMES}/${THEME}/theme.rasi\"|" \
+sed -i "s|^@import \".*themes/.*/theme.rasi\"$|@import \"${ROFI_THEMES}/${THEME}/theme.rasi\"|" \
   "$ROFI_THEME"
 
-sed -i "s|@import \".*/rofi/mode.rasi\"|@import \"${ROFI_MODE}\"|" "$ROFI_THEME"
+sed -i "s|^@import \".*mode.rasi\"$|@import \"${ROFI_MODE}\"|" "$ROFI_THEME"
 
 command -v argvus-terminal >/dev/null 2>&1 && argvus-terminal --apply "$THEME" >/dev/null 2>&1 || true
 

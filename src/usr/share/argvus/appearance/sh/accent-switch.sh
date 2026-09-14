@@ -121,11 +121,11 @@ apply_theme_references() {
     "$(paths_config taskbar/config/argvus-taskbar.css)" 2>/dev/null || true
   sed -i "s|@import url(\"./themes/.*/widget-telemetry-theme.css\");|@import url(\"./themes/${THEME}/widget-telemetry-theme.css\");|" \
     "$(paths_config widget-telemetry/config/argvus-widget-telemetry.css)" 2>/dev/null || true
-  sed -i "s|@theme \".*/rofi/theme.rasi\"|@theme \"${_rofi_theme_file}\"|" \
+  sed -i "s|^@theme \".*theme.rasi\"$|@theme \"${_rofi_theme_file}\"|" \
     "$_rofi_config" 2>/dev/null || true
-  sed -i "s|@import \".*/rofi/themes/.*/theme.rasi\"|@import \"${_rofi_theme}\"|" \
+  sed -i "s|^@import \".*themes/.*/theme.rasi\"$|@import \"${_rofi_theme}\"|" \
     "$_rofi_theme_file" 2>/dev/null || true
-  sed -i "s|@import \".*/rofi/mode.rasi\"|@import \"${_rofi_mode}\"|" \
+  sed -i "s|^@import \".*mode.rasi\"$|@import \"${_rofi_mode}\"|" \
     "$_rofi_theme_file" 2>/dev/null || true
   command -v argvus-terminal >/dev/null 2>&1 && argvus-terminal --apply "$THEME" >/dev/null 2>&1 || true
   command -v argvus-system-monitor >/dev/null 2>&1 && argvus-system-monitor --apply "$THEME" >/dev/null 2>&1 || true
@@ -236,7 +236,9 @@ apply_application_colors() {
 refresh_runtime() {
   command -v hyprctl >/dev/null 2>&1 && hyprctl reload >/dev/null 2>&1 || true
   command -v argvus-terminal >/dev/null 2>&1 && argvus-terminal --apply "$THEME" >/dev/null 2>&1 || true
-  argvus-sessionctl restart waybar dunst snappy-switcher shell >/dev/null 2>&1 || true
+  if [ "${ARGVUS_THEME_SWITCH:-0}" != 1 ]; then
+    argvus-sessionctl restart waybar dunst snappy-switcher shell >/dev/null 2>&1 || true
+  fi
   # Signal running kitty instances to reload config (SIGUSR1)
   for _pid in $(pgrep -x kitty 2>/dev/null); do
     kill -USR1 "$_pid" 2>/dev/null || true
