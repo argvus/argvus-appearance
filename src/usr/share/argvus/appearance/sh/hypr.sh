@@ -103,6 +103,11 @@ hypr_apply_wallpaper() {
   if command -v systemctl >/dev/null 2>&1 &&
      systemctl --user is-active --quiet argvus-session.target 2>/dev/null &&
      systemctl --user cat argvus-wallpaper.service >/dev/null 2>&1; then
+    # argvus-wallpaper.service reads WALLPAPER_PATH from the user manager
+    # environment. Refresh it before restarting the service, otherwise every
+    # theme change starts the wallpaper service with its old/default image.
+    systemctl --user set-environment WALLPAPER_PATH="$_wallpaper_path" \
+      >/dev/null 2>&1 || true
     systemctl --user restart argvus-wallpaper.service >/dev/null 2>&1 && return 0
   fi
 

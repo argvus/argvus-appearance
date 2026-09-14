@@ -5,6 +5,13 @@
 
 ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/session/sh/bootstrap.sh}"
 . "$ARGVUS_BOOTSTRAP"
+
+# Wallpaper runtime helpers live with the appearance component. Load them
+# explicitly; bootstrap only provides shared session APIs and does not
+# implicitly source appearance-owned scripts.
+ARGVUS_HYPR_HELPER="${ARGVUS_SYSTEM_CONFIG}/appearance/sh/hypr.sh"
+[ -r "$ARGVUS_HYPR_HELPER" ] && . "$ARGVUS_HYPR_HELPER"
+
 ARGVUS_MUTABLE_CONFIG=1
 
 THEME="${1:-}"
@@ -297,6 +304,7 @@ apply_gtk_theme_files() {
 
 HYPR_THEMES="$(required_theme_parent appearance/config/hypr/themes "$THEME")"
 WAYBAR_THEMES="$(optional_theme_parent taskbar/config/themes "$THEME")"
+optional_theme_parent widget-telemetry/config/themes "$THEME" >/dev/null
 QS_THEMES="$(optional_theme_parent control-panel/config/quickshell/argvus-control-panel/themes "$THEME")"
 ROFI_THEMES="$(optional_theme_parent launcher/config/themes "$THEME")"
 ROFI_CONFIG="$(paths_config launcher/config/config.rasi)"
@@ -515,8 +523,8 @@ apply_wallpaper() {
 # Sincroniza o tema do argvus-taskbar-storage com o tema ativo.
 # Mapeia: dark -> argvus-dark-aether.css, silver -> argvus-dark-silver.css, slate -> argvus-dark-slate.css, light -> argvus-light-veil.css
 apply_argvus_storage_theme() {
-  _storage_theme_dir="$(paths_config argvus/taskbar/storage/themes)"
-  _storage_theme_dest="$(paths_config argvus/taskbar/storage/theme.css)"
+  _storage_theme_dir="$(paths_config taskbar-storage/config/themes)"
+  _storage_theme_dest="$(paths_config taskbar-storage/config/theme.css)"
 
   # Tenta encontrar os arquivos de tema em ordem de prioridade:
   # 1. Diretório do usuário (~/.config/argvus/taskbar/storage/themes)
@@ -542,8 +550,8 @@ apply_argvus_storage_theme() {
   if [ -f "${_storage_theme_dir}/${_theme_name}" ]; then
     _theme_src="${_storage_theme_dir}/${_theme_name}"
   # Tenta o sistema canônico
-  elif [ -f "/usr/share/argvus/taskbar-storage/config/themes/${_theme_name}" ]; then
-    _theme_src="/usr/share/argvus/taskbar-storage/config/themes/${_theme_name}"
+  elif [ -f "$(paths_system_config taskbar-storage/config/themes/${_theme_name})" ]; then
+    _theme_src="$(paths_system_config taskbar-storage/config/themes/${_theme_name})"
   # Mantém instalações antigas funcionais durante a migração.
   elif [ -f "/etc/argvus/taskbar/storage/themes/${_theme_name}" ]; then
     _theme_src="/etc/argvus/taskbar/storage/themes/${_theme_name}"
@@ -614,11 +622,25 @@ fi
 printf '%s' "$THEME" > "$ACTIVE_FILE"
 
 # ----- Per-theme waybar layout -----
-refresh_managed_waybar_file waybar/argvus-taskbar.jsonc
-refresh_managed_waybar_file waybar/argvus-taskbar.css
+# Refresh the canonical mutable copies. The previous legacy `waybar/...`
+# arguments resolved against /usr/share/argvus/waybar, which no longer exists
+# after the project split and left stale script paths in user configurations.
+refresh_managed_waybar_file taskbar/config/argvus-taskbar.jsonc
+refresh_managed_waybar_file taskbar/config/argvus-taskbar.css
+refresh_managed_waybar_file widget-telemetry/config/argvus-widget-telemetry.jsonc
+refresh_managed_waybar_file widget-telemetry/config/argvus-widget-telemetry.css
 _waybar_cfg="$(paths_config taskbar/config/argvus-taskbar.jsonc)"
 _waybar_cfg_widget_telemetry="$(paths_config widget-telemetry/config/argvus-widget-telemetry.jsonc)"
 _widget_telemetry_css="$(paths_config widget-telemetry/config/argvus-widget-telemetry.css)"
+
+# System CSS uses the appearance package's shared mode file. Mutable user
+# copies keep the relative import because theme/mode switching writes the
+# per-user Waybar file beside these styles.
+for _waybar_style in "$(paths_config taskbar/config/argvus-taskbar.css)" \
+                     "$_widget_telemetry_css"; do
+  [ -f "$_waybar_style" ] || continue
+  sed -i 's|@import url("/usr/share/argvus/appearance/config/waybar/mode.css");|@import url("./mode.css");|' "$_waybar_style"
+done
 
 case "$THEME" in
   argvus-dark-aether | argvus-dark-silver | argvus-light-veil | argvus-dark-slate | argvus-dark-universe)
