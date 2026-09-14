@@ -34,36 +34,9 @@ if [ "${ARGVUS_NO_RUNTIME:-0}" = 1 ]; then
 fi
 
 if [ -z "$THEME" ]; then
-  THEME=$(
-    rofi -config "$(paths_config launcher/config/config.rasi)" -dmenu -p "   Select Theme" -i -theme-str 'listview {lines: 10;}' <<'EOF'
-01 - Argvus Dark Aether
-02 - Argvus Dark Aether Float
-03 - Argvus Dark Silver
-04 - Argvus Dark Silver Float
-05 - Argvus Dark Slate
-06 - Argvus Dark Slate Float
-07 - Argvus Dark Universe
-08 - Argvus Dark Universe Float
-09 - Argvus Light Veil
-10 - Argvus Light Veil Float
-EOF
-  )
-
-  [ -z "$THEME" ] && exit 0
-
-  case "$THEME" in
-    "01 - Argvus Dark Aether")       THEME="argvus-dark-aether" ;;
-    "02 - Argvus Dark Aether Float") THEME="argvus-dark-aether-float" ;;
-    "03 - Argvus Dark Silver")       THEME="argvus-dark-silver" ;;
-    "04 - Argvus Dark Silver Float") THEME="argvus-dark-silver-float" ;;
-    "05 - Argvus Dark Slate")        THEME="argvus-dark-slate" ;;
-    "06 - Argvus Dark Slate Float")  THEME="argvus-dark-slate-float" ;;
-    "07 - Argvus Dark Universe")     THEME="argvus-dark-universe" ;;
-    "08 - Argvus Dark Universe Float") THEME="argvus-dark-universe-float" ;;
-    "09 - Argvus Light Veil")        THEME="argvus-light-veil" ;;
-    "10 - Argvus Light Veil Float")  THEME="argvus-light-veil-float" ;;
-    *) printf 'Invalid theme selection\n' >&2; exit 1 ;;
-  esac
+  # The selector uses the same two-pass transaction as the removable-device
+  # menu: the first Rofi closes before the model submenu opens.
+  exec sh "$(paths_config appearance/sh/theme-menu.sh)"
 fi
 
 # Serialize the complete transaction, including cleanup. Close the lock FD in
@@ -248,13 +221,46 @@ native_config_home() {
 }
 
 # A theme switch rewrites several live surfaces and also reloads applications
-# such as Kitty.  DPMS is the compositor-level blackout: it hides existing
-# windows as well as ARGVUS layers, so no intermediate palette is visible.
-# Services are stopped while the display is blank and restarted only after all
-# configuration, wallpaper, and runtime reloads have completed.
+# such as Kitty. A fullscreen Rofi splash keeps the transition visible without
+# turning the display off; services are restarted only after configuration and
+# wallpaper updates have completed.
 THEME_TRANSITION_ACTIVE=0
-THEME_DISPLAY_BLANKED=0
+THEME_SPLASH_PID=0
 THEME_CONFIG_READY=0
+
+theme_splash_start() {
+  [ "$RUNTIME" -eq 1 ] || return 0
+  command -v rofi >/dev/null 2>&1 || return 0
+
+  _splash_config="$(paths_config launcher/config/config.rasi)"
+  (
+    _rofi_pid=0
+    _frame=0
+    _frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+    trap '[ "$_rofi_pid" -gt 0 ] && kill "$_rofi_pid" 2>/dev/null || true; exit 0' EXIT HUP INT TERM
+    while :; do
+      _spinner="$(printf '%s' "$_frames" | cut -c $((_frame % 10 + 1)))"
+      printf '%s  Applying ARGVUS theme...\n' "$_spinner" |
+        rofi -config "$_splash_config" -dmenu -no-custom -sync -p '' \
+          -theme-str 'window { fullscreen: true; background-color: rgba(0, 0, 0, 100%); } listview { lines: 1; } textbox { horizontal-align: 0.5; }' \
+        >/dev/null 2>&1 &
+      _rofi_pid=$!
+      sleep 0.18
+      kill "$_rofi_pid" 2>/dev/null || true
+      wait "$_rofi_pid" 2>/dev/null || true
+      _rofi_pid=0
+      _frame=$((_frame + 1))
+    done
+  ) &
+  THEME_SPLASH_PID=$!
+}
+
+theme_splash_stop() {
+  [ "$THEME_SPLASH_PID" -gt 0 ] || return 0
+  kill "$THEME_SPLASH_PID" 2>/dev/null || true
+  wait "$THEME_SPLASH_PID" 2>/dev/null || true
+  THEME_SPLASH_PID=0
+}
 
 theme_transition_cleanup() {
   _status="${1:-0}"
@@ -263,21 +269,17 @@ theme_transition_cleanup() {
   if [ "$THEME_TRANSITION_ACTIVE" -eq 1 ]; then
     # Reuse the exact lifecycle behind SUPER + Shift + R. It owns config
     # synchronization and the complete service list, including idle and polkit.
-    if ! argvus-sessionctl reload; then
+    if ! argvus-sessionctl reload >/dev/null 2>&1; then
       printf 'Error: global session reload failed after theme application.\n' >&2
       [ "$_status" -ne 0 ] || _status=1
     fi
     THEME_TRANSITION_ACTIVE=0
   fi
 
-  if [ "$THEME_DISPLAY_BLANKED" -eq 1 ]; then
-    sleep 0.25
-    hyprctl eval 'hl.dispatch(hl.dsp.dpms({ action = "on" }))' >/dev/null 2>&1 || true
-  fi
+  theme_splash_stop
 
   if [ "$_status" -eq 0 ] && [ "$THEME_CONFIG_READY" -eq 1 ]; then
-    notify-send "Theme" "Switched to '${THEME}'" 2>/dev/null || true
-    printf "Theme '%s' applied.\n" "$THEME"
+    :
   fi
 
   exit "$_status"
@@ -290,11 +292,7 @@ theme_transition_begin() {
   trap 'exit 130' INT
   trap 'exit 143' TERM
   THEME_TRANSITION_ACTIVE=1
-  if hyprctl eval 'hl.dispatch(hl.dsp.dpms({ action = "off" }))' >/dev/null 2>&1; then
-    THEME_DISPLAY_BLANKED=1
-  else
-    printf 'Warning: could not blank displays; applying theme with component restart.\n' >&2
-  fi
+  theme_splash_start
 
   for _unit in \
     argvus-taskbar.service \
@@ -910,14 +908,14 @@ esac
 
 # Every theme owns its default accent. A manual accent remains active only until
 # the user switches themes, including when switching back to the same theme.
-if ! sh "$(paths_config appearance/sh/accent-switch.sh)" --theme-default; then
+if ! sh "$(paths_config appearance/sh/accent-switch.sh)" --theme-default >/dev/null 2>&1; then
   printf 'Error: could not restore the default accent for %s.\n' "$THEME" >&2
   exit 1
 fi
 
 _hyprlock_theme_script="$(paths_config lock/sh/hyprlock-theme.sh)"
 if [ -f "$_hyprlock_theme_script" ]; then
-  if ! sh "$_hyprlock_theme_script" --invalidate; then
+  if ! sh "$_hyprlock_theme_script" --invalidate >/dev/null 2>&1; then
     printf 'Error: could not apply the Hyprlock theme for %s.\n' "$THEME" >&2
     exit 1
   fi
@@ -958,4 +956,3 @@ THEME_CONFIG_READY=1
 if [ "$RUNTIME" -eq 1 ]; then
   theme_transition_cleanup 0
 fi
-printf "Theme '%s' applied.\n" "$THEME"

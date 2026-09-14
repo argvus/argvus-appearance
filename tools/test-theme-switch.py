@@ -117,11 +117,8 @@ class ThemeSwitchTests(unittest.TestCase):
                 commands = self.commands()
                 restart = ["argvus-sessionctl", "reload"]
                 self.assertEqual(commands.count(restart), 1)
-                on = ["hyprctl", "eval", 'hl.dispatch(hl.dsp.dpms({ action = "on" }))']
-                if not fail:
-                    self.assertGreater(commands.index(on), commands.index(restart))
-                else:
-                    self.assertNotIn(on, commands)
+                self.assertFalse(any(c[0] == "hyprctl" and "dpms" in " ".join(c)
+                                     for c in commands))
 
     def test_failed_global_reload_restores_display_and_reports_failure(self):
         self.env["TEST_RELOAD_FAIL"] = "1"
@@ -129,7 +126,27 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertNotIn("applied.", result.stdout)
         commands = self.commands()
         self.assertIn(["argvus-sessionctl", "reload"], commands)
-        self.assertIn(["hyprctl", "eval", 'hl.dispatch(hl.dsp.dpms({ action = "on" }))'], commands)
+        self.assertFalse(any(c[0] == "hyprctl" and "dpms" in " ".join(c)
+                             for c in commands))
+
+    def test_theme_menu_exposes_family_then_model_protocol(self):
+        menu = self.system / "appearance/sh/theme-menu.sh"
+        source = menu.read_text()
+        self.assertIn("ARGVUS Dark Aether >", source)
+        self.assertIn('run_menu "$_family" Normal Float', source)
+        self.assertIn("-kb-accept-entry 'Return,KP_Enter,Right'", source)
+        self.assertIn("-kb-cancel 'Escape,Left'", source)
+        self.assertIn("Normal) exec sh", source)
+        self.assertIn("Float) exec sh", source)
+
+    def test_theme_menu_releases_rofi_arrow_bindings(self):
+        switcher = (self.system / "appearance/sh/theme-switch.sh").read_text()
+        self.assertIn("theme-menu.sh", switcher)
+        self.assertNotIn("-kb-custom-1 Right", switcher)
+
+    def test_theme_switch_is_silent_on_success(self):
+        result = self.apply("argvus-dark-aether")
+        self.assertEqual(result.stdout, "")
 
     def test_partial_theme_directory_is_repaired_without_losing_edits(self):
         theme = "argvus-dark-aether"
