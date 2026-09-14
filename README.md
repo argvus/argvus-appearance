@@ -5,9 +5,9 @@ Desktop Environment.
 
 It currently ships:
 
-- GTK / Qt theme integration under `/usr/share/argvus/gtk-3.0`,
-  `/usr/share/argvus/gtk-4.0` and `/usr/share/argvus/qt6ct`
-- Hyprland appearance integration under `/usr/share/argvus/hypr`
+- GTK / Qt theme integration under `/usr/share/argvus/appearance/config/gtk-3.0`,
+  `/usr/share/argvus/appearance/config/gtk-4.0` and `/usr/share/argvus/appearance/config/qt6ct`
+- Hyprland appearance integration under `/usr/share/argvus/appearance/config/hypr`
 - Toggle, accent and brightness scripts under `/usr/share/argvus/appearance/sh`
 
 Wallpapers and fonts are provided by the separate `argvus-wallpapers` and
@@ -16,12 +16,10 @@ Wallpapers and fonts are provided by the separate `argvus-wallpapers` and
 ## Layout
 
 ```text
-config/
-  gtk-3.0/
-  gtk-4.0/
-  qt6ct/
-  hypr/
-  scripts/
+src/usr/share/argvus/appearance/
+  config/{gtk-3.0,gtk-4.0,qt6ct,hypr,waybar}/
+  sh/
+  docs/
 ```
 
 ## Installation

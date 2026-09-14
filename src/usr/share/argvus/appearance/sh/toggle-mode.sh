@@ -138,7 +138,7 @@ find_theme_wallpaper() {
 # ==============================================================================
 # WAYBAR — mode.css
 # ==============================================================================
-MODE_CSS="$(paths_config taskbar/config/mode.css)"
+MODE_CSS="$(paths_config appearance/config/waybar/mode.css)"
 mkdir -p "$(dirname "$MODE_CSS")"
 
 if [ "$MODE" = "light" ] && [ "$THEME" = "argvus-dark-aether" ]; then

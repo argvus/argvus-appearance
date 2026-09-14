@@ -137,6 +137,22 @@ apply_theme_references() {
   fi
 }
 
+apply_control_center() {
+  # The Control Center owns its palette; a stale calendar cache must not
+  # override its active theme, especially when the calendar is not installed.
+  _center_source="$(paths_config "control-center/config/themes/${THEME}.css")"
+  [ -f "$_center_source" ] || return 0
+  _center_cache="${XDG_CACHE_HOME:-$HOME/.cache}/argvus-control-center/theme.css"
+  mkdir -p "${_center_cache%/*}"
+  _center_temp="${_center_cache}.$$"
+  # Only override accent fields. The Rust loader reads backgrounds and relative
+  # imports directly from its official active theme, including Float parents.
+  {
+    printf '@define-color argvus_accent %s;\n' "$COLOR"
+    printf '@define-color argvus_accent_alpha rgba(%s, %s, %s, 0.45);\n' "$RED" "$GREEN" "$BLUE"
+  } > "$_center_temp" && mv "$_center_temp" "$_center_cache"
+}
+
 apply_waybar() {
   _theme_css="$(paths_config "taskbar/config/themes/${THEME}/theme.css")"
   _widget_telemetry_css="$(paths_config "widget-telemetry/config/themes/${THEME}/widget-telemetry-theme.css")"
@@ -287,6 +303,7 @@ printf '%s\n' "$COLOR" > "$ACCENT_FILE"
 
 apply_theme_references
 apply_waybar
+apply_control_center
 apply_rofi
 apply_qt_palette
 apply_quickshell

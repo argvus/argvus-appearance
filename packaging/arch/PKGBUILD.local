@@ -8,6 +8,7 @@ url="https://github.com/argvus/argvus-appearance"
 license=('GPL-3.0-only')
 options=('!debug')
 depends=(
+  'util-linux'
   'argvus-session'
   'argvus-fonts'
   'argvus-wallpapers'

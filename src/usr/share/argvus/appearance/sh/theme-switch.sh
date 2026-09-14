@@ -19,6 +19,15 @@ THEME="${1:-}"
 ACTIVE_FILE="${ARGVUS_CONFIG_HOME}/argvus/.active-theme"
 RUNTIME=1
 mkdir -p "${ACTIVE_FILE%/*}"
+# Development-only sibling lookup, relative to the migrated source layout.
+_source_root="$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)"
+case "$_source_root" in
+  */src/usr/share/argvus/appearance/sh)
+    _appearance_root="${_source_root%/src/usr/share/argvus/appearance/sh}"
+    _workspace_root="${_appearance_root%/*}"
+    ;;
+  *) _workspace_root="" ;;
+esac
 
 if [ "${ARGVUS_NO_RUNTIME:-0}" = 1 ]; then
   RUNTIME=0
@@ -57,16 +66,22 @@ EOF
   esac
 fi
 
+# Serialize the complete transaction, including cleanup. Close the lock FD in
+# children so a wallpaper process cannot keep the next theme switch blocked.
+if [ "${ARGVUS_THEME_LOCKED:-0}" != 1 ]; then
+  _theme_lock="$(paths_cache theme-switch.lock)"
+  mkdir -p "${_theme_lock%/*}"
+  exec env ARGVUS_THEME_LOCKED=1 flock --exclusive --close "$_theme_lock" sh "$0" "$THEME"
+fi
+
 ensure_theme_parent() {
   _relative="$1"
   _theme="$2"
   _target="$(paths_user_config "${_relative}/${_theme}")"
 
-  if [ -d "$_target" ]; then
-    dirname "$_target"
-    return 0
-  fi
-
+  # Taskbar and telemetry share the legacy user waybar/themes directory.
+  # An existing directory does not imply that this component's files exist.
+  # Fill missing files while preserving existing user edits and overrides.
   for _source in \
     "$(paths_override_config "${_relative}/${_theme}")" \
     "$(paths_generated_config "${_relative}/${_theme}")" \
@@ -74,13 +89,12 @@ ensure_theme_parent() {
     [ "$_source" = "$_target" ] && continue
     if [ -d "$_source" ]; then
       mkdir -p "$_target"
-      cp -R "$_source/." "$_target/"
-      dirname "$_target"
-      return 0
+      cp -R --update=none "$_source/." "$_target/" || return 1
     fi
   done
 
-  return 1
+  [ -d "$_target" ] || return 1
+  dirname "$_target"
 }
 
 required_theme_parent() {
@@ -239,18 +253,31 @@ native_config_home() {
 # Services are stopped while the display is blank and restarted only after all
 # configuration, wallpaper, and runtime reloads have completed.
 THEME_TRANSITION_ACTIVE=0
+THEME_DISPLAY_BLANKED=0
+THEME_CONFIG_READY=0
 
 theme_transition_cleanup() {
   _status="${1:-0}"
   trap - EXIT HUP INT TERM
 
   if [ "$THEME_TRANSITION_ACTIVE" -eq 1 ]; then
-    for _component in wallpaper waybar dunst control-panel snappy-switcher; do
-      argvus-sessionctl restart "$_component" >/dev/null 2>&1 || true
-    done
-    sleep 0.25
-    hyprctl dispatch dpms on >/dev/null 2>&1 || true
+    # Reuse the exact lifecycle behind SUPER + Shift + R. It owns config
+    # synchronization and the complete service list, including idle and polkit.
+    if ! argvus-sessionctl reload; then
+      printf 'Error: global session reload failed after theme application.\n' >&2
+      [ "$_status" -ne 0 ] || _status=1
+    fi
     THEME_TRANSITION_ACTIVE=0
+  fi
+
+  if [ "$THEME_DISPLAY_BLANKED" -eq 1 ]; then
+    sleep 0.25
+    hyprctl eval 'hl.dispatch(hl.dsp.dpms({ action = "on" }))' >/dev/null 2>&1 || true
+  fi
+
+  if [ "$_status" -eq 0 ] && [ "$THEME_CONFIG_READY" -eq 1 ]; then
+    notify-send "Theme" "Switched to '${THEME}'" 2>/dev/null || true
+    printf "Theme '%s' applied.\n" "$THEME"
   fi
 
   exit "$_status"
@@ -258,15 +285,17 @@ theme_transition_cleanup() {
 
 theme_transition_begin() {
   [ "$RUNTIME" -eq 1 ] || return 0
-  command -v hyprctl >/dev/null 2>&1 || return 0
-
-  trap 'theme_transition_cleanup "$?"' EXIT HUP INT TERM
-  if ! hyprctl dispatch dpms off >/dev/null 2>&1; then
-    trap - EXIT HUP INT TERM
-    return 0
+  trap 'theme_transition_cleanup "$?"' EXIT
+  trap 'exit 129' HUP
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
+  THEME_TRANSITION_ACTIVE=1
+  if hyprctl eval 'hl.dispatch(hl.dsp.dpms({ action = "off" }))' >/dev/null 2>&1; then
+    THEME_DISPLAY_BLANKED=1
+  else
+    printf 'Warning: could not blank displays; applying theme with component restart.\n' >&2
   fi
 
-  THEME_TRANSITION_ACTIVE=1
   for _unit in \
     argvus-taskbar.service \
     argvus-widget-telemetry.service \
@@ -301,6 +330,8 @@ apply_gtk_runtime_settings() {
   _theme_name="$2"
   _fallback_theme="$3"
 
+  [ "$RUNTIME" -eq 1 ] || return 0
+
   command -v gsettings >/dev/null 2>&1 || return 0
 
   gsettings set org.gnome.desktop.interface color-scheme "$_scheme" 2>/dev/null || true
@@ -321,7 +352,7 @@ apply_gtk_theme_files() {
   _prefer_dark="$3"
 
   for _gtk_version in gtk-3.0 gtk-4.0; do
-    _theme_dir="$(optional_theme_parent "${_gtk_version}/themes" "$THEME")"
+    _theme_dir="$(optional_theme_parent "appearance/config/${_gtk_version}/themes" "$THEME")"
 
     _argvus_gtk_dir="$(paths_user_config "$_gtk_version")"
     _native_gtk_dir="$(native_config_home)/${_gtk_version}"
@@ -362,7 +393,7 @@ FOOT_THEMES="$(optional_theme_parent app-profiles/config/foot/themes "$THEME")"
 FOOT_SYSTEM_THEMES="$(paths_system_config app-profiles/config/foot/themes)"
 YAZI_CONFIG_ROOT="$(paths_config app-profiles/config/yazi)"
 YAZI_SYSTEM_ROOT="$(paths_system_config app-profiles/config/yazi)"
-SNAPPY_THEMES="$(optional_theme_parent snappy-switcher/themes "$THEME")"
+SNAPPY_THEMES="$(optional_theme_parent app-profiles/config/snappy-switcher/themes "$THEME")"
 SUPERFILE_CONFIG_ROOT="$(paths_config app-profiles/config/superfile)"
 SUPERFILE_THEMES="$(optional_theme_file_parent app-profiles/config/superfile/theme "${THEME}.toml")"
 QT6CT_COLORS="$(paths_config appearance/config/qt6ct/colors)"
@@ -372,7 +403,8 @@ HYPRPAPER_DIR="$(paths_backgrounds argvus)"
 apply_wallpaper_runtime() {
   _wall="$1"
   [ "$RUNTIME" -eq 1 ] || return 0
-  hypr_apply_wallpaper "$_wall"
+  # The central reload starts the wallpaper after every config is ready.
+  systemctl --user set-environment WALLPAPER_PATH="$_wall"
 }
 
 get_active_monitor() {
@@ -489,6 +521,7 @@ send_foot_palette_to_pty() {
 
 apply_running_foot_theme() {
   _theme_file="$1"
+  [ "$RUNTIME" -eq 1 ] || return 0
   [ -f "$_theme_file" ] || return 0
 
   for _pid in $(pgrep -x foot 2>/dev/null) $(pgrep -x footclient 2>/dev/null); do
@@ -602,8 +635,8 @@ apply_argvus_storage_theme() {
   elif [ -f "/etc/argvus/taskbar/storage/themes/${_theme_name}" ]; then
     _theme_src="/etc/argvus/taskbar/storage/themes/${_theme_name}"
   # Tenta o diretório do projeto argvus-taskbar-storage (desenvolvimento).
-  elif [ -f "$(dirname "$0")/../../../../argvus-taskbar-storage/src/usr/share/argvus/taskbar-storage/config/themes/${_theme_name}" ]; then
-    _theme_src="$(dirname "$0")/../../../../argvus-taskbar-storage/src/usr/share/argvus/taskbar-storage/config/themes/${_theme_name}"
+  elif [ -n "$_workspace_root" ] && [ -f "$_workspace_root/argvus-taskbar-storage/src/usr/share/argvus/taskbar-storage/config/themes/${_theme_name}" ]; then
+    _theme_src="$_workspace_root/argvus-taskbar-storage/src/usr/share/argvus/taskbar-storage/config/themes/${_theme_name}"
   else
     return 0
   fi
@@ -634,8 +667,8 @@ apply_argvus_calendar_theme() {
     _calendar_theme_src="$(paths_config "argvus-taskbar-calendar/themes/${_calendar_theme_name}")"
   elif [ -f "/etc/argvus/taskbar/calendar/themes/${_calendar_theme_name}" ]; then
     _calendar_theme_src="/etc/argvus/taskbar/calendar/themes/${_calendar_theme_name}"
-  elif [ -f "$(dirname "$0")/../../../../argvus-taskbar-calendar/resources/themes/${_calendar_theme_name}" ]; then
-    _calendar_theme_src="$(dirname "$0")/../../../../argvus-taskbar-calendar/resources/themes/${_calendar_theme_name}"
+  elif [ -n "$_workspace_root" ] && [ -f "$_workspace_root/argvus-taskbar-calendar/resources/themes/${_calendar_theme_name}" ]; then
+    _calendar_theme_src="$_workspace_root/argvus-taskbar-calendar/resources/themes/${_calendar_theme_name}"
   else
     return 0
   fi
@@ -858,7 +891,7 @@ if [ -f "$_superfile_conf" ] && [ -f "$SUPERFILE_THEMES/$THEME.toml" ]; then
 fi
 
 # Reset GTK mode to match the selected theme.
-MODE_CSS="$(paths_config taskbar/config/mode.css)"
+MODE_CSS="$(paths_config appearance/config/waybar/mode.css)"
 printf '/* mode.css — reset on theme switch */\n' > "$MODE_CSS"
 GTK_MODE_FILE="${ARGVUS_CONFIG_HOME}/argvus/.gtk-mode"
 mkdir -p "$(dirname "$GTK_MODE_FILE")"
@@ -900,21 +933,13 @@ if [ -f "$_spaces_script" ]; then
   fi
 fi
 
-if [ "$RUNTIME" -eq 1 ]; then
-  # Reload Hyprland config
-  hyprctl reload
+# Set wallpaper for the new theme
+if ! apply_wallpaper "$_theme_wallpaper"; then
+  printf 'Error: could not prepare the wallpaper for %s.\n' "$THEME" >&2
+  exit 1
 fi
 
-# Set wallpaper for the new theme
-apply_wallpaper "$_theme_wallpaper"
-
 if [ "$RUNTIME" -eq 1 ]; then
-  # Restart dunst with new theme colors
-  argvus-sessionctl restart dunst >/dev/null 2>&1 || true
-
-  # Restart snappy-switcher with new theme
-  argvus-sessionctl restart snappy-switcher >/dev/null 2>&1 || true
-
   # Signal running kitty instances to reload config (SIGUSR1)
   for _pid in $(pgrep -x kitty 2>/dev/null); do
     kill -USR1 "$_pid" 2>/dev/null || true
@@ -926,11 +951,11 @@ if [ "$RUNTIME" -eq 1 ]; then
   done
 fi
 
-# Sidebar NOT restarted — Theme.qml picks up the new theme dynamically
-# via FileView watching .active-theme.
-
 apply_argvus_storage_theme
 apply_argvus_calendar_theme
 
-[ "$RUNTIME" -eq 1 ] && notify-send "Theme" "Switched to '${THEME}'" 2>/dev/null || true
+THEME_CONFIG_READY=1
+if [ "$RUNTIME" -eq 1 ]; then
+  theme_transition_cleanup 0
+fi
 printf "Theme '%s' applied.\n" "$THEME"

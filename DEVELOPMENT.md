@@ -14,12 +14,8 @@ On Arch Linux, the package recipe lives at `packaging/arch/PKGBUILD`.
 Validate the expected asset layout:
 
 ```sh
-test -f config/hypr/hyprpaper.conf
-test -f config/hypr/application-style.conf
-test -f config/hypr/hyprtoolkit.conf
-test -f config/gtk-3.0/settings.ini
-test -f config/gtk-4.0/settings.ini
-test -d config/qt6ct
+make validate
+python tools/test-theme-switch.py
 ```
 
 Validate installation into a staging directory:
@@ -33,7 +29,7 @@ make DESTDIR=/tmp/argvus-appearance-pkg PREFIX=/usr install
 The Arch package installs:
 
 ```text
-/usr/share/argvus/config/
+/usr/share/argvus/appearance/{config,sh,docs}/
 /usr/share/licenses/argvus-appearance/LICENSE
 ```
 
