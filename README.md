@@ -8,7 +8,7 @@ It currently ships:
 - GTK / Qt theme integration under `/usr/share/argvus/gtk-3.0`,
   `/usr/share/argvus/gtk-4.0` and `/usr/share/argvus/qt6ct`
 - Hyprland appearance integration under `/usr/share/argvus/hypr`
-- Toggle, accent and brightness scripts under `/usr/share/argvus/scripts`
+- Toggle, accent and brightness scripts under `/usr/share/argvus/appearance/sh`
 
 Wallpapers and fonts are provided by the separate `argvus-wallpapers` and
 `argvus-fonts` packages.

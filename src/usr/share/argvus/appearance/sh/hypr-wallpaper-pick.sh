@@ -1,10 +1,10 @@
 #!/usr/bin/env sh
 # shellcheck disable=SC1090,SC1091,SC2034
 
-ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/scripts/argvus/bootstrap.sh}"
+ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/session/sh/bootstrap.sh}"
 . "$ARGVUS_BOOTSTRAP"
 ARGVUS_MUTABLE_CONFIG=1
-HYPRPAPER_FILE="$(paths_config hypr/hyprpaper.conf)"
+HYPRPAPER_FILE="$(paths_config appearance/config/hypr/hyprpaper.conf)"
 
 # Start in the user's HOME so the chooser can select any supported image.
 WALLPAPERS_DIR="${HOME:?}"
@@ -48,6 +48,6 @@ sed -i "s|^[[:space:]]*path[[:space:]]*=.*$|  path =  ${CONFIG_PATH}|" "$HYPRPAP
 apply_wallpaper_runtime "$SELECTED_PATH"
 
 # Rebuild Hyprlock config and invalidate the cached lock wallpaper.
-sh "$(paths_config scripts/argvus/hyprlock-theme.sh)" --invalidate >/dev/null 2>&1 || true
+sh "$(paths_config lock/sh/hyprlock-theme.sh)" --invalidate >/dev/null 2>&1 || true
 
 notify-send "Wallpaper" "Alterado para:\n$(basename "$SELECTED_PATH")"

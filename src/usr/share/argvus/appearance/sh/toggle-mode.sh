@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 # shellcheck disable=SC1091
-ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/scripts/argvus/bootstrap.sh}"
+ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/session/sh/bootstrap.sh}"
 . "$ARGVUS_BOOTSTRAP"
 ARGVUS_MUTABLE_CONFIG=1
 
@@ -83,7 +83,7 @@ fi
 
 # Read current theme
 THEME="$(cat "$ARGVUS_CONFIG_HOME/argvus/.active-theme" 2>/dev/null || echo "argvus-dark-aether")"
-HYPRPAPER_FILE="$(paths_config hypr/hyprpaper.conf)"
+HYPRPAPER_FILE="$(paths_config appearance/config/hypr/hyprpaper.conf)"
 HYPRPAPER_DIR="/usr/share/backgrounds/argvus"
 
 apply_wallpaper_runtime() {
@@ -136,7 +136,7 @@ find_theme_wallpaper() {
 # ==============================================================================
 # WAYBAR — mode.css
 # ==============================================================================
-MODE_CSS="$(paths_config waybar/mode.css)"
+MODE_CSS="$(paths_config taskbar/config/mode.css)"
 mkdir -p "$(dirname "$MODE_CSS")"
 
 if [ "$MODE" = "light" ] && [ "$THEME" = "argvus-dark-aether" ]; then
@@ -193,7 +193,7 @@ apply_wallpaper "$THEME_WALLPAPER"
 # ==============================================================================
 # ROFI — mode.rasi
 # ==============================================================================
-MODE_RASI="$(paths_config rofi/mode.rasi)"
+MODE_RASI="$(paths_config launcher/config/mode.rasi)"
 mkdir -p "$(dirname "$MODE_RASI")"
 
 if [ "$MODE" = "light" ] && [ "$THEME" = "argvus-dark-aether" ]; then

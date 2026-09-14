@@ -5,7 +5,7 @@
 
 set -u
 
-ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/scripts/argvus/bootstrap.sh}"
+ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/session/sh/bootstrap.sh}"
 . "$ARGVUS_BOOTSTRAP"
 ARGVUS_MUTABLE_CONFIG=1
 
@@ -45,7 +45,7 @@ read_accent_state() {
 }
 
 select_accent() {
-  rofi -config "$(paths_config rofi/config.rasi)" -dmenu -p "Accent color" -i -theme-str 'listview {lines: 9;}' <<'EOF'
+  rofi -config "$(paths_config launcher/config/config.rasi)" -dmenu -p "Accent color" -i -theme-str 'listview {lines: 9;}' <<'EOF'
 01 - Blue       #3590bd
 02 - Slate Blue #7391a5
 03 - Brown      #996548
@@ -110,17 +110,17 @@ set_dunst_section_value() {
 }
 
 apply_theme_references() {
-  _yazi_config="$(paths_config yazi)"
-  _superfile_config="$(paths_config superfile)"
-  _rofi_config="$(paths_config rofi/config.rasi)"
-  _rofi_theme_file="$(paths_config rofi/theme.rasi)"
-  _rofi_mode="$(paths_config rofi/mode.rasi)"
-  _rofi_theme="$(paths_config "rofi/themes/${THEME}/theme.rasi")"
+  _yazi_config="$(paths_config app-profiles/config/yazi)"
+  _superfile_config="$(paths_config app-profiles/config/superfile)"
+  _rofi_config="$(paths_config launcher/config/config.rasi)"
+  _rofi_theme_file="$(paths_config launcher/config/theme.rasi)"
+  _rofi_mode="$(paths_config launcher/config/mode.rasi)"
+  _rofi_theme="$(paths_config "launcher/config/themes/${THEME}/theme.rasi")"
 
   sed -i "s|@import url(\"./themes/.*/theme.css\");|@import url(\"./themes/${THEME}/theme.css\");|" \
-    "$(paths_config waybar/argvus-taskbar.css)" 2>/dev/null || true
+    "$(paths_config taskbar/config/argvus-taskbar.css)" 2>/dev/null || true
   sed -i "s|@import url(\"./themes/.*/widget-telemetry-theme.css\");|@import url(\"./themes/${THEME}/widget-telemetry-theme.css\");|" \
-    "$(paths_config waybar/argvus-widget-telemetry.css)" 2>/dev/null || true
+    "$(paths_config widget-telemetry/config/argvus-widget-telemetry.css)" 2>/dev/null || true
   sed -i "s|@theme \".*/rofi/theme.rasi\"|@theme \"${_rofi_theme_file}\"|" \
     "$_rofi_config" 2>/dev/null || true
   sed -i "s|@import \".*/rofi/themes/.*/theme.rasi\"|@import \"${_rofi_theme}\"|" \
@@ -129,17 +129,17 @@ apply_theme_references() {
     "$_rofi_theme_file" 2>/dev/null || true
   command -v argvus-terminal >/dev/null 2>&1 && argvus-terminal --apply "$THEME" >/dev/null 2>&1 || true
   command -v argvus-system-monitor >/dev/null 2>&1 && argvus-system-monitor --apply "$THEME" >/dev/null 2>&1 || true
-  replace_setting "$(paths_config snappy-switcher/config.ini)" name "${THEME}/theme.ini"
+  replace_setting "$(paths_config app-profiles/config/snappy-switcher/config.ini)" name "${THEME}/theme.ini"
   replace_setting "$_superfile_config/config.toml" theme "\"${THEME}\""
-  replace_setting "$(paths_config qt6ct/qt6ct.conf)" color_scheme_path "$(paths_config "qt6ct/colors/${THEME}.conf")"
+  replace_setting "$(paths_config appearance/config/qt6ct/qt6ct.conf)" color_scheme_path "$(paths_config "appearance/config/qt6ct/colors/${THEME}.conf")"
   if [ -f "$_yazi_config/flavors/${THEME}.yazi/flavor.toml" ]; then
     printf '[flavor]\ndark = "%s"\n' "$THEME" > "$_yazi_config/theme.toml"
   fi
 }
 
 apply_waybar() {
-  _theme_css="$(paths_config "waybar/themes/${THEME}/theme.css")"
-  _widget_telemetry_css="$(paths_config "waybar/themes/${THEME}/widget-telemetry-theme.css")"
+  _theme_css="$(paths_config "taskbar/config/themes/${THEME}/theme.css")"
+  _widget_telemetry_css="$(paths_config "widget-telemetry/config/themes/${THEME}/widget-telemetry-theme.css")"
   [ -f "$_theme_css" ] && sed -i \
     -e "s|^@define-color th-decorate .*|@define-color th-decorate        ${COLOR};|" \
     -e "s|^@define-color th-decorate-rgba .*|@define-color th-decorate-rgba   rgba(${RED}, ${GREEN}, ${BLUE}, 0.45);|" \
@@ -155,7 +155,7 @@ apply_waybar() {
 }
 
 apply_rofi() {
-  _file="$(paths_config "rofi/themes/${THEME}/theme.rasi")"
+  _file="$(paths_config "launcher/config/themes/${THEME}/theme.rasi")"
   [ -f "$_file" ] || return 0
   sed -i \
     -e "s|^[[:space:]]*th-fg:.*|    th-fg:            rgb(${RED}, ${GREEN}, ${BLUE});|" \
@@ -165,7 +165,7 @@ apply_rofi() {
 }
 
 apply_qt_palette() {
-  _file="$(paths_config "qt6ct/colors/${THEME}.conf")"
+  _file="$(paths_config "appearance/config/qt6ct/colors/${THEME}.conf")"
   [ -f "$_file" ] || return 0
   _tmp="${_file}.accent.$$"
   awk -v accent="#ff${HEX}" '
@@ -184,7 +184,7 @@ apply_qt_palette() {
 }
 
 apply_quickshell() {
-  _file="$(paths_config "quickshell/argvus-control-panel/themes/${THEME}/Theme.qml")"
+  _file="$(paths_config "control-panel/config/quickshell/argvus-control-panel/themes/${THEME}/Theme.qml")"
   [ -f "$_file" ] || return 0
   sed -i \
     -e "s|^[[:space:]]*readonly property color accent:.*|    readonly property color accent:          \"${COLOR}\"|" \
@@ -202,11 +202,11 @@ apply_quickshell() {
 }
 
 apply_application_colors() {
-  _hyprlock="$(paths_config hypr/hyprlock.conf)"
-  _hyprtoolkit="$(paths_config hypr/hyprtoolkit.conf)"
-  _dunst="$(paths_config dunst/dunstrc)"
-  _snappy="$(paths_config "snappy-switcher/themes/${THEME}/theme.ini")"
-  _superfile="$(paths_config "superfile/theme/${THEME}.toml")"
+  _hyprlock="$(paths_config lock/config/hyprlock.conf)"
+  _hyprtoolkit="$(paths_config appearance/config/hypr/hyprtoolkit.conf)"
+  _dunst="$(paths_config notifications/config/dunstrc)"
+  _snappy="$(paths_config "app-profiles/config/snappy-switcher/themes/${THEME}/theme.ini")"
+  _superfile="$(paths_config "app-profiles/config/superfile/theme/${THEME}.toml")"
 
   [ -f "$_hyprlock" ] && sed -i "s|^[[:space:]]*outer_color = .*|  outer_color = rgb(${HEX})|" "$_hyprlock"
   [ -f "$_hyprtoolkit" ] && sed -i \

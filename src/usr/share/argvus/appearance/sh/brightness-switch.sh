@@ -6,7 +6,7 @@
 
 set -u
 
-ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/scripts/argvus/bootstrap.sh}"
+ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/session/sh/bootstrap.sh}"
 . "$ARGVUS_BOOTSTRAP"
 
 BACKLIGHT_DEV="${ARGVUS_BACKLIGHT_DEV:-}"
@@ -107,7 +107,7 @@ select_menu() {
   fi
 
   _selection=$(
-    rofi -config "$(paths_config rofi/config.rasi)" -dmenu -p "$_prompt" -i -theme-str 'listview {lines: 10;}' <<EOF
+    rofi -config "$(paths_config launcher/config/config.rasi)" -dmenu -p "$_prompt" -i -theme-str 'listview {lines: 10;}' <<EOF
 01 - $_inc +10%
 02 - $_inc +5%
 03 - $_dec -5%

@@ -2,8 +2,8 @@
 
 # -- Hyprland-specific paths and helpers --------------------------------------
 
-HYPRPAPER_FILE="$(paths_config hypr/hyprpaper.conf)"
-HYPRLOCK_FILE="$(paths_config hypr/hyprlock.conf)"
+HYPRPAPER_FILE="$(paths_config appearance/config/hypr/hyprpaper.conf)"
+HYPRLOCK_FILE="$(paths_config lock/config/hyprlock.conf)"
 
 GET_HYPRPAPER_PATH=$(
   sed -n \

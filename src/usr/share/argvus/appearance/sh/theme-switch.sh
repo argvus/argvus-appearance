@@ -3,7 +3,7 @@
 # Usage: theme-switch <theme-name>
 # shellcheck disable=SC1090,SC1091,SC2034
 
-ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/scripts/argvus/bootstrap.sh}"
+ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/session/sh/bootstrap.sh}"
 . "$ARGVUS_BOOTSTRAP"
 ARGVUS_MUTABLE_CONFIG=1
 
@@ -18,7 +18,7 @@ fi
 
 if [ -z "$THEME" ]; then
   THEME=$(
-    rofi -config "$(paths_config rofi/config.rasi)" -dmenu -p "   Select Theme" -i -theme-str 'listview {lines: 10;}' <<'EOF'
+    rofi -config "$(paths_config launcher/config/config.rasi)" -dmenu -p "   Select Theme" -i -theme-str 'listview {lines: 10;}' <<'EOF'
 01 - Argvus Dark Aether
 02 - Argvus Dark Aether Float
 03 - Argvus Dark Silver
@@ -295,24 +295,24 @@ apply_gtk_theme_files() {
   printf '%s\n' "$_gtk_mode" > "$GTK_MODE_FILE"
 }
 
-HYPR_THEMES="$(required_theme_parent hypr/themes "$THEME")"
-WAYBAR_THEMES="$(optional_theme_parent waybar/themes "$THEME")"
-QS_THEMES="$(optional_theme_parent quickshell/argvus-control-panel/themes "$THEME")"
-ROFI_THEMES="$(optional_theme_parent rofi/themes "$THEME")"
-ROFI_CONFIG="$(paths_config rofi/config.rasi)"
-ROFI_THEME="$(paths_config rofi/theme.rasi)"
-ROFI_MODE="$(paths_config rofi/mode.rasi)"
-DUNST_THEMES="$(optional_theme_parent dunst/themes "$THEME")"
-FOOT_CONFIG="$(paths_config foot/foot.ini)"
-FOOT_THEMES="$(optional_theme_parent foot/themes "$THEME")"
-FOOT_SYSTEM_THEMES="$(paths_system_config foot/themes)"
-YAZI_CONFIG_ROOT="$(paths_config yazi)"
-YAZI_SYSTEM_ROOT="$(paths_system_config yazi)"
+HYPR_THEMES="$(required_theme_parent appearance/config/hypr/themes "$THEME")"
+WAYBAR_THEMES="$(optional_theme_parent taskbar/config/themes "$THEME")"
+QS_THEMES="$(optional_theme_parent control-panel/config/quickshell/argvus-control-panel/themes "$THEME")"
+ROFI_THEMES="$(optional_theme_parent launcher/config/themes "$THEME")"
+ROFI_CONFIG="$(paths_config launcher/config/config.rasi)"
+ROFI_THEME="$(paths_config launcher/config/theme.rasi)"
+ROFI_MODE="$(paths_config launcher/config/mode.rasi)"
+DUNST_THEMES="$(optional_theme_parent notifications/config/themes "$THEME")"
+FOOT_CONFIG="$(paths_config app-profiles/config/foot/foot.ini)"
+FOOT_THEMES="$(optional_theme_parent app-profiles/config/foot/themes "$THEME")"
+FOOT_SYSTEM_THEMES="$(paths_system_config app-profiles/config/foot/themes)"
+YAZI_CONFIG_ROOT="$(paths_config app-profiles/config/yazi)"
+YAZI_SYSTEM_ROOT="$(paths_system_config app-profiles/config/yazi)"
 SNAPPY_THEMES="$(optional_theme_parent snappy-switcher/themes "$THEME")"
-SUPERFILE_CONFIG_ROOT="$(paths_config superfile)"
+SUPERFILE_CONFIG_ROOT="$(paths_config app-profiles/config/superfile)"
 SUPERFILE_THEMES="$(optional_theme_file_parent superfile/theme "${THEME}.toml")"
-QT6CT_COLORS="$(paths_config qt6ct/colors)"
-HYPRPAPER_FILE="$(paths_config hypr/hyprpaper.conf)"
+QT6CT_COLORS="$(paths_config appearance/config/qt6ct/colors)"
+HYPRPAPER_FILE="$(paths_config appearance/config/hypr/hyprpaper.conf)"
 HYPRPAPER_DIR="$(paths_backgrounds argvus)"
 
 apply_wallpaper_runtime() {
@@ -458,7 +458,7 @@ apply_running_foot_theme() {
 
 apply_dunst_theme() {
   _theme_file="$DUNST_THEMES/$THEME/dunstrc.theme"
-  _dunstrc="$(paths_config dunst/dunstrc)"
+  _dunstrc="$(paths_config notifications/config/dunstrc)"
   [ -f "$_theme_file" ] && [ -f "$_dunstrc" ] || return 0
 
   _highlight=$(theme_value "$_theme_file" highlight "#3590bd")
@@ -520,8 +520,8 @@ apply_argvus_storage_theme() {
 
   # Tenta encontrar os arquivos de tema em ordem de prioridade:
   # 1. Diretório do usuário (~/.config/argvus/taskbar/storage/themes)
-  # 2. Diretório do sistema (/etc/argvus/taskbar/storage/themes)
-  # 3. Diretório do projeto (para desenvolvimento)
+  # 2. Diretório canônico do sistema (/usr/share/argvus/taskbar-storage/config/themes)
+  # 3. Diretório legado do sistema (/etc/argvus/taskbar/storage/themes)
   _theme_src=""
   case "$THEME" in
     argvus-dark-aether|argvus-dark-aether-float)
@@ -541,15 +541,15 @@ apply_argvus_storage_theme() {
   # Tenta o diretório do usuário
   if [ -f "${_storage_theme_dir}/${_theme_name}" ]; then
     _theme_src="${_storage_theme_dir}/${_theme_name}"
-  # Tenta o sistema
+  # Tenta o sistema canônico
+  elif [ -f "/usr/share/argvus/taskbar-storage/config/themes/${_theme_name}" ]; then
+    _theme_src="/usr/share/argvus/taskbar-storage/config/themes/${_theme_name}"
+  # Mantém instalações antigas funcionais durante a migração.
   elif [ -f "/etc/argvus/taskbar/storage/themes/${_theme_name}" ]; then
     _theme_src="/etc/argvus/taskbar/storage/themes/${_theme_name}"
-  # Tenta o diretório do projeto argvus-taskbar-storage (desenvolvimento)
-  elif [ -f "$(dirname "$0")/../../../../argvus-taskbar-storage/themes/${_theme_name}" ]; then
-    _theme_src="$(dirname "$0")/../../../../argvus-taskbar-storage/themes/${_theme_name}"
-  # Tenta o diretório legado, caso exista em uma instalação antiga.
-  elif [ -f "$(paths_config argvus/taskbar/storage/themes/${_theme_name})" ]; then
-    _theme_src="$(paths_config argvus/taskbar/storage/themes/${_theme_name})"
+  # Tenta o diretório do projeto argvus-taskbar-storage (desenvolvimento).
+  elif [ -f "$(dirname "$0")/../../../../argvus-taskbar-storage/src/usr/share/argvus/taskbar-storage/config/themes/${_theme_name}" ]; then
+    _theme_src="$(dirname "$0")/../../../../argvus-taskbar-storage/src/usr/share/argvus/taskbar-storage/config/themes/${_theme_name}"
   else
     return 0
   fi
@@ -616,9 +616,9 @@ printf '%s' "$THEME" > "$ACTIVE_FILE"
 # ----- Per-theme waybar layout -----
 refresh_managed_waybar_file waybar/argvus-taskbar.jsonc
 refresh_managed_waybar_file waybar/argvus-taskbar.css
-_waybar_cfg="$(paths_config waybar/argvus-taskbar.jsonc)"
-_waybar_cfg_widget_telemetry="$(paths_config waybar/argvus-widget-telemetry.jsonc)"
-_widget_telemetry_css="$(paths_config waybar/argvus-widget-telemetry.css)"
+_waybar_cfg="$(paths_config taskbar/config/argvus-taskbar.jsonc)"
+_waybar_cfg_widget_telemetry="$(paths_config widget-telemetry/config/argvus-widget-telemetry.jsonc)"
+_widget_telemetry_css="$(paths_config widget-telemetry/config/argvus-widget-telemetry.css)"
 
 case "$THEME" in
   argvus-dark-aether | argvus-dark-silver | argvus-light-veil | argvus-dark-slate | argvus-dark-universe)
@@ -629,13 +629,13 @@ case "$THEME" in
     sed -i "s|\"margin-top\": -\?[0-9]*|\"margin-top\": 1|" "$_waybar_cfg_widget_telemetry"
     sed -i "s|\"margin-left\": -\?[0-9]*|\"margin-left\": 1|" "$_waybar_cfg_widget_telemetry"
     sed -i "s|\"margin-bottom\": -\?[0-9]*|\"margin-bottom\": 1|" "$_waybar_cfg_widget_telemetry"
-    sed -i '/^window#waybar {/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config waybar/argvus-taskbar.css)"
-    sed -i '/^#workspaces button/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config waybar/argvus-taskbar.css)"
-    sed -i '/^#workspaces button\.active,/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config waybar/argvus-taskbar.css)"
-    sed -i '/^tooltip {/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config waybar/argvus-taskbar.css)"
-    sed -i '/^#right-0, #right-1, #right-2, #right-search, #mpris/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config waybar/argvus-taskbar.css)"
+    sed -i '/^window#waybar {/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config taskbar/config/argvus-taskbar.css)"
+    sed -i '/^#workspaces button/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config taskbar/config/argvus-taskbar.css)"
+    sed -i '/^#workspaces button\.active,/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config taskbar/config/argvus-taskbar.css)"
+    sed -i '/^tooltip {/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config taskbar/config/argvus-taskbar.css)"
+    sed -i '/^#right-0, #right-1, #right-2, #right-search, #mpris/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config taskbar/config/argvus-taskbar.css)"
     sed -i '/^window#waybar {/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$_widget_telemetry_css"
-    _rofi_cfg="$(paths_config rofi/theme.rasi)"
+    _rofi_cfg="$(paths_config launcher/config/theme.rasi)"
     sed -i '/^window {/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$_rofi_cfg"
     sed -i '/^element selected.normal {/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$_rofi_cfg"
     ;;
@@ -647,13 +647,13 @@ case "$THEME" in
     sed -i "s|\"margin-top\": -\?[0-9]*|\"margin-top\": 15|" "$_waybar_cfg_widget_telemetry"
     sed -i "s|\"margin-left\": -\?[0-9]*|\"margin-left\": 20|" "$_waybar_cfg_widget_telemetry"
     sed -i "s|\"margin-bottom\": -\?[0-9]*|\"margin-bottom\": 15|" "$_waybar_cfg_widget_telemetry"
-    sed -i '/^window#waybar {/,/^}/s/border-radius: [0-9]*px;/border-radius: 4px;/' "$(paths_config waybar/argvus-taskbar.css)"
-    sed -i '/^#workspaces button/,/^}/s/border-radius: [0-9]*px;/border-radius: 5px;/' "$(paths_config waybar/argvus-taskbar.css)"
-    sed -i '/^#workspaces button\.active,/,/^}/s/border-radius: [0-9]*px;/border-radius: 4px;/' "$(paths_config waybar/argvus-taskbar.css)"
-    sed -i '/^tooltip {/,/^}/s/border-radius: [0-9]*px;/border-radius: 8px;/' "$(paths_config waybar/argvus-taskbar.css)"
-    sed -i '/^#right-0, #right-1, #right-2, #right-search, #mpris/,/^}/s/border-radius: [0-9]*px;/border-radius: 5px;/' "$(paths_config waybar/argvus-taskbar.css)"
+    sed -i '/^window#waybar {/,/^}/s/border-radius: [0-9]*px;/border-radius: 4px;/' "$(paths_config taskbar/config/argvus-taskbar.css)"
+    sed -i '/^#workspaces button/,/^}/s/border-radius: [0-9]*px;/border-radius: 5px;/' "$(paths_config taskbar/config/argvus-taskbar.css)"
+    sed -i '/^#workspaces button\.active,/,/^}/s/border-radius: [0-9]*px;/border-radius: 4px;/' "$(paths_config taskbar/config/argvus-taskbar.css)"
+    sed -i '/^tooltip {/,/^}/s/border-radius: [0-9]*px;/border-radius: 8px;/' "$(paths_config taskbar/config/argvus-taskbar.css)"
+    sed -i '/^#right-0, #right-1, #right-2, #right-search, #mpris/,/^}/s/border-radius: [0-9]*px;/border-radius: 5px;/' "$(paths_config taskbar/config/argvus-taskbar.css)"
     sed -i '/^window#waybar {/,/^}/s/border-radius: [0-9]*px;/border-radius: 8px;/' "$_widget_telemetry_css"
-    _rofi_cfg="$(paths_config rofi/theme.rasi)"
+    _rofi_cfg="$(paths_config launcher/config/theme.rasi)"
     sed -i '/^window {/,/^}/s/border-radius: [0-9]*px;/border-radius: 6px;/' "$_rofi_cfg"
     sed -i '/^element selected.normal {/,/^}/s/border-radius: [0-9]*px;/border-radius: 5px;/' "$_rofi_cfg"
     ;;
@@ -661,20 +661,20 @@ esac
 
 case "$THEME" in
   argvus-dark-slate)
-    sed -i '/^window#waybar {/,/^}/s/border: .*;/border: none;/' "$(paths_config waybar/argvus-taskbar.css)"
+    sed -i '/^window#waybar {/,/^}/s/border: .*;/border: none;/' "$(paths_config taskbar/config/argvus-taskbar.css)"
     ;;
   *)
-    sed -i '/^window#waybar {/,/^}/s/border: .*;/border: 1px solid @th-decorate;/' "$(paths_config waybar/argvus-taskbar.css)"
+    sed -i '/^window#waybar {/,/^}/s/border: .*;/border: 1px solid @th-decorate;/' "$(paths_config taskbar/config/argvus-taskbar.css)"
     ;;
 esac
 
 sed -i "s|@import url(\"./themes/.*/theme.css\");|@import url(\"./themes/${THEME}/theme.css\");|" \
-  "$(paths_config waybar/argvus-taskbar.css)"
+  "$(paths_config taskbar/config/argvus-taskbar.css)"
 
 sed -i "s|@import url(\"./themes/.*/widget-telemetry-theme.css\");|@import url(\"./themes/${THEME}/widget-telemetry-theme.css\");|" \
-  "$(paths_config waybar/argvus-widget-telemetry.css)"
+  "$(paths_config widget-telemetry/config/argvus-widget-telemetry.css)"
 
-write_managed_css_block "$(paths_config waybar/argvus-taskbar.css)" "* {
+write_managed_css_block "$(paths_config taskbar/config/argvus-taskbar.css)" "* {
   font-family: \"${ARGVUS_TASKBAR_FAMILY}\", \"Symbols Nerd Font Mono\", monospace;
   font-size: ${ARGVUS_TASKBAR_SIZE}px;
 }
@@ -694,7 +694,7 @@ write_managed_css_block "$(paths_config waybar/argvus-taskbar.css)" "* {
   font-family: \"Symbols Nerd Font Mono\";
 }"
 
-write_managed_css_block "$(paths_config waybar/argvus-widget-telemetry.css)" "* {
+write_managed_css_block "$(paths_config widget-telemetry/config/argvus-widget-telemetry.css)" "* {
   font-family: \"${ARGVUS_SYSINFO_FAMILY}\", \"Symbols Nerd Font Mono\", monospace;
   font-size: ${ARGVUS_SYSINFO_SIZE}px;
 }"
@@ -739,16 +739,16 @@ fi
 apply_dunst_theme
 
 if [ -f "$HYPR_THEMES/$THEME/hyprtoolkit.conf" ]; then
-  cp "$HYPR_THEMES/$THEME/hyprtoolkit.conf" "$(paths_config hypr/hyprtoolkit.conf)"
-  replace_or_append_setting "$(paths_config hypr/hyprtoolkit.conf)" font_family "\"$ARGVUS_SYSTEM_FAMILY\""
-  replace_or_append_setting "$(paths_config hypr/hyprtoolkit.conf)" font_size "$ARGVUS_SYSTEM_SIZE"
+  cp "$HYPR_THEMES/$THEME/hyprtoolkit.conf" "$(paths_config appearance/config/hypr/hyprtoolkit.conf)"
+  replace_or_append_setting "$(paths_config appearance/config/hypr/hyprtoolkit.conf)" font_family "\"$ARGVUS_SYSTEM_FAMILY\""
+  replace_or_append_setting "$(paths_config appearance/config/hypr/hyprtoolkit.conf)" font_size "$ARGVUS_SYSTEM_SIZE"
 fi
 
 if [ -f "$HYPR_THEMES/$THEME/application-style.conf" ]; then
-  cp "$HYPR_THEMES/$THEME/application-style.conf" "$(paths_config hypr/application-style.conf)"
+  cp "$HYPR_THEMES/$THEME/application-style.conf" "$(paths_config appearance/config/hypr/application-style.conf)"
 fi
 
-_qt6ct_conf="$(paths_config qt6ct/qt6ct.conf)"
+_qt6ct_conf="$(paths_config appearance/config/qt6ct/qt6ct.conf)"
 if [ -f "$_qt6ct_conf" ] && [ -f "$QT6CT_COLORS/$THEME.conf" ]; then
   sed -i "s|^color_scheme_path=.*|color_scheme_path=${QT6CT_COLORS}/${THEME}.conf|" "$_qt6ct_conf"
   sed -i "s|^custom_palette=.*|custom_palette=true|" "$_qt6ct_conf"
@@ -762,7 +762,7 @@ fi
 command -v argvus-system-monitor >/dev/null 2>&1 && argvus-system-monitor --apply "$THEME" >/dev/null 2>&1 || true
 
 if [ -f "$SNAPPY_THEMES/$THEME/theme.ini" ]; then
-  _snappy_conf="$(paths_config snappy-switcher/config.ini)"
+  _snappy_conf="$(paths_config app-profiles/config/snappy-switcher/config.ini)"
   sed -i "s|^name = .*|name = ${THEME}/theme.ini|" "$_snappy_conf"
 fi
 
@@ -792,7 +792,7 @@ if [ -f "$_superfile_conf" ] && [ -f "$SUPERFILE_THEMES/$THEME.toml" ]; then
 fi
 
 # Reset GTK mode to match the selected theme.
-MODE_CSS="$(paths_config waybar/mode.css)"
+MODE_CSS="$(paths_config taskbar/config/mode.css)"
 printf '/* mode.css — reset on theme switch */\n' > "$MODE_CSS"
 GTK_MODE_FILE="${ARGVUS_CONFIG_HOME}/argvus/.gtk-mode"
 mkdir -p "$(dirname "$GTK_MODE_FILE")"
@@ -811,12 +811,12 @@ esac
 
 # Every theme owns its default accent. A manual accent remains active only until
 # the user switches themes, including when switching back to the same theme.
-if ! sh "$(paths_config scripts/argvus/accent-switch.sh)" --theme-default; then
+if ! sh "$(paths_config appearance/sh/accent-switch.sh)" --theme-default; then
   printf 'Error: could not restore the default accent for %s.\n' "$THEME" >&2
   exit 1
 fi
 
-_hyprlock_theme_script="$(paths_config scripts/argvus/hyprlock-theme.sh)"
+_hyprlock_theme_script="$(paths_config lock/sh/hyprlock-theme.sh)"
 if [ -f "$_hyprlock_theme_script" ]; then
   if ! sh "$_hyprlock_theme_script" --invalidate; then
     printf 'Error: could not apply the Hyprlock theme for %s.\n' "$THEME" >&2
@@ -826,7 +826,7 @@ fi
 
 # Re-apply the user's spaces override after the theme has rewritten its
 # generated Waybar files. Spacing is a user preference for every theme type.
-_spaces_script="$(paths_config scripts/argvus/spaces-switch.sh)"
+_spaces_script="$(paths_config hyprland/sh/spaces-switch.sh)"
 if [ -f "$_spaces_script" ]; then
   if ! sh "$_spaces_script" --apply-static; then
     printf 'Error: could not re-apply the spaces override for %s.\n' "$THEME" >&2
