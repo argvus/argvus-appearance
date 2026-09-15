@@ -26,13 +26,13 @@ get_active_monitor() {
 }
 
 if command -v argvus >/dev/null 2>&1; then
-  argvus-tui-terminal --class argvus-wallpaper-picker --term foot -- \
+  argvus-tui-terminal --class argvus-wallpaper-picker --term kitty -- \
     argvus --spf --chooser-file="$SELECTED_FILE" "$WALLPAPERS_DIR"
 elif command -v spf >/dev/null 2>&1; then
-  argvus-tui-terminal --class argvus-wallpaper-picker --term foot -- \
+  argvus-tui-terminal --class argvus-wallpaper-picker --term kitty -- \
     spf --chooser-file="$SELECTED_FILE" "$WALLPAPERS_DIR"
 else
-  argvus-tui-terminal --class argvus-wallpaper-picker --term foot -- \
+  argvus-tui-terminal --class argvus-wallpaper-picker --term kitty -- \
     yazi --chooser-file="$SELECTED_FILE" "$WALLPAPERS_DIR"
 fi
 
