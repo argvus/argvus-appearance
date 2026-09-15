@@ -108,6 +108,11 @@ class ThemeSwitchTests(unittest.TestCase):
                     self.assertIn("@define-color argvus_accent #", palette)
                     self.assertNotIn("argvus_bg", palette)
                     self.assertNotIn("@import", palette)
+                    qt6ct = (self.base / "native/qt6ct/qt6ct.conf").read_text()
+                    self.assertIn(
+                        f"color_scheme_path = {self.user / 'qt6ct/colors' / (theme + '.conf')}",
+                        qt6ct,
+                    )
         self.assertFalse(any(c[0] == "gsettings" for c in self.commands()))
 
     def test_restart_does_not_depend_on_dpms(self):
