@@ -8,7 +8,7 @@ wallpaper, notification, idle and polkit lifecycle. Waybar must
 restart even if blanking the display fails: a CSS reload does not update its
 layer-shell margins. Signal cleanup restores the services and display.
 
-Normal themes default to zero taskbar and telemetry margins. Float themes
+Normal themes default to 1px taskbar and telemetry margins. Float themes
 default to 20px margins; `hyprland/sh/spaces-switch.sh` remains responsible for
 the final position and for explicit user `.spaces` preferences.
 

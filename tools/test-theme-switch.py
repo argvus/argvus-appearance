@@ -88,7 +88,7 @@ class ThemeSwitchTests(unittest.TestCase):
             for theme in (normal + "-float", normal):
                 with self.subTest(theme=theme):
                     self.apply(theme)
-                    margin = 20 if theme.endswith("-float") else 0
+                    margin = 20 if theme.endswith("-float") else 1
                     bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
                     for edge in ("top", "left", "right"):
                         self.assertIn(f'"margin-{edge}": {margin}', bar)

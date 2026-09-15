@@ -744,13 +744,13 @@ done
 
 case "$THEME" in
   argvus-dark-aether | argvus-dark-silver | argvus-light-veil | argvus-dark-slate | argvus-dark-universe)
-    sed -i "s|\"margin-top\": [0-9]*|\"margin-top\": 0|" "$_waybar_cfg"
-    sed -i "s|\"margin-left\": [0-9]*|\"margin-left\": 0|" "$_waybar_cfg"
-    sed -i "s|\"margin-right\": [0-9]*|\"margin-right\": 0|" "$_waybar_cfg"
-    sed -i "s|\"margin-bottom\": -\?[0-9]*|\"margin-bottom\": 0|" "$_waybar_cfg"
-    sed -i "s|\"margin-top\": -\?[0-9]*|\"margin-top\": 0|" "$_waybar_cfg_widget_telemetry"
-    sed -i "s|\"margin-left\": -\?[0-9]*|\"margin-left\": 0|" "$_waybar_cfg_widget_telemetry"
-    sed -i "s|\"margin-bottom\": -\?[0-9]*|\"margin-bottom\": 0|" "$_waybar_cfg_widget_telemetry"
+    sed -i "s|\"margin-top\": [0-9]*|\"margin-top\": 1|" "$_waybar_cfg"
+    sed -i "s|\"margin-left\": [0-9]*|\"margin-left\": 1|" "$_waybar_cfg"
+    sed -i "s|\"margin-right\": [0-9]*|\"margin-right\": 1|" "$_waybar_cfg"
+    sed -i "s|\"margin-bottom\": -\?[0-9]*|\"margin-bottom\": 1|" "$_waybar_cfg"
+    sed -i "s|\"margin-top\": -\?[0-9]*|\"margin-top\": 1|" "$_waybar_cfg_widget_telemetry"
+    sed -i "s|\"margin-left\": -\?[0-9]*|\"margin-left\": 1|" "$_waybar_cfg_widget_telemetry"
+    sed -i "s|\"margin-bottom\": -\?[0-9]*|\"margin-bottom\": 1|" "$_waybar_cfg_widget_telemetry"
     sed -i '/^window#waybar {/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config taskbar/config/argvus-taskbar.css)"
     sed -i '/^#workspaces button/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config taskbar/config/argvus-taskbar.css)"
     sed -i '/^#workspaces button\.active,/,/^}/s/border-radius: [0-9]*px;/border-radius: 0px;/' "$(paths_config taskbar/config/argvus-taskbar.css)"
