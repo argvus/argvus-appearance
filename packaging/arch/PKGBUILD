@@ -13,6 +13,7 @@ depends=(
   'argvus-session'
   'argvus-fonts'
   'argvus-wallpapers'
+  'argvus-theme-splash'
   'brightnessctl'
   'fontconfig'
   'gtk3'

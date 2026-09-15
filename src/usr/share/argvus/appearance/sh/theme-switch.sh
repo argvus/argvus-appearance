@@ -222,39 +222,56 @@ native_config_home() {
 }
 
 # A theme switch rewrites several live surfaces and also reloads applications
-# such as Kitty. A fullscreen Rofi splash keeps the transition visible without
-# turning the display off; services are restarted only after configuration and
-# wallpaper updates have completed.
+# such as Kitty. The standalone layer-shell splash keeps the transition visible
+# while services are restarted and configuration is synchronized.
 THEME_TRANSITION_ACTIVE=0
 THEME_SPLASH_PID=0
 THEME_CONFIG_READY=0
 
+theme_splash_color() {
+  _key="$1"
+  _fallback="$2"
+  _file="$(paths_config "appearance/config/hypr/themes/${THEME}/hyprtoolkit.conf")"
+  _color=""
+  if [ -f "$_file" ]; then
+    _color="$(sed -n "s|^[[:space:]]*${_key}[[:space:]]*=[[:space:]]*0xFF\([[:xdigit:]]\{6\}\)[[:space:]]*$|#\1|p" "$_file" | head -n 1)"
+  fi
+  [ -n "$_color" ] && printf '%s\n' "$_color" || printf '%s\n' "$_fallback"
+}
+
 theme_splash_start() {
   [ "$RUNTIME" -eq 1 ] || return 0
-  command -v rofi >/dev/null 2>&1 || return 0
+  command -v argvus-theme-splash >/dev/null 2>&1 || {
+    printf '%s\n' 'argvus-appearance: argvus-theme-splash is unavailable; continuing without overlay' >&2
+    return 0
+  }
 
-  _splash_config="$(paths_config launcher/config/config.rasi)"
-  _theme_applying="$(argvus_tr appearance theme.applying)"
-  (
-    _rofi_pid=0
-    _frame=0
-    _frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
-    trap '[ "$_rofi_pid" -gt 0 ] && kill "$_rofi_pid" 2>/dev/null || true; exit 0' EXIT HUP INT TERM
-    while :; do
-      _spinner="$(printf '%s' "$_frames" | cut -c $((_frame % 10 + 1)))"
-      printf '%s  %s\n' "$_spinner" "$_theme_applying" |
-        rofi -config "$_splash_config" -dmenu -no-custom -sync -p '' \
-          -theme-str 'window { fullscreen: true; background-color: rgba(0, 0, 0, 100%); } listview { lines: 1; } textbox { horizontal-align: 0.5; }' \
-        >/dev/null 2>&1 &
-      _rofi_pid=$!
-      sleep 0.18
-      kill "$_rofi_pid" 2>/dev/null || true
-      wait "$_rofi_pid" 2>/dev/null || true
-      _rofi_pid=0
-      _frame=$((_frame + 1))
-    done
-  ) &
+  _splash_ready="${XDG_RUNTIME_DIR:-/tmp}/argvus-theme-splash.$$"
+  rm -f "$_splash_ready"
+  _splash_foreground="$(theme_splash_color text '#f4f4f4')"
+  _splash_accent="$(theme_splash_color accent '#7aa2f7')"
+  argvus-theme-splash \
+    --theme "$THEME" \
+    --background '#101218' \
+    --foreground "$_splash_foreground" \
+    --accent "$_splash_accent" \
+    --ready-file "$_splash_ready" &
   THEME_SPLASH_PID=$!
+
+  # Readiness is a bounded startup handshake, not a visual-animation poll.
+  _splash_wait=0
+  while [ ! -s "$_splash_ready" ] && kill -0 "$THEME_SPLASH_PID" 2>/dev/null; do
+    [ "$_splash_wait" -ge 40 ] && break
+    sleep 0.05
+    _splash_wait=$((_splash_wait + 1))
+  done
+  if [ ! -s "$_splash_ready" ]; then
+    printf '%s\n' 'argvus-appearance: argvus-theme-splash did not become ready; continuing without overlay' >&2
+    kill -TERM "$THEME_SPLASH_PID" 2>/dev/null || true
+    wait "$THEME_SPLASH_PID" 2>/dev/null || true
+    THEME_SPLASH_PID=0
+  fi
+  rm -f "$_splash_ready"
 }
 
 theme_splash_stop() {
