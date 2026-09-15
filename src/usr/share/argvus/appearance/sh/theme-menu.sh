@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # Hierarchical Rofi theme selector, using the same two-pass transaction as
-# argvus-taskbar-storage's removable-device menu.
+# argvus-removable-devices's removable-device menu.
 
 set -eu
 

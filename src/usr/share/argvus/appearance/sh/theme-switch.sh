@@ -616,15 +616,15 @@ apply_wallpaper() {
   apply_wallpaper_runtime "$_wall"
 }
 
-# Sincroniza o tema do argvus-taskbar-storage com o tema ativo.
+# Sincroniza o tema do argvus-removable-devices com o tema ativo.
 # Mapeia: dark -> argvus-dark-aether.css, silver -> argvus-dark-silver.css, slate -> argvus-dark-slate.css, light -> argvus-light-veil.css
 apply_argvus_storage_theme() {
-  _storage_theme_dir="$(paths_config taskbar-storage/config/themes)"
-  _storage_theme_dest="$(paths_config taskbar-storage/config/theme.css)"
+  _storage_theme_dir="$(paths_config removable-devices/config/themes)"
+  _storage_theme_dest="$(paths_config removable-devices/config/theme.css)"
 
   # Tenta encontrar os arquivos de tema em ordem de prioridade:
-  # 1. Diretório do usuário (~/.config/argvus/taskbar/storage/themes)
-  # 2. Diretório canônico do sistema (/usr/share/argvus/taskbar-storage/config/themes)
+  # 1. Diretório do usuário (~/.config/argvus/removable-devices/themes)
+  # 2. Diretório canônico do sistema (/usr/share/argvus/removable-devices/config/themes)
   # 3. Diretório legado do sistema (/etc/argvus/taskbar/storage/themes)
   _theme_src=""
   case "$THEME" in
@@ -646,14 +646,14 @@ apply_argvus_storage_theme() {
   if [ -f "${_storage_theme_dir}/${_theme_name}" ]; then
     _theme_src="${_storage_theme_dir}/${_theme_name}"
   # Tenta o sistema canônico
-  elif [ -f "$(paths_system_config taskbar-storage/config/themes/${_theme_name})" ]; then
-    _theme_src="$(paths_system_config taskbar-storage/config/themes/${_theme_name})"
+  elif [ -f "$(paths_system_config removable-devices/config/themes/${_theme_name})" ]; then
+    _theme_src="$(paths_system_config removable-devices/config/themes/${_theme_name})"
   # Mantém instalações antigas funcionais durante a migração.
   elif [ -f "/etc/argvus/taskbar/storage/themes/${_theme_name}" ]; then
     _theme_src="/etc/argvus/taskbar/storage/themes/${_theme_name}"
-  # Tenta o diretório do projeto argvus-taskbar-storage (desenvolvimento).
-  elif [ -n "$_workspace_root" ] && [ -f "$_workspace_root/argvus-taskbar-storage/src/usr/share/argvus/taskbar-storage/config/themes/${_theme_name}" ]; then
-    _theme_src="$_workspace_root/argvus-taskbar-storage/src/usr/share/argvus/taskbar-storage/config/themes/${_theme_name}"
+  # Tenta o diretório do projeto argvus-removable-devices (desenvolvimento).
+  elif [ -n "$_workspace_root" ] && [ -f "$_workspace_root/argvus-removable-devices/src/usr/share/argvus/removable-devices/config/themes/${_theme_name}" ]; then
+    _theme_src="$_workspace_root/argvus-removable-devices/src/usr/share/argvus/removable-devices/config/themes/${_theme_name}"
   else
     return 0
   fi
