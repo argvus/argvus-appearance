@@ -45,16 +45,26 @@ read_accent_state() {
 }
 
 select_accent() {
-  rofi -config "$(paths_config launcher/config/config.rasi)" -dmenu -p "Accent color" -i -theme-str 'listview {lines: 9;}' <<'EOF'
-01 - Blue       #3590bd
-02 - Slate Blue #7391a5
-03 - Brown      #996548
-04 - Green      #17d174
-05 - Magenta    #cb17d1
-06 - Red        #d1174f
-07 - Yellow     #d1ce17
-08 - Purple     #9617d1
-09 - Silver     #595959
+  _blue="$(argvus_tr appearance accent.color.blue)"
+  _slate_blue="$(argvus_tr appearance accent.color.slate_blue)"
+  _brown="$(argvus_tr appearance accent.color.brown)"
+  _green="$(argvus_tr appearance accent.color.green)"
+  _magenta="$(argvus_tr appearance accent.color.magenta)"
+  _red="$(argvus_tr appearance accent.color.red)"
+  _yellow="$(argvus_tr appearance accent.color.yellow)"
+  _purple="$(argvus_tr appearance accent.color.purple)"
+  _silver="$(argvus_tr appearance accent.color.silver)"
+  rofi -config "$(paths_config launcher/config/config.rasi)" -dmenu \
+    -p "$(argvus_tr appearance accent.title)" -i -theme-str 'listview {lines: 9;}' <<EOF
+01 - $_blue       #3590bd
+02 - $_slate_blue #7391a5
+03 - $_brown      #996548
+04 - $_green      #17d174
+05 - $_magenta    #cb17d1
+06 - $_red        #d1174f
+07 - $_yellow     #d1ce17
+08 - $_purple     #9617d1
+09 - $_silver     #595959
 EOF
 }
 
@@ -270,7 +280,7 @@ case "${1:-}" in
     NOTIFY=0
     _active_theme="$(read_state "$ACTIVE_FILE" "$DEFAULT_THEME")"
     if ! REQUESTED="$(theme_default_accent "$_active_theme")"; then
-      printf 'No default accent for theme: %s\n' "$_active_theme" >&2
+      argvus_tr appearance accent.default_missing "theme=$_active_theme" >&2
       exit 1
     fi
     ;;
@@ -284,7 +294,7 @@ if [ "${ARGVUS_NO_RUNTIME:-0}" = 1 ]; then
 fi
 
 if ! normalize_accent "$REQUESTED"; then
-  printf 'Invalid accent color: %s\n' "$REQUESTED" >&2
+  argvus_tr appearance accent.invalid "value=$REQUESTED" >&2
   exit 1
 fi
 
@@ -311,6 +321,7 @@ apply_application_colors
 
 [ "$RUNTIME" -eq 1 ] && refresh_runtime
 if [ "$NOTIFY" -eq 1 ]; then
-  notify-send "Accent" "Highlight color: ${COLOR}" 2>/dev/null || true
+  notify-send "$(argvus_tr appearance accent.notification.title)" \
+    "$(argvus_tr appearance accent.notification.message "color=$COLOR")" 2>/dev/null || true
 fi
-printf 'Accent %s applied to %s.\n' "$COLOR" "$THEME"
+argvus_tr appearance accent.applied "color=$COLOR" "theme=$THEME"

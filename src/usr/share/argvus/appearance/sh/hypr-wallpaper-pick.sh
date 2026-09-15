@@ -52,4 +52,5 @@ apply_wallpaper_runtime "$SELECTED_PATH"
 # Rebuild Hyprlock config and invalidate the cached lock wallpaper.
 sh "$(paths_config lock/sh/hyprlock-theme.sh)" --invalidate >/dev/null 2>&1 || true
 
-notify-send "Wallpaper" "Alterado para:\n$(basename "$SELECTED_PATH")"
+notify-send "$(argvus_tr appearance wallpaper.notification.title)" \
+  "$(argvus_tr appearance wallpaper.notification.message "name=$(basename "$SELECTED_PATH")")"

@@ -21,29 +21,36 @@ run_menu() {
 }
 
 while :; do
-  _family="$(run_menu 'Select theme' \
-    'ARGVUS Dark Aether >' \
-    'ARGVUS Dark Silver >' \
-    'ARGVUS Dark Slate >' \
-    'ARGVUS Dark Universe >' \
-    'ARGVUS Light Veil >' || true)"
+  _dark_aether="$(argvus_tr appearance theme.family.dark_aether)"
+  _dark_silver="$(argvus_tr appearance theme.family.dark_silver)"
+  _dark_slate="$(argvus_tr appearance theme.family.dark_slate)"
+  _dark_universe="$(argvus_tr appearance theme.family.dark_universe)"
+  _light_veil="$(argvus_tr appearance theme.family.light_veil)"
+  _family="$(run_menu "$(argvus_tr appearance theme.select)" \
+    "$_dark_aether" \
+    "$_dark_silver" \
+    "$_dark_slate" \
+    "$_dark_universe" \
+    "$_light_veil" || true)"
   _family="$(printf '%s' "$_family" | sed 's/[[:space:]]*$//')"
   [ -n "$_family" ] || exit 0
 
   case "$_family" in
-    'ARGVUS Dark Aether >') _theme='argvus-dark-aether' ;;
-    'ARGVUS Dark Silver >') _theme='argvus-dark-silver' ;;
-    'ARGVUS Dark Slate >') _theme='argvus-dark-slate' ;;
-    'ARGVUS Dark Universe >') _theme='argvus-dark-universe' ;;
-    'ARGVUS Light Veil >') _theme='argvus-light-veil' ;;
+    "$_dark_aether") _theme='argvus-dark-aether' ;;
+    "$_dark_silver") _theme='argvus-dark-silver' ;;
+    "$_dark_slate") _theme='argvus-dark-slate' ;;
+    "$_dark_universe") _theme='argvus-dark-universe' ;;
+    "$_light_veil") _theme='argvus-light-veil' ;;
     *) continue ;;
   esac
 
-  _model="$(run_menu "$_family" Normal Float || true)"
+  _model="$(run_menu "$_family" \
+    "$(argvus_tr appearance theme.model.normal)" \
+    "$(argvus_tr appearance theme.model.float)" || true)"
   _model="$(printf '%s' "$_model" | sed 's/[[:space:]]*$//')"
   case "$_model" in
-    Normal) exec sh "$THEME_SWITCH" "$_theme" >/dev/null 2>&1 ;;
-    Float) exec sh "$THEME_SWITCH" "${_theme}-float" >/dev/null 2>&1 ;;
+    "$(argvus_tr appearance theme.model.normal)") exec sh "$THEME_SWITCH" "$_theme" >/dev/null 2>&1 ;;
+    "$(argvus_tr appearance theme.model.float)") exec sh "$THEME_SWITCH" "${_theme}-float" >/dev/null 2>&1 ;;
     *) continue ;;
   esac
 done

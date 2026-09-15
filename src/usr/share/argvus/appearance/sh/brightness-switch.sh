@@ -84,27 +84,22 @@ apply() {
   _value="$1"
   case "$BACKEND" in
     none)
-      notify_error "Brightness" "no controllable backlight found"
+      notify_error "$(argvus_tr appearance brightness.title_short)" \
+        "$(argvus_tr appearance brightness.unavailable)"
       return 1
       ;;
     brightnessctl) apply_brightnessctl "$_value" ;;
     ddcutil) apply_ddcutil "$_value" ;;
   esac
   _current="$(read_brightness)"
-  notify_send "Brightness" "${_current}%"
+  notify_send "$(argvus_tr appearance brightness.title_short)" "${_current}%"
 }
 
 select_menu() {
   _current="$(read_brightness)"
-  if locale_is_pt; then
-    _prompt="Brilho (atual: ${_current}%)"
-    _inc="Aumentar"
-    _dec="Diminuir"
-  else
-    _prompt="Brightness (current: ${_current}%)"
-    _inc="Increase"
-    _dec="Decrease"
-  fi
+  _prompt="$(argvus_tr appearance brightness.title "percent=$_current")"
+  _inc="$(argvus_tr appearance brightness.increase)"
+  _dec="$(argvus_tr appearance brightness.decrease)"
 
   _selection=$(
     rofi -config "$(paths_config launcher/config/config.rasi)" -dmenu -p "$_prompt" -i -theme-str 'listview {lines: 10;}' <<EOF
@@ -133,7 +128,7 @@ EOF
     *" 75%")  apply "75%" ;;
     *" 90%")  apply "90%" ;;
     *" 100%") apply "100%" ;;
-    *) printf 'Invalid brightness selection\n' >&2; return 1 ;;
+    *) argvus_tr appearance brightness.invalid >&2; return 1 ;;
   esac
 }
 
@@ -144,11 +139,12 @@ case "${1:-}" in
   --get)    read_brightness ;;
   --up)     apply "+5%" ;;
   --down)   apply "5%-" ;;
-  --set)    [ -n "${2:-}" ] || { printf 'Missing percent\n' >&2; exit 1; }
+  --set)    [ -n "${2:-}" ] || { argvus_tr appearance brightness.missing_percent >&2; exit 1; }
             apply "$2" ;;
   --menu|"")
     [ "$BACKEND" = "none" ] && {
-      notify_error "Brightness" "no controllable backlight found"
+      notify_error "$(argvus_tr appearance brightness.title_short)" \
+        "$(argvus_tr appearance brightness.unavailable)"
       exit 1
     }
     select_menu

@@ -75,7 +75,8 @@ required_theme_parent() {
   _theme="$2"
 
   if ! ensure_theme_parent "$_relative" "$_theme"; then
-    printf 'Error: theme directory not found: %s\n' "$(paths_system_config "${_relative}/${_theme}")" >&2
+    argvus_tr appearance theme.directory_missing \
+      "path=$(paths_system_config "${_relative}/${_theme}")" >&2
     exit 1
   fi
 }
@@ -233,6 +234,7 @@ theme_splash_start() {
   command -v rofi >/dev/null 2>&1 || return 0
 
   _splash_config="$(paths_config launcher/config/config.rasi)"
+  _theme_applying="$(argvus_tr appearance theme.applying)"
   (
     _rofi_pid=0
     _frame=0
@@ -240,7 +242,7 @@ theme_splash_start() {
     trap '[ "$_rofi_pid" -gt 0 ] && kill "$_rofi_pid" 2>/dev/null || true; exit 0' EXIT HUP INT TERM
     while :; do
       _spinner="$(printf '%s' "$_frames" | cut -c $((_frame % 10 + 1)))"
-      printf '%s  Applying ARGVUS theme...\n' "$_spinner" |
+      printf '%s  %s\n' "$_spinner" "$_theme_applying" |
         rofi -config "$_splash_config" -dmenu -no-custom -sync -p '' \
           -theme-str 'window { fullscreen: true; background-color: rgba(0, 0, 0, 100%); } listview { lines: 1; } textbox { horizontal-align: 0.5; }' \
         >/dev/null 2>&1 &
@@ -270,7 +272,7 @@ theme_transition_cleanup() {
     # Reuse the exact lifecycle behind SUPER + Shift + R. It owns config
     # synchronization and the complete service list, including idle and polkit.
     if ! argvus-sessionctl reload >/dev/null 2>&1; then
-      printf 'Error: global session reload failed after theme application.\n' >&2
+      argvus_tr appearance theme.reload_failed >&2
       [ "$_status" -ne 0 ] || _status=1
     fi
     THEME_TRANSITION_ACTIVE=0
@@ -428,7 +430,7 @@ find_theme_wallpaper() {
   if [ -n "$_wall_name" ]; then
     _wall="${HYPRPAPER_DIR}/${_wall_name}"
     if [ ! -f "$_wall" ]; then
-      printf 'Error: wallpaper not found: %s\n' "$_wall" >&2
+      argvus_tr appearance theme.wallpaper_missing "path=$_wall" >&2
       return 1
     fi
     printf '%s\n' "$_wall"
@@ -677,16 +679,18 @@ apply_argvus_calendar_theme() {
 }
 
 if [ -z "$THEME" ]; then
-  printf 'Usage: theme-switch <theme-name>\n' >&2
+  argvus_tr appearance theme.usage >&2
   exit 1
 fi
 
 if [ ! -f "$SUPERFILE_THEMES/$THEME.toml" ]; then
-  printf 'Warning: superfile theme not found: %s\n' "$SUPERFILE_THEMES/$THEME.toml" >&2
+  argvus_tr appearance theme.superfile_missing \
+    "path=$SUPERFILE_THEMES/$THEME.toml" >&2
 fi
 
 if [ ! -f "$QT6CT_COLORS/$THEME.conf" ]; then
-  printf 'Warning: qt6ct color scheme not found: %s\n' "$QT6CT_COLORS/$THEME.conf" >&2
+  argvus_tr appearance theme.qt6ct_missing \
+    "path=$QT6CT_COLORS/$THEME.conf" >&2
 fi
 
 if ! _theme_wallpaper="$(find_theme_wallpaper "$THEME")"; then
@@ -871,7 +875,8 @@ fi
 if [ -f "$YAZI_CONFIG_ROOT/flavors/$THEME.yazi/flavor.toml" ]; then
   printf '[flavor]\ndark = "%s"\n' "$THEME" > "$YAZI_CONFIG_ROOT/theme.toml"
 else
-  printf 'Warning: yazi flavor not found: %s\n' "$YAZI_CONFIG_ROOT/flavors/$THEME.yazi/flavor.toml" >&2
+  argvus_tr appearance theme.yazi_missing \
+    "path=$YAZI_CONFIG_ROOT/flavors/$THEME.yazi/flavor.toml" >&2
 fi
 
 _superfile_conf="$SUPERFILE_CONFIG_ROOT/config.toml"
@@ -909,14 +914,14 @@ esac
 # Every theme owns its default accent. A manual accent remains active only until
 # the user switches themes, including when switching back to the same theme.
 if ! sh "$(paths_config appearance/sh/accent-switch.sh)" --theme-default >/dev/null 2>&1; then
-  printf 'Error: could not restore the default accent for %s.\n' "$THEME" >&2
+  argvus_tr appearance theme.accent_restore_failed "theme=$THEME" >&2
   exit 1
 fi
 
 _hyprlock_theme_script="$(paths_config lock/sh/hyprlock-theme.sh)"
 if [ -f "$_hyprlock_theme_script" ]; then
   if ! sh "$_hyprlock_theme_script" --invalidate >/dev/null 2>&1; then
-    printf 'Error: could not apply the Hyprlock theme for %s.\n' "$THEME" >&2
+    argvus_tr appearance theme.hyprlock_failed "theme=$THEME" >&2
     exit 1
   fi
 fi
@@ -926,14 +931,14 @@ fi
 _spaces_script="$(paths_config hyprland/sh/spaces-switch.sh)"
 if [ -f "$_spaces_script" ]; then
   if ! sh "$_spaces_script" --apply-static; then
-    printf 'Error: could not re-apply the spaces override for %s.\n' "$THEME" >&2
+    argvus_tr appearance theme.spaces_failed "theme=$THEME" >&2
     exit 1
   fi
 fi
 
 # Set wallpaper for the new theme
 if ! apply_wallpaper "$_theme_wallpaper"; then
-  printf 'Error: could not prepare the wallpaper for %s.\n' "$THEME" >&2
+  argvus_tr appearance theme.wallpaper_prepare_failed "theme=$THEME" >&2
   exit 1
 fi
 

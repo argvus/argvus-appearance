@@ -64,6 +64,7 @@ class ThemeSwitchTests(unittest.TestCase):
             "XDG_STATE_HOME": str(self.base / "state"),
             "ARGVUS_NO_RUNTIME": "1",
             "ARGVUS_THEME_LOCKED": "0",
+            "ARGVUS_I18N_DIR": str(ROOT / "argvus-i18n/locales"),
             "TEST_COMMAND_LOG": str(self.log),
             "PATH": str(mockbin) + os.pathsep + os.environ["PATH"],
         }
@@ -132,12 +133,13 @@ class ThemeSwitchTests(unittest.TestCase):
     def test_theme_menu_exposes_family_then_model_protocol(self):
         menu = self.system / "appearance/sh/theme-menu.sh"
         source = menu.read_text()
-        self.assertIn("ARGVUS Dark Aether >", source)
-        self.assertIn('run_menu "$_family" Normal Float', source)
+        self.assertIn("theme.family.dark_aether", source)
+        self.assertIn("theme.model.normal", source)
+        self.assertIn("theme.model.float", source)
         self.assertIn("-kb-accept-entry 'Return,KP_Enter,Right'", source)
         self.assertIn("-kb-cancel 'Escape,Left'", source)
-        self.assertIn("Normal) exec sh", source)
-        self.assertIn("Float) exec sh", source)
+        self.assertIn('theme.model.normal)\") exec sh', source)
+        self.assertIn('theme.model.float)\") exec sh', source)
 
     def test_theme_menu_releases_rofi_arrow_bindings(self):
         switcher = (self.system / "appearance/sh/theme-switch.sh").read_text()

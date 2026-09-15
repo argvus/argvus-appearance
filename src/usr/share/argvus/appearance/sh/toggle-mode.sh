@@ -187,7 +187,7 @@ argvus-sessionctl restart waybar >/dev/null 2>&1 || true
 # WALLPAPER
 # ==============================================================================
 THEME_WALLPAPER="$(find_theme_wallpaper "$THEME")" || {
-  printf 'Wallpaper not found for theme: %s\n' "$THEME" >&2
+  argvus_tr appearance theme.wallpaper_missing "path=$THEME"
   exit 1
 }
 apply_wallpaper "$THEME_WALLPAPER"
