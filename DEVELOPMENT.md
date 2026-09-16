@@ -7,7 +7,8 @@ Argvus Appearance contains shared themes and appearance integration for Argvus.
 This repository is config-only. Local validation requires `make`, a POSIX
 shell and standard POSIX install tools.
 
-On Arch Linux, the package recipe lives at `packaging/arch/PKGBUILD`.
+On Arch Linux, the package recipes live at `packaging/arch/ci/PKGBUILD` and
+`packaging/arch/local/PKGBUILD`.
 
 ## Commands
 
@@ -18,10 +19,10 @@ make validate
 python tools/test-theme-switch.py
 ```
 
-Validate installation into a staging directory:
+Build the local package:
 
 ```sh
-make DESTDIR=/tmp/argvus-appearance-pkg PREFIX=/usr install
+make build
 ```
 
 ## Package Contents

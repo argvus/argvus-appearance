@@ -241,7 +241,8 @@ theme_splash_color() {
 
 theme_splash_start() {
   [ "$RUNTIME" -eq 1 ] || return 0
-  command -v argvus-theme-splash >/dev/null 2>&1 || {
+  _splash_bin='/usr/lib/argvus/theme-splash/splash'
+  [ -x "$_splash_bin" ] || {
     printf '%s\n' 'argvus-appearance: argvus-theme-splash is unavailable; continuing without overlay' >&2
     return 0
   }
@@ -250,7 +251,7 @@ theme_splash_start() {
   rm -f "$_splash_ready"
   _splash_foreground="$(theme_splash_color text '#f4f4f4')"
   _splash_accent="$(theme_splash_color accent '#7aa2f7')"
-  argvus-theme-splash \
+  "$_splash_bin" \
     --theme "$THEME" \
     --background '#101218' \
     --foreground "$_splash_foreground" \
