@@ -88,17 +88,18 @@ class ThemeSwitchTests(unittest.TestCase):
             for theme in (normal + "-float", normal):
                 with self.subTest(theme=theme):
                     self.apply(theme)
-                    margin = 16 if theme.endswith("-float") else 0
-                    bottom_margin = 0
+                    margin = 18 if theme.endswith("-float") else 0
+                    bottom_margin = 18 if theme.endswith("-float") else 2
                     bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
                     for edge in ("top", "left", "right"):
                         self.assertIn(f'"margin-{edge}": {margin}', bar)
                     self.assertIn(f'"margin-bottom": {bottom_margin}', bar)
                     widget = (self.user / "waybar/argvus-widget-telemetry.jsonc").read_text()
-                    effective = 8 if theme.endswith("-float") else 1
-                    self.assertIn(f'"margin-top": {effective}', widget)
-                    self.assertIn(f'"margin-left": {effective}', widget)
-                    self.assertIn(f'"margin-bottom": {effective}', widget)
+                    effective_left = 18 if theme.endswith("-float") else 0
+                    effective_bottom = 18 if theme.endswith("-float") else 0
+                    self.assertIn('"margin-top": 0', widget)
+                    self.assertIn(f'"margin-left": {effective_left}', widget)
+                    self.assertIn(f'"margin-bottom": {effective_bottom}', widget)
                     for css in (self.user / "waybar").glob("*.css"):
                         for ref in re.findall(r'@import url\("([^"]+)"\)', css.read_text()):
                             self.assertTrue((css.parent / ref).is_file(), (theme, css, ref))
@@ -185,28 +186,28 @@ class ThemeSwitchTests(unittest.TestCase):
         self.apply("argvus-light-veil")
         bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
         self.assertIn('"position": "top"', bar)
-        for edge in ("top", "left", "right", "bottom"):
+        for edge in ("top", "left", "right"):
             self.assertIn(f'"margin-{edge}": 0', bar)
+        self.assertIn('"margin-bottom": 2', bar)
         spaces_status = subprocess.run(
             ["sh", str(self.system / "hyprland/sh/spaces-switch.sh"), "--status"],
             env=self.env, capture_output=True, text=True, check=True,
         ).stdout
-        self.assertIn("gaps_in=1", spaces_status)
+        self.assertIn("gaps_in=2", spaces_status)
         for edge in ("top", "left", "right", "bottom"):
-            self.assertIn(f"gaps_out_{edge}=1", spaces_status)
+            self.assertIn(f"gaps_out_{edge}=0", spaces_status)
 
         self.apply("argvus-light-veil-float")
         bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
-        for edge in ("top", "left", "right"):
-            self.assertIn(f'"margin-{edge}": 16', bar)
-        self.assertIn('"margin-bottom": 0', bar)
+        for edge in ("top", "left", "right", "bottom"):
+            self.assertIn(f'"margin-{edge}": 18', bar)
         float_spaces_status = subprocess.run(
             ["sh", str(self.system / "hyprland/sh/spaces-switch.sh"), "--status"],
             env=self.env, capture_output=True, text=True, check=True,
         ).stdout
-        self.assertIn("gaps_in=8", float_spaces_status)
+        self.assertIn("gaps_in=10", float_spaces_status)
         for edge in ("top", "left", "right", "bottom"):
-            self.assertIn(f"gaps_out_{edge}=8", float_spaces_status)
+            self.assertIn(f"gaps_out_{edge}=18", float_spaces_status)
 
         (self.user / ".spaces").write_text(
             "waybar_top=2\nwaybar_left=4\nwaybar_right=5\nwaybar_bottom=7\n"
@@ -317,6 +318,7 @@ class ThemeSwitchTests(unittest.TestCase):
         ).stdout
         self.assertIn("rounded=0", borders_status)
         self.assertIn("rounding=0", borders_status)
+        self.assertIn("thickness=1", borders_status)
 
         self.apply("argvus-dark-aether-float")
         css = (self.user / "waybar/argvus-taskbar.css").read_text()
@@ -332,6 +334,23 @@ class ThemeSwitchTests(unittest.TestCase):
         ).stdout
         self.assertIn("rounded=1", borders_status)
         self.assertIn("rounding=4", borders_status)
+        self.assertIn("thickness=1", borders_status)
+
+        borders_script = self.system / "hyprland/sh/borders-switch.sh"
+        subprocess.run(
+            ["sh", str(borders_script), "--set-persist", "thickness", "7"],
+            env=self.env, capture_output=True, text=True, check=True,
+        )
+        before = (self.user / "waybar/argvus-taskbar.css").read_text()
+        telemetry_before = (self.user / "waybar/argvus-widget-telemetry.css").read_text()
+        subprocess.run(
+            ["sh", str(borders_script), "--apply"],
+            env=self.env | {"ARGVUS_NO_RUNTIME": "0"},
+            capture_output=True, text=True, check=True,
+        )
+        self.assertIn(["hyprctl", "keyword", "general:border_size", "7"], self.commands())
+        self.assertEqual(before, (self.user / "waybar/argvus-taskbar.css").read_text())
+        self.assertEqual(telemetry_before, (self.user / "waybar/argvus-widget-telemetry.css").read_text())
 
 
 if __name__ == "__main__":
