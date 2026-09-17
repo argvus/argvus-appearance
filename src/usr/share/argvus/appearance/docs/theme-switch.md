@@ -8,9 +8,11 @@ wallpaper, notification, idle and polkit lifecycle. Waybar must
 restart even if blanking the display fails: a CSS reload does not update its
 layer-shell margins. Signal cleanup restores the services and display.
 
-Normal themes default to 1px taskbar and telemetry margins. Float themes
-default to 20px margins; `hyprland/sh/spaces-switch.sh` remains responsible for
-the final position and for explicit user `.spaces` preferences.
+Applying a Normal theme resets taskbar margins to `0,0,0,0`, borders to
+disabled with rounding `0`, and window gaps to `3/1`. Applying a Float theme
+resets taskbar margins to `20,20,20,1`, borders to enabled with rounding `4`,
+and window gaps to `3/1`. The Control Panel can then change and apply these
+values until the next theme switch, which acts as the mode reset.
 
 Packaged files remain under `/usr/share/argvus/<component>/{config,sh,docs}`.
 Managed user copies retain their compatibility paths under

@@ -944,12 +944,22 @@ if [ -f "$_hyprlock_theme_script" ]; then
   fi
 fi
 
-# Re-apply the user's spaces override after the theme has rewritten its
-# generated Waybar files. Spacing is a user preference for every theme type.
+# Applying a theme resets the window/taskbar spacing to the selected mode's
+# defaults. The Control Panel can then create a new user override.
 _spaces_script="$(paths_config hyprland/sh/spaces-switch.sh)"
 if [ -f "$_spaces_script" ]; then
-  if ! sh "$_spaces_script" --apply-static; then
+  if ! ARGVUS_NO_RUNTIME=1 sh "$_spaces_script" --reset; then
     argvus_tr appearance theme.spaces_failed "theme=$THEME" >&2
+    exit 1
+  fi
+fi
+
+# Apply the selected mode's border defaults to both the taskbar CSS and
+# Hyprland. The Control Panel can then create a new user override.
+_borders_script="$(paths_config hyprland/sh/borders-switch.sh)"
+if [ -f "$_borders_script" ]; then
+  if ! ARGVUS_NO_RUNTIME=1 sh "$_borders_script" --reset; then
+    argvus_tr appearance theme.borders_failed "theme=$THEME" >&2
     exit 1
   fi
 fi

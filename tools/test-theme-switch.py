@@ -88,10 +88,12 @@ class ThemeSwitchTests(unittest.TestCase):
             for theme in (normal + "-float", normal):
                 with self.subTest(theme=theme):
                     self.apply(theme)
-                    margin = 20 if theme.endswith("-float") else 1
+                    margin = 20 if theme.endswith("-float") else 0
+                    bottom_margin = 1 if theme.endswith("-float") else 0
                     bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
                     for edge in ("top", "left", "right"):
                         self.assertIn(f'"margin-{edge}": {margin}', bar)
+                    self.assertIn(f'"margin-bottom": {bottom_margin}', bar)
                     widget = (self.user / "waybar/argvus-widget-telemetry.jsonc").read_text()
                     self.assertIn(f'"margin-top": {margin}', widget)
                     for css in (self.user / "waybar").glob("*.css"):
@@ -171,13 +173,52 @@ class ThemeSwitchTests(unittest.TestCase):
         self.apply("argvus-light-veil")
         self.assertEqual((self.user / "gtk-4.0/gtk.css").read_text(), custom.read_text())
 
-    def test_explicit_spacing_and_bottom_position_survive(self):
-        (self.user / ".spaces").write_text("waybar=7\nwaybar_pos=bottom\ngaps_out=0\n")
+    def test_theme_switch_resets_spacing_to_mode_defaults(self):
+        (self.user / ".spaces").write_text(
+            "waybar_top=7\nwaybar_left=8\nwaybar_right=9\nwaybar_bottom=10\n"
+            "waybar_pos=bottom\ngaps_out=0\n"
+        )
         self.apply("argvus-light-veil")
         bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
-        self.assertIn('"position": "bottom"', bar)
-        self.assertIn('"margin-bottom": 7', bar)
-        self.assertIn('"margin-left": 7', bar)
+        self.assertIn('"position": "top"', bar)
+        for edge in ("top", "left", "right", "bottom"):
+            self.assertIn(f'"margin-{edge}": 0', bar)
+        spaces_status = subprocess.run(
+            ["sh", str(self.system / "hyprland/sh/spaces-switch.sh"), "--status"],
+            env=self.env, capture_output=True, text=True, check=True,
+        ).stdout
+        self.assertIn("gaps_in=3", spaces_status)
+        self.assertIn("gaps_out=1", spaces_status)
+
+        self.apply("argvus-light-veil-float")
+        bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
+        for edge in ("top", "left", "right"):
+            self.assertIn(f'"margin-{edge}": 20', bar)
+        self.assertIn('"margin-bottom": 1', bar)
+
+    def test_theme_switch_resets_borders_to_mode_defaults(self):
+        (self.user / ".borders").write_text("rounded=1\nrounding=10\n")
+        self.apply("argvus-dark-aether")
+        css = (self.user / "waybar/argvus-taskbar.css").read_text()
+        self.assertIn("border-radius: 0px;", css)
+        self.assertNotIn("border-radius: 10px;", css)
+        borders_status = subprocess.run(
+            ["sh", str(self.system / "hyprland/sh/borders-switch.sh"), "--status"],
+            env=self.env, capture_output=True, text=True, check=True,
+        ).stdout
+        self.assertIn("rounded=0", borders_status)
+        self.assertIn("rounding=0", borders_status)
+
+        self.apply("argvus-dark-aether-float")
+        css = (self.user / "waybar/argvus-taskbar.css").read_text()
+        self.assertIn("border-radius: 4px;", css)
+        self.assertNotIn("border-radius: 0px;", css)
+        borders_status = subprocess.run(
+            ["sh", str(self.system / "hyprland/sh/borders-switch.sh"), "--status"],
+            env=self.env, capture_output=True, text=True, check=True,
+        ).stdout
+        self.assertIn("rounded=1", borders_status)
+        self.assertIn("rounding=4", borders_status)
 
 
 if __name__ == "__main__":
