@@ -196,12 +196,29 @@ class ThemeSwitchTests(unittest.TestCase):
             self.assertIn(f'"margin-{edge}": 20', bar)
         self.assertIn('"margin-bottom": 1', bar)
 
+        (self.user / ".spaces").write_text(
+            "waybar_top=2\nwaybar_left=4\nwaybar_right=5\nwaybar_bottom=7\n"
+            "waybar_pos=top\ngaps_out=1\n"
+        )
+        subprocess.run(
+            ["sh", str(self.system / "hyprland/sh/spaces-switch.sh"), "--apply"],
+            env=self.env | {"ARGVUS_NO_RUNTIME": "0"},
+            capture_output=True, text=True, check=True,
+        )
+        bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
+        self.assertIn('"margin-bottom": 7', bar)
+        self.assertIn(["hyprctl", "keyword", "general:gaps_out", "8 6 1 5"], self.commands())
+
     def test_theme_switch_resets_borders_to_mode_defaults(self):
         (self.user / ".borders").write_text("rounded=1\nrounding=10\n")
         self.apply("argvus-dark-aether")
         css = (self.user / "waybar/argvus-taskbar.css").read_text()
+        telemetry_css = (self.user / "waybar/argvus-widget-telemetry.css").read_text()
+        rofi = (self.user / "rofi/theme.rasi").read_text()
         self.assertIn("border-radius: 0px;", css)
         self.assertNotIn("border-radius: 10px;", css)
+        self.assertIn("border-radius: 0px;", telemetry_css)
+        self.assertIn("border-radius: 0px;", rofi)
         borders_status = subprocess.run(
             ["sh", str(self.system / "hyprland/sh/borders-switch.sh"), "--status"],
             env=self.env, capture_output=True, text=True, check=True,
@@ -211,8 +228,12 @@ class ThemeSwitchTests(unittest.TestCase):
 
         self.apply("argvus-dark-aether-float")
         css = (self.user / "waybar/argvus-taskbar.css").read_text()
+        telemetry_css = (self.user / "waybar/argvus-widget-telemetry.css").read_text()
+        rofi = (self.user / "rofi/theme.rasi").read_text()
         self.assertIn("border-radius: 4px;", css)
         self.assertNotIn("border-radius: 0px;", css)
+        self.assertIn("border-radius: 4px;", telemetry_css)
+        self.assertIn("border-radius: 4px;", rofi)
         borders_status = subprocess.run(
             ["sh", str(self.system / "hyprland/sh/borders-switch.sh"), "--status"],
             env=self.env, capture_output=True, text=True, check=True,
