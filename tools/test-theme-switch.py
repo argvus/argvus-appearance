@@ -95,7 +95,10 @@ class ThemeSwitchTests(unittest.TestCase):
                         self.assertIn(f'"margin-{edge}": {margin}', bar)
                     self.assertIn(f'"margin-bottom": {bottom_margin}', bar)
                     widget = (self.user / "waybar/argvus-widget-telemetry.jsonc").read_text()
-                    self.assertIn(f'"margin-top": {margin}', widget)
+                    effective = 8 if theme.endswith("-float") else 1
+                    self.assertIn(f'"margin-top": {effective}', widget)
+                    self.assertIn(f'"margin-left": {effective}', widget)
+                    self.assertIn(f'"margin-bottom": {effective}', widget)
                     for css in (self.user / "waybar").glob("*.css"):
                         for ref in re.findall(r'@import url\("([^"]+)"\)', css.read_text()):
                             self.assertTrue((css.parent / ref).is_file(), (theme, css, ref))
@@ -217,9 +220,18 @@ class ThemeSwitchTests(unittest.TestCase):
         )
         bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
         self.assertIn('"margin-bottom": 7', bar)
-        # The top taskbar owns the top edge. Hyprland must not add the
-        # configured window top gap to the taskbar bottom margin.
+        # The generated effective geometry complements the taskbar reservation
+        # instead of adding the requested gaps_out value a second time.
         self.assertIn(["hyprctl", "keyword", "general:gaps_out", "0 5 7 4"], self.commands())
+        effective = (self.user / "generated/spaces-effective.conf").read_text()
+        self.assertIn("effective_top=0", effective)
+        self.assertIn("effective_left=4", effective)
+        self.assertIn("effective_right=5", effective)
+        self.assertIn("effective_bottom=7", effective)
+        telemetry = (self.user / "waybar/argvus-widget-telemetry.jsonc").read_text()
+        self.assertIn('"margin-top": 0', telemetry)
+        self.assertIn('"margin-left": 4', telemetry)
+        self.assertIn('"margin-bottom": 7', telemetry)
 
         (self.user / ".spaces").write_text(
             "waybar_top=6\nwaybar_left=4\nwaybar_right=5\nwaybar_bottom=7\n"
@@ -232,6 +244,62 @@ class ThemeSwitchTests(unittest.TestCase):
             capture_output=True, text=True, check=True,
         )
         self.assertIn(["hyprctl", "keyword", "general:gaps_out", "2 5 0 4"], self.commands())
+
+    def test_effective_geometry_constraints_preserve_requested_state(self):
+        script = self.system / "hyprland/sh/spaces-switch.sh"
+        lua = (self.system / "hyprland/config/hyprland.lua").read_text()
+        self.assertIn("generated/spaces-effective.conf", lua)
+        self.assertIn("math.max(0, _spaces_gaps_out_top - _spaces_waybar_bottom)", lua)
+        self.assertIn("math.max(0, _spaces_gaps_out_bottom - _spaces_waybar_top)", lua)
+        cases = (
+            ("top", "15", "15", "0", "15"),
+            ("top", "5", "15", "10", "15"),
+            ("top", "20", "15", "0", "15"),
+            ("top", "0", "15", "15", "15"),
+            ("bottom", "15", "15", "0", "15"),
+            ("bottom", "5", "15", "10", "15"),
+            ("bottom", "20", "15", "0", "15"),
+            ("bottom", "0", "15", "15", "15"),
+        )
+        for position, facing, requested, expected, other in cases:
+            with self.subTest(position=position, facing=facing):
+                top_margin = facing if position == "bottom" else 0
+                bottom_margin = facing if position == "top" else 0
+                (self.user / ".spaces").write_text(
+                    f"waybar_top={top_margin}\nwaybar_left=3\nwaybar_right=4\n"
+                    f"waybar_bottom={bottom_margin}\nwaybar_pos={position}\n"
+                    f"gaps_in=2\ngaps_out_top=15\ngaps_out_left=6\n"
+                    f"gaps_out_right=7\ngaps_out_bottom=15\n"
+                )
+                subprocess.run(
+                    ["sh", str(script), "--apply"],
+                    env=self.env | {"ARGVUS_NO_RUNTIME": "0"},
+                    capture_output=True, text=True, check=True,
+                )
+                state = (self.user / ".spaces").read_text()
+                self.assertIn(f"waybar_pos={position}", state)
+                self.assertIn(f"gaps_out_top={requested}", state)
+                self.assertIn("gaps_out_bottom=15", state)
+                status = subprocess.run(
+                    ["sh", str(script), "--status"],
+                    env=self.env, capture_output=True, text=True, check=True,
+                ).stdout
+                self.assertIn("gaps_out_top=15", status)
+                self.assertIn("gaps_out_bottom=15", status)
+                self.assertEqual(
+                    subprocess.run(
+                        ["sh", str(script), "--get", "gaps_out_top"],
+                        env=self.env, capture_output=True, text=True, check=True,
+                    ).stdout.strip(),
+                    "15",
+                )
+                effective = (self.user / "generated/spaces-effective.conf").read_text()
+                expected_top = expected if position == "top" else requested
+                expected_bottom = expected if position == "bottom" else other
+                self.assertIn(f"effective_top={expected_top}", effective)
+                self.assertIn(f"effective_bottom={expected_bottom}", effective)
+                self.assertIn("effective_left=6", effective)
+                self.assertIn("effective_right=7", effective)
 
     def test_theme_switch_resets_borders_to_mode_defaults(self):
         (self.user / ".borders").write_text("rounded=1\nrounding=10\n")
