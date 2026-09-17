@@ -217,7 +217,21 @@ class ThemeSwitchTests(unittest.TestCase):
         )
         bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
         self.assertIn('"margin-bottom": 7', bar)
-        self.assertIn(["hyprctl", "keyword", "general:gaps_out", "2 5 7 4"], self.commands())
+        # The top taskbar owns the top edge. Hyprland must not add the
+        # configured window top gap to the taskbar bottom margin.
+        self.assertIn(["hyprctl", "keyword", "general:gaps_out", "0 5 7 4"], self.commands())
+
+        (self.user / ".spaces").write_text(
+            "waybar_top=6\nwaybar_left=4\nwaybar_right=5\nwaybar_bottom=7\n"
+            "waybar_pos=bottom\ngaps_out_top=2\ngaps_out_left=4\n"
+            "gaps_out_right=5\ngaps_out_bottom=3\n"
+        )
+        subprocess.run(
+            ["sh", str(self.system / "hyprland/sh/spaces-switch.sh"), "--apply"],
+            env=self.env | {"ARGVUS_NO_RUNTIME": "0"},
+            capture_output=True, text=True, check=True,
+        )
+        self.assertIn(["hyprctl", "keyword", "general:gaps_out", "2 5 0 4"], self.commands())
 
     def test_theme_switch_resets_borders_to_mode_defaults(self):
         (self.user / ".borders").write_text("rounded=1\nrounding=10\n")
