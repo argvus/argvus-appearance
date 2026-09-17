@@ -88,8 +88,8 @@ class ThemeSwitchTests(unittest.TestCase):
             for theme in (normal + "-float", normal):
                 with self.subTest(theme=theme):
                     self.apply(theme)
-                    margin = 20 if theme.endswith("-float") else 0
-                    bottom_margin = 1 if theme.endswith("-float") else 0
+                    margin = 16 if theme.endswith("-float") else 0
+                    bottom_margin = 0
                     bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
                     for edge in ("top", "left", "right"):
                         self.assertIn(f'"margin-{edge}": {margin}', bar)
@@ -176,7 +176,8 @@ class ThemeSwitchTests(unittest.TestCase):
     def test_theme_switch_resets_spacing_to_mode_defaults(self):
         (self.user / ".spaces").write_text(
             "waybar_top=7\nwaybar_left=8\nwaybar_right=9\nwaybar_bottom=10\n"
-            "waybar_pos=bottom\ngaps_out=0\n"
+            "waybar_pos=bottom\ngaps_out_top=0\ngaps_out_left=0\n"
+            "gaps_out_right=0\ngaps_out_bottom=0\n"
         )
         self.apply("argvus-light-veil")
         bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
@@ -187,18 +188,27 @@ class ThemeSwitchTests(unittest.TestCase):
             ["sh", str(self.system / "hyprland/sh/spaces-switch.sh"), "--status"],
             env=self.env, capture_output=True, text=True, check=True,
         ).stdout
-        self.assertIn("gaps_in=3", spaces_status)
-        self.assertIn("gaps_out=1", spaces_status)
+        self.assertIn("gaps_in=1", spaces_status)
+        for edge in ("top", "left", "right", "bottom"):
+            self.assertIn(f"gaps_out_{edge}=1", spaces_status)
 
         self.apply("argvus-light-veil-float")
         bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
         for edge in ("top", "left", "right"):
-            self.assertIn(f'"margin-{edge}": 20', bar)
-        self.assertIn('"margin-bottom": 1', bar)
+            self.assertIn(f'"margin-{edge}": 16', bar)
+        self.assertIn('"margin-bottom": 0', bar)
+        float_spaces_status = subprocess.run(
+            ["sh", str(self.system / "hyprland/sh/spaces-switch.sh"), "--status"],
+            env=self.env, capture_output=True, text=True, check=True,
+        ).stdout
+        self.assertIn("gaps_in=8", float_spaces_status)
+        for edge in ("top", "left", "right", "bottom"):
+            self.assertIn(f"gaps_out_{edge}=8", float_spaces_status)
 
         (self.user / ".spaces").write_text(
             "waybar_top=2\nwaybar_left=4\nwaybar_right=5\nwaybar_bottom=7\n"
-            "waybar_pos=top\ngaps_out=1\n"
+            "waybar_pos=top\ngaps_out_top=2\ngaps_out_left=4\n"
+            "gaps_out_right=5\ngaps_out_bottom=7\n"
         )
         subprocess.run(
             ["sh", str(self.system / "hyprland/sh/spaces-switch.sh"), "--apply"],
@@ -207,7 +217,7 @@ class ThemeSwitchTests(unittest.TestCase):
         )
         bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
         self.assertIn('"margin-bottom": 7', bar)
-        self.assertIn(["hyprctl", "keyword", "general:gaps_out", "8 6 1 5"], self.commands())
+        self.assertIn(["hyprctl", "keyword", "general:gaps_out", "2 5 7 4"], self.commands())
 
     def test_theme_switch_resets_borders_to_mode_defaults(self):
         (self.user / ".borders").write_text("rounded=1\nrounding=10\n")
