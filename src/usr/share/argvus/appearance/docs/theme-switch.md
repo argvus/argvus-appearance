@@ -8,7 +8,7 @@ wallpaper, notification, idle and polkit lifecycle. Waybar must
 restart even if blanking the display fails: a CSS reload does not update its
 layer-shell margins. Signal cleanup restores the services and display.
 
-Applying a Normal theme resets taskbar margins to `0,0,0,0`, borders to
+Applying a Sticky theme resets taskbar margins to `0,0,0,0`, borders to
 disabled with rounding `0`, and window gaps to `3/1`. Applying a Float theme
 resets taskbar margins to `20,20,20,1`, borders to enabled with rounding `4`,
 and window gaps to `3/1`. The Control Panel can then change and apply these

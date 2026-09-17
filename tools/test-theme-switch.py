@@ -82,10 +82,10 @@ class ThemeSwitchTests(unittest.TestCase):
     def commands(self):
         return [json.loads(line) for line in self.log.read_text().splitlines()]
 
-    def test_all_pairs_float_to_normal_and_imports(self):
+    def test_all_pairs_float_to_sticky_and_imports(self):
         themes = self.system / "appearance/config/hypr/themes"
-        for normal in sorted(p.name for p in themes.iterdir() if not p.name.endswith("-float")):
-            for theme in (normal + "-float", normal):
+        for sticky in sorted(p.name for p in themes.iterdir() if not p.name.endswith("-float")):
+            for theme in (sticky + "-float", sticky):
                 with self.subTest(theme=theme):
                     self.apply(theme)
                     margin = 18 if theme.endswith("-float") else 0
@@ -145,11 +145,11 @@ class ThemeSwitchTests(unittest.TestCase):
         menu = self.system / "appearance/sh/theme-menu.sh"
         source = menu.read_text()
         self.assertIn("theme.family.dark_aether", source)
-        self.assertIn("theme.model.normal", source)
+        self.assertIn("theme.model.sticky", source)
         self.assertIn("theme.model.float", source)
         self.assertIn("-kb-accept-entry 'Return,KP_Enter,Right'", source)
         self.assertIn("-kb-cancel 'Escape,Left'", source)
-        self.assertIn('theme.model.normal)\") exec sh', source)
+        self.assertIn('theme.model.sticky)\") exec sh', source)
         self.assertIn('theme.model.float)\") exec sh', source)
 
     def test_theme_menu_releases_rofi_arrow_bindings(self):

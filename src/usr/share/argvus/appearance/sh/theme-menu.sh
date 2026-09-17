@@ -45,11 +45,11 @@ while :; do
   esac
 
   _model="$(run_menu "$_family" \
-    "$(argvus_tr appearance theme.model.normal)" \
+    "$(argvus_tr appearance theme.model.sticky)" \
     "$(argvus_tr appearance theme.model.float)" || true)"
   _model="$(printf '%s' "$_model" | sed 's/[[:space:]]*$//')"
   case "$_model" in
-    "$(argvus_tr appearance theme.model.normal)") exec sh "$THEME_SWITCH" "$_theme" >/dev/null 2>&1 ;;
+    "$(argvus_tr appearance theme.model.sticky)") exec sh "$THEME_SWITCH" "$_theme" >/dev/null 2>&1 ;;
     "$(argvus_tr appearance theme.model.float)") exec sh "$THEME_SWITCH" "${_theme}-float" >/dev/null 2>&1 ;;
     *) continue ;;
   esac
