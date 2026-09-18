@@ -405,7 +405,6 @@ ROFI_THEMES="$(optional_theme_parent launcher/config/themes "$THEME")"
 ROFI_CONFIG="$(paths_config launcher/config/config.rasi)"
 ROFI_THEME="$(paths_config launcher/config/theme.rasi)"
 ROFI_MODE="$(paths_config launcher/config/mode.rasi)"
-DUNST_THEMES="$(optional_theme_parent notifications/config/themes "$THEME")"
 FOOT_CONFIG="$(paths_config app-profiles/config/foot/foot.ini)"
 FOOT_THEMES="$(optional_theme_parent app-profiles/config/foot/themes "$THEME")"
 FOOT_SYSTEM_THEMES="$(paths_system_config app-profiles/config/foot/themes)"
@@ -562,43 +561,12 @@ apply_running_foot_theme() {
 }
 
 apply_dunst_theme() {
-  _theme_file="$DUNST_THEMES/$THEME/dunstrc.theme"
   _dunstrc="$(paths_config notifications/config/dunstrc)"
-  [ -f "$_theme_file" ] && [ -f "$_dunstrc" ] || return 0
-
-  _highlight=$(theme_value "$_theme_file" highlight "#3590bd")
-  _frame=$(theme_value "$_theme_file" frame_color "$_highlight")
-  _low_bg=$(theme_value "$_theme_file" low_background "#101010")
-  _low_fg=$(theme_value "$_theme_file" low_foreground "#aaaaaa")
-  _normal_bg=$(theme_value "$_theme_file" normal_background "$_low_bg")
-  _normal_fg=$(theme_value "$_theme_file" normal_foreground "$_low_fg")
-  _critical_bg=$(theme_value "$_theme_file" critical_background "$_normal_bg")
-  _critical_fg=$(theme_value "$_theme_file" critical_foreground "$_normal_fg")
-  _app_bg=$(theme_value "$_theme_file" app_background "$_normal_bg")
-  _app_fg=$(theme_value "$_theme_file" app_foreground "$_normal_fg")
-
-  set_dunst_section_value "$_dunstrc" global highlight "$_highlight"
-  set_dunst_section_value "$_dunstrc" global frame_color "$_frame"
-
-  set_dunst_section_value "$_dunstrc" urgency_low background "$_low_bg"
-  set_dunst_section_value "$_dunstrc" urgency_low foreground "$_low_fg"
-  set_dunst_section_value "$_dunstrc" urgency_low frame_color "$_frame"
-
-  set_dunst_section_value "$_dunstrc" urgency_normal background "$_normal_bg"
-  set_dunst_section_value "$_dunstrc" urgency_normal foreground "$_normal_fg"
-  set_dunst_section_value "$_dunstrc" urgency_normal frame_color "$_frame"
-
-  set_dunst_section_value "$_dunstrc" urgency_critical background "$_critical_bg"
-  set_dunst_section_value "$_dunstrc" urgency_critical foreground "$_critical_fg"
-  set_dunst_section_value "$_dunstrc" urgency_critical frame_color "$_frame"
-  set_dunst_section_value "$_dunstrc" urgency_critical highlight "$_highlight"
-
-  for _section in hyprshot volume gpu-screen-recorder network spotify discord; do
-    set_dunst_section_value "$_dunstrc" "$_section" background "$_app_bg"
-    set_dunst_section_value "$_dunstrc" "$_section" foreground "$_app_fg"
-    set_dunst_section_value "$_dunstrc" "$_section" frame_color "$_frame"
-    set_dunst_section_value "$_dunstrc" "$_section" highlight "$_highlight"
-  done
+  _theme_helper="$(paths_system_config notifications/sh/theme.sh)"
+  [ -r "$_theme_helper" ] || return 0
+  # shellcheck disable=SC1090
+  . "$_theme_helper"
+  argvus_notifications_apply_theme "$THEME" "$_dunstrc"
 }
 
 apply_wallpaper() {

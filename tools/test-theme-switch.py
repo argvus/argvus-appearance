@@ -121,6 +121,26 @@ class ThemeSwitchTests(unittest.TestCase):
                     )
         self.assertFalse(any(c[0] == "gsettings" for c in self.commands()))
 
+    def test_dunst_theme_follows_selected_theme(self):
+        expected = {
+            "argvus-dark-aether": ("#3590bd", "#111316", "#B0BFCB"),
+            "argvus-dark-silver": ("#595959", "#111316", "#B0BFCB"),
+            "argvus-dark-slate": ("#7391a5", "#2F3541", "#A6B8C4"),
+            # accent-switch normalizes the active accent to lowercase after
+            # the Dunst palette is applied.
+            "argvus-dark-universe": ("#eeeeee", "#000000", "#AAAAAA"),
+            "argvus-light-veil": ("#181818", "#f7f7f7", "#454545"),
+        }
+
+        for theme, (highlight, background, foreground) in expected.items():
+            with self.subTest(theme=theme):
+                self.apply(theme)
+                config = (self.user / "dunst/dunstrc").read_text()
+                self.assertIn(f'highlight = "{highlight}"', config)
+                self.assertIn(f'background = "{background}"', config)
+                self.assertIn(f'foreground = "{foreground}"', config)
+                self.assertIn("[discord]", config)
+
     def test_restart_does_not_depend_on_dpms(self):
         for fail in (False, True):
             with self.subTest(fail_dpms=fail):
