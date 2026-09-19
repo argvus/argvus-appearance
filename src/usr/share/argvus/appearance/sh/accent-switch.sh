@@ -172,9 +172,9 @@ apply_theme_references() {
 }
 
 apply_control_center() {
-  # The Control Center owns its palette; a stale calendar cache must not
-  # override its active theme, especially when the calendar is not installed.
-  _center_source="$(paths_config "control-center/config/themes/${THEME}.css")"
+  # The appearance package owns the shared TUI palette consumed by all
+  # terminal applications, including Control Center and the greeter.
+  _center_source="$(paths_config "appearance/config/tui/themes/${THEME}.css")"
   [ -f "$_center_source" ] || return 0
   _center_cache="${XDG_CACHE_HOME:-$HOME/.cache}/argvus-control-center/theme.css"
   mkdir -p "${_center_cache%/*}"
