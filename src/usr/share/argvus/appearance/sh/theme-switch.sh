@@ -17,6 +17,7 @@ export ARGVUS_THEME_SWITCH=1
 
 THEME="${1:-}"
 ACTIVE_FILE="${ARGVUS_CONFIG_HOME}/argvus/.active-theme"
+GREETER_THEME_STATE_DIR="${ARGVUS_GREETER_THEME_STATE_DIR:-/var/lib/argvus/greeter/themes}"
 RUNTIME=1
 mkdir -p "${ACTIVE_FILE%/*}"
 # Development-only sibling lookup, relative to the migrated source layout.
@@ -664,6 +665,35 @@ apply_argvus_calendar_theme() {
   command -v argvus-taskbar-calendar >/dev/null 2>&1 && argvus-taskbar-calendar reload >/dev/null 2>&1 || true
 }
 
+# Publish only the validated theme identifier needed by the pre-authentication
+# greeter. The private .active-theme remains the user-facing source of truth;
+# this persistent projection avoids granting the greeter access to user homes.
+publish_greeter_theme() {
+  case "$THEME" in
+    argvus-dark-aether|argvus-dark-aether-float|argvus-dark-silver|argvus-dark-silver-float|\
+    argvus-dark-slate|argvus-dark-slate-float|argvus-dark-universe|argvus-dark-universe-float|\
+    argvus-light-veil|argvus-light-veil-float)
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+
+  [ -d "$GREETER_THEME_STATE_DIR" ] || return 0
+
+  _greeter_theme_uid="$(id -u)"
+  _greeter_theme_target="$GREETER_THEME_STATE_DIR/$_greeter_theme_uid"
+  _greeter_theme_tmp="${_greeter_theme_target}.tmp.$$"
+  if ! printf '%s\n' "$THEME" > "$_greeter_theme_tmp"; then
+    rm -f -- "$_greeter_theme_tmp"
+    return 0
+  fi
+  chmod 0644 "$_greeter_theme_tmp" 2>/dev/null || true
+  if ! mv -f -- "$_greeter_theme_tmp" "$_greeter_theme_target"; then
+    rm -f -- "$_greeter_theme_tmp"
+  fi
+}
+
 if [ -z "$THEME" ]; then
   argvus_tr appearance theme.usage >&2
   exit 1
@@ -952,6 +982,7 @@ fi
 
 apply_argvus_storage_theme
 apply_argvus_calendar_theme
+publish_greeter_theme
 
 THEME_CONFIG_READY=1
 if [ "$RUNTIME" -eq 1 ]; then
