@@ -49,7 +49,8 @@ class ThemeSwitchTests(unittest.TestCase):
         mockbin = self.base / "bin"
         mockbin.mkdir()
         for name in ("hyprctl", "systemctl", "argvus-sessionctl", "pgrep",
-                     "gsettings", "notify-send", "argvus-terminal", "argvus-system-monitor"):
+                     "gsettings", "notify-send", "argvus-terminal", "argvus-system-monitor",
+                     "argvus-widget-telemetry-toggle"):
             script = mockbin / name
             script.write_text(MOCK)
             script.chmod(0o755)
@@ -180,6 +181,25 @@ class ThemeSwitchTests(unittest.TestCase):
     def test_theme_switch_is_silent_on_success(self):
         result = self.apply("argvus-dark-aether")
         self.assertEqual(result.stdout, "")
+
+    def test_theme_switch_preserves_taskbar_utility_group_mode(self):
+        mode_file = self.base / "state/argvus/taskbar-right-2-mode"
+        mode_file.parent.mkdir(parents=True)
+        mode_file.write_text("always-expanded\n")
+
+        self.apply("argvus-dark-aether")
+
+        taskbar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
+        self.assertIn('//    "drawer": {', taskbar)
+        self.assertIn('//      "custom/right-2-expander",', taskbar)
+
+        mode_file.write_text("auto\n")
+        self.apply("argvus-dark-aether")
+
+        taskbar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
+        self.assertIn('    "drawer": {', taskbar)
+        self.assertIn('      "custom/right-2-expander",', taskbar)
+        self.assertIn(["argvus-widget-telemetry-toggle", "blocks", "apply"], self.commands())
 
     def test_partial_theme_directory_is_repaired_without_losing_edits(self):
         theme = "argvus-dark-aether"

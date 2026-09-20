@@ -728,6 +728,15 @@ refresh_managed_waybar_file taskbar/config/argvus-taskbar.jsonc
 refresh_managed_waybar_file taskbar/config/argvus-taskbar.css
 refresh_managed_waybar_file widget-telemetry/config/argvus-widget-telemetry.jsonc
 refresh_managed_waybar_file widget-telemetry/config/argvus-widget-telemetry.css
+_taskbar_right_2_mode_script="$(paths_config appearance/sh/taskbar-right-2-mode.sh)"
+if [ -x "$_taskbar_right_2_mode_script" ]; then
+  "$_taskbar_right_2_mode_script" apply
+fi
+# The managed Waybar file is recreated above, so restore the user's sparse
+# telemetry block preferences before the session components are restarted.
+if command -v argvus-widget-telemetry-toggle >/dev/null 2>&1; then
+  argvus-widget-telemetry-toggle blocks apply || true
+fi
 _waybar_cfg="$(paths_config taskbar/config/argvus-taskbar.jsonc)"
 _waybar_cfg_widget_telemetry="$(paths_config widget-telemetry/config/argvus-widget-telemetry.jsonc)"
 _widget_telemetry_css="$(paths_config widget-telemetry/config/argvus-widget-telemetry.css)"
