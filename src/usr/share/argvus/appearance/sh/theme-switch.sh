@@ -972,6 +972,10 @@ if [ -f "$_borders_script" ]; then
 fi
 
 # Set wallpaper for the new theme
+# A theme change is an explicit request to use the theme's wallpaper. Clear
+# the independent custom selection so the new theme also remains active after
+# the next logout/login cycle.
+rm -f "$ARGVUS_CONFIG_HOME/argvus/.wallpaper-custom"
 if ! apply_wallpaper "$_theme_wallpaper"; then
   argvus_tr appearance theme.wallpaper_prepare_failed "theme=$THEME" >&2
   exit 1

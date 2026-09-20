@@ -48,6 +48,7 @@ MONITOR="$(get_active_monitor)"
 # Update hyprpaper.conf with ~ path
 [ -n "$MONITOR" ] && sed -i "s|^[[:space:]]*monitor[[:space:]]*=.*$|  monitor = ${MONITOR}|" "$HYPRPAPER_FILE"
 sed -i "s|^[[:space:]]*path[[:space:]]*=.*$|  path =  ${CONFIG_PATH}|" "$HYPRPAPER_FILE"
+persist_custom_wallpaper "$SELECTED_PATH"
 
 # Apply with full path
 apply_wallpaper_runtime "$SELECTED_PATH"

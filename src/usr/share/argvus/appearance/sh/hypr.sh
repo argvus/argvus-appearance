@@ -24,6 +24,22 @@ GET_HYPRLOCK_PATH=$(
 WALLPAPER_PATH="$GET_HYPRPAPER_PATH"
 HYPRLOCK_PATH="$GET_HYPRLOCK_PATH"
 
+# A custom wallpaper is independent from the active visual theme. Keep its
+# selected path in the user-owned ARGVUS state so the session service can
+# restore it without relying on a transient systemd manager environment.
+CUSTOM_WALLPAPER_STATE="$ARGVUS_CONFIG_HOME/argvus/.wallpaper-custom"
+
+persist_custom_wallpaper() {
+  _wallpaper_path="$1"
+  mkdir -p "${CUSTOM_WALLPAPER_STATE%/*}"
+  printf '%s\n' "$_wallpaper_path" > "$CUSTOM_WALLPAPER_STATE"
+}
+
+read_custom_wallpaper() {
+  [ -f "$CUSTOM_WALLPAPER_STATE" ] || return 1
+  sed -n '1p' "$CUSTOM_WALLPAPER_STATE"
+}
+
 hypr_monitors() {
   if command -v hyprctl >/dev/null 2>&1; then
     hyprctl monitors 2>/dev/null |

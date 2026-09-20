@@ -119,6 +119,26 @@ apply_wallpaper() {
   apply_wallpaper_runtime "$_wall"
 }
 
+wallpaper_is_custom() {
+  _configured_wallpaper="$(read_custom_wallpaper 2>/dev/null || true)"
+  if [ -n "$_configured_wallpaper" ] && [ -f "$_configured_wallpaper" ]; then
+    return 0
+  fi
+
+  # Migrate an existing custom selection made before the explicit state file
+  # existed. The packaged theme wallpaper remains theme-owned; every other
+  # valid configured image is treated as the user's independent selection.
+  _configured_wallpaper="$(
+    sed -n \
+      -e "s|^[[:space:]]*path[[:space:]]*=[[:space:]]*~|$HOME|p" \
+      -e "s|^[[:space:]]*path[[:space:]]*=[[:space:]]*\(/.*\)|\1|p" \
+      "$HYPRPAPER_FILE" 2>/dev/null | head -n1
+  )"
+  [ -f "$_configured_wallpaper" ] || return 1
+  [ "$_configured_wallpaper" != "$(find_theme_wallpaper "$THEME" 2>/dev/null || true)" ] || return 1
+  persist_custom_wallpaper "$_configured_wallpaper"
+}
+
 find_theme_wallpaper() {
   _theme="$1"
   case "$_theme" in
@@ -190,7 +210,9 @@ THEME_WALLPAPER="$(find_theme_wallpaper "$THEME")" || {
   argvus_tr appearance theme.wallpaper_missing "path=$THEME"
   exit 1
 }
-apply_wallpaper "$THEME_WALLPAPER"
+if ! wallpaper_is_custom; then
+  apply_wallpaper "$THEME_WALLPAPER"
+fi
 
 # ==============================================================================
 # ROFI — mode.rasi
