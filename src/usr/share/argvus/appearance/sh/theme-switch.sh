@@ -1013,6 +1013,14 @@ apply_argvus_storage_theme
 apply_argvus_calendar_theme
 publish_greeter_theme
 
+# Theme application recreates managed consumer files. Reapply the persisted
+# effects state last so disabled effects keep their surfaces solid, while an
+# enabled state restores each theme's native transparency and blur.
+_effects_script="$(paths_config session/sh/effects-toggle.sh)"
+if [ -f "$_effects_script" ]; then
+  sh "$_effects_script" apply >/dev/null 2>&1 || true
+fi
+
 THEME_CONFIG_READY=1
 if [ "$RUNTIME" -eq 1 ]; then
   theme_transition_cleanup 0
