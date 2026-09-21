@@ -12,6 +12,7 @@ ARGVUS_MUTABLE_CONFIG=1
 STATE_DIR="${ARGVUS_CONFIG_HOME}/argvus"
 ACCENT_FILE="${STATE_DIR}/.accent-color"
 ACTIVE_FILE="${STATE_DIR}/.active-theme"
+GREETER_THEME_STATE_DIR="${ARGVUS_GREETER_THEME_STATE_DIR:-/var/lib/argvus/greeter/themes}"
 DEFAULT_ACCENT="#3590bd"
 DEFAULT_THEME="argvus-dark-aether"
 RUNTIME=1
@@ -343,6 +344,22 @@ apply_application_colors() {
   fi
 }
 
+publish_greeter_accent() {
+  [ -d "$GREETER_THEME_STATE_DIR" ] || return 0
+
+  _greeter_accent_uid="$(id -u)"
+  _greeter_accent_target="$GREETER_THEME_STATE_DIR/$_greeter_accent_uid.accent"
+  _greeter_accent_tmp="${_greeter_accent_target}.tmp.$$"
+  if ! printf '%s\n' "$COLOR" > "$_greeter_accent_tmp"; then
+    rm -f -- "$_greeter_accent_tmp"
+    return 0
+  fi
+  chmod 0644 "$_greeter_accent_tmp" 2>/dev/null || true
+  if ! mv -f -- "$_greeter_accent_tmp" "$_greeter_accent_target"; then
+    rm -f -- "$_greeter_accent_tmp"
+  fi
+}
+
 refresh_runtime() {
   command -v hyprctl >/dev/null 2>&1 && hyprctl reload >/dev/null 2>&1 || true
   command -v argvus-terminal >/dev/null 2>&1 && argvus-terminal --apply "$THEME" >/dev/null 2>&1 || true
@@ -394,6 +411,7 @@ esac
 mkdir -p "$STATE_DIR"
 printf '%s\n' "$THEME" > "$ACTIVE_FILE"
 printf '%s\n' "$COLOR" > "$ACCENT_FILE"
+publish_greeter_accent
 
 apply_theme_references
 apply_waybar

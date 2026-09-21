@@ -25,6 +25,12 @@ The Control Panel launches theme selection through a transient user service so
 restarting the panel cannot terminate its own theme switch. The Control Center
 reads its own theme resources and an accent-only cache, not the calendar cache.
 
+After applying a highlight color, `accent-switch.sh` also publishes the
+validated `#RRGGBB` value to the per-UID greeter projection at
+`/var/lib/argvus/greeter/themes/<uid>.accent`. This public file lets the
+pre-authentication greeter and both session handoff spinners use the same
+accent without granting them access to the user's private configuration.
+
 For integration checks in an ecosystem checkout, run
 `python tools/test-theme-switch.py` from `argvus-appearance` and
 `python tools/test-paths.py` from `argvus-session`. The tests isolate configuration
