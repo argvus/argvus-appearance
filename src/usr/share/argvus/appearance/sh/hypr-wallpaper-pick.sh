@@ -25,6 +25,22 @@ get_active_monitor() {
   fi
 }
 
+if [ "${1:-}" = "--apply" ]; then
+  SELECTED_PATH="${2:-}"
+  [ -f "$SELECTED_PATH" ] || {
+    printf '%s\n' "wallpaper file not found" >&2
+    exit 1
+  }
+  CONFIG_PATH=$(printf '%s\n' "$SELECTED_PATH" | sed "s|^$HOME|~|")
+  MONITOR="$(get_active_monitor)"
+  [ -n "$MONITOR" ] && sed -i "s|^[[:space:]]*monitor[[:space:]]*=.*$|  monitor = ${MONITOR}|" "$HYPRPAPER_FILE"
+  sed -i "s|^[[:space:]]*path[[:space:]]*=.*$|  path =  ${CONFIG_PATH}|" "$HYPRPAPER_FILE"
+  persist_custom_wallpaper "$SELECTED_PATH"
+  apply_wallpaper_runtime "$SELECTED_PATH"
+  sh "$(paths_config lock/sh/hyprlock-theme.sh)" --invalidate >/dev/null 2>&1 || true
+  exit 0
+fi
+
 if command -v argvus >/dev/null 2>&1; then
   argvus-tui-terminal --class argvus-wallpaper-picker --term kitty -- \
     argvus --spf --chooser-file="$SELECTED_FILE" "$WALLPAPERS_DIR"
