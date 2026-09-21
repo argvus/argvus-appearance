@@ -163,6 +163,23 @@ replace_or_append_ini_setting() {
   fi
 }
 
+sync_snappy_switcher_theme() {
+  _source_config="$(paths_config app-profiles/config/snappy-switcher/config.ini)"
+  _source_theme="$(paths_config "app-profiles/config/snappy-switcher/themes/${THEME}/theme.ini")"
+  _native_root="${ARGVUS_CONFIG_HOME}/snappy-switcher"
+  _native_config="${_native_root}/config.ini"
+  _native_theme="${_native_root}/themes/${THEME}.ini"
+
+  [ -f "$_source_config" ] || return 0
+  [ -f "$_source_theme" ] || return 0
+  mkdir -p "${_native_root}/themes"
+  if [ ! -f "$_native_config" ]; then
+    cp "$_source_config" "$_native_config"
+  fi
+  sed -i "s|^[[:space:]]*name[[:space:]]*=.*|name = ${THEME}.ini|" "$_native_config"
+  cp "$_source_theme" "$_native_theme"
+}
+
 font_state_value() {
   _key="$1"
   _fallback="$2"
@@ -888,8 +905,7 @@ fi
 command -v argvus-system-monitor >/dev/null 2>&1 && argvus-system-monitor --apply "$THEME" >/dev/null 2>&1 || true
 
 if [ -f "$SNAPPY_THEMES/$THEME/theme.ini" ]; then
-  _snappy_conf="$(paths_config app-profiles/config/snappy-switcher/config.ini)"
-  sed -i "s|^name = .*|name = ${THEME}/theme.ini|" "$_snappy_conf"
+  sync_snappy_switcher_theme
 fi
 
 if [ -d "$YAZI_SYSTEM_ROOT/flavors/$THEME.yazi" ]; then

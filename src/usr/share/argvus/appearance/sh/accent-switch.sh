@@ -21,7 +21,7 @@ read_state() {
   _state_file="$1"
   _fallback="$2"
   if [ -s "$_state_file" ]; then
-    sed -n '1p' "$_state_file"
+    sed -n '1{s/\r$//;s/^[[:space:]]*//;s/[[:space:]]*$//;p;}' "$_state_file"
   else
     printf '%s\n' "$_fallback"
   fi
@@ -41,7 +41,22 @@ theme_default_accent() {
 read_accent_state() {
   _state_theme="$(read_state "$ACTIVE_FILE" "$DEFAULT_THEME")"
   _state_default="$(theme_default_accent "$_state_theme" 2>/dev/null || printf '%s\n' "$DEFAULT_ACCENT")"
-  read_state "$ACCENT_FILE" "$_state_default"
+  _state_accent="$(read_state "$ACCENT_FILE" "$_state_default")"
+  case "$_state_accent" in
+    blue) _state_accent="#3590BD" ;;
+    slate-blue) _state_accent="#7391A5" ;;
+    brown) _state_accent="#996548" ;;
+    green) _state_accent="#17D174" ;;
+    magenta) _state_accent="#CB17D1" ;;
+    red) _state_accent="#D1174F" ;;
+    yellow) _state_accent="#D1CE17" ;;
+    purple) _state_accent="#9617D1" ;;
+    silver) _state_accent="#595959" ;;
+  esac
+  case "$_state_accent" in
+    \#??????|??????) printf '%s\n' "$_state_accent" ;;
+    *) printf '%s\n' "$_state_default" ;;
+  esac
 }
 
 select_accent() {
@@ -69,21 +84,29 @@ EOF
 }
 
 normalize_accent() {
-  _requested="$(printf '%s' "$1" | tr 'A-F' 'a-f')"
+  _requested="$(printf '%s' "$1" | tr 'a-f' 'A-F')"
   case "$_requested" in
-    *\#3590bd|3590bd) COLOR="#3590bd"; RED=53; GREEN=144; BLUE=189; ACCENT_TEXT="#111316" ;;
-    *\#181818|181818) COLOR="#181818"; RED=24; GREEN=24; BLUE=24; ACCENT_TEXT="#f7f7f7" ;;
-    *\#7391a5|7391a5) COLOR="#7391a5"; RED=115; GREEN=145; BLUE=165; ACCENT_TEXT="#111316" ;;
-    *\#996548|996548) COLOR="#996548"; RED=153; GREEN=101; BLUE=72; ACCENT_TEXT="#f7f7f7" ;;
-    *\#17d174|17d174) COLOR="#17d174"; RED=23; GREEN=209; BLUE=116; ACCENT_TEXT="#111316" ;;
-    *\#cb17d1|cb17d1) COLOR="#cb17d1"; RED=203; GREEN=23; BLUE=209; ACCENT_TEXT="#f7f7f7" ;;
-    *\#d1174f|d1174f) COLOR="#d1174f"; RED=209; GREEN=23; BLUE=79; ACCENT_TEXT="#f7f7f7" ;;
-    *\#d1ce17|d1ce17) COLOR="#d1ce17"; RED=209; GREEN=206; BLUE=23; ACCENT_TEXT="#111316" ;;
-    *\#9617d1|9617d1) COLOR="#9617d1"; RED=150; GREEN=23; BLUE=209; ACCENT_TEXT="#f7f7f7" ;;
-    *\#595959|595959) COLOR="#595959"; RED=89; GREEN=89; BLUE=89; ACCENT_TEXT="#f7f7f7" ;;
-    *\#eeeeee|eeeeee) COLOR="#eeeeee"; RED=238; GREEN=238; BLUE=238; ACCENT_TEXT="#000000" ;;
-    *) return 1 ;;
+    \#*) _hex="${_requested#\#}" ;;
+    *) _hex="$_requested" ;;
   esac
+  [ "${#_hex}" -eq 6 ] || return 1
+  case "$_hex" in
+    *[!0-9A-F]*) return 1 ;;
+  esac
+
+  COLOR="#$_hex"
+  RED="$(printf '%d' "0x${_hex%????}")"
+  BLUE="$(printf '%d' "0x${_hex#????}")"
+  # Extract the middle byte without relying on non-POSIX substring syntax.
+  _middle="${_hex#??}"
+  _middle="${_middle%??}"
+  GREEN="$(printf '%d' "0x$_middle")"
+  _luminance=$(( (299 * RED + 587 * GREEN + 114 * BLUE) / 1000 ))
+  if [ "$_luminance" -ge 128 ]; then
+    ACCENT_TEXT="#000000"
+  else
+    ACCENT_TEXT="#FFFFFF"
+  fi
   HEX="${COLOR#\#}"
 }
 
@@ -93,6 +116,23 @@ replace_setting() {
   _value="$3"
   [ -f "$_file" ] || return 0
   sed -i "s|^${_name}[[:space:]]*=.*|${_name} = ${_value}|" "$_file"
+}
+
+sync_snappy_switcher_theme() {
+  _source_config="$(paths_config app-profiles/config/snappy-switcher/config.ini)"
+  _source_theme="$(paths_config "app-profiles/config/snappy-switcher/themes/${THEME}/theme.ini")"
+  _native_root="${ARGVUS_CONFIG_HOME}/snappy-switcher"
+  _native_config="${_native_root}/config.ini"
+  _native_theme="${_native_root}/themes/${THEME}.ini"
+
+  [ -f "$_source_config" ] || return 0
+  [ -f "$_source_theme" ] || return 0
+  mkdir -p "${_native_root}/themes"
+  if [ ! -f "$_native_config" ]; then
+    cp "$_source_config" "$_native_config"
+  fi
+  sed -i "s|^[[:space:]]*name[[:space:]]*=.*|name = ${THEME}.ini|" "$_native_config"
+  cp "$_source_theme" "$_native_theme"
 }
 
 sync_native_qt6ct_config() {
@@ -161,7 +201,7 @@ apply_theme_references() {
     "$_rofi_theme_file" 2>/dev/null || true
   command -v argvus-terminal >/dev/null 2>&1 && argvus-terminal --apply "$THEME" >/dev/null 2>&1 || true
   command -v argvus-system-monitor >/dev/null 2>&1 && argvus-system-monitor --apply "$THEME" >/dev/null 2>&1 || true
-  replace_setting "$(paths_config app-profiles/config/snappy-switcher/config.ini)" name "${THEME}/theme.ini"
+  sync_snappy_switcher_theme
   replace_setting "$_superfile_config/config.toml" theme "\"${THEME}\""
   _qt6ct_conf="$(paths_config appearance/config/qt6ct/qt6ct.conf)"
   replace_setting "$_qt6ct_conf" color_scheme_path "$(paths_config "appearance/config/qt6ct/colors/${THEME}.conf")"
@@ -255,7 +295,10 @@ apply_application_colors() {
   _hyprlock="$(paths_config lock/config/hyprlock.conf)"
   _hyprtoolkit="$(paths_config appearance/config/hypr/hyprtoolkit.conf)"
   _dunst="$(paths_config notifications/config/dunstrc)"
-  _snappy="$(paths_config "app-profiles/config/snappy-switcher/themes/${THEME}/theme.ini")"
+  _foot="$(paths_config app-profiles/config/foot/foot.ini)"
+  sync_snappy_switcher_theme
+  _snappy="${ARGVUS_CONFIG_HOME}/snappy-switcher/themes/${THEME}.ini"
+  _yazi="$(paths_config "app-profiles/config/yazi/flavors/${THEME}.yazi/flavor.toml")"
   _superfile="$(paths_config "app-profiles/config/superfile/theme/${THEME}.toml")"
 
   [ -f "$_hyprlock" ] && sed -i "s|^[[:space:]]*outer_color = .*|  outer_color = rgb(${HEX})|" "$_hyprlock"
@@ -269,9 +312,22 @@ apply_application_colors() {
       set_dunst_section_value "$_dunst" "$_section" highlight "$COLOR"
     done
   fi
+  [ -f "$_foot" ] && sed -i "s|^[[:space:]]*border-color=.*|border-color=${HEX}ff|" "$_foot"
+  _native_foot="${ARGVUS_CONFIG_HOME}/foot/foot.ini"
+  if [ -f "$_native_foot" ] && grep -q 'argvus.*/foot/themes' "$_native_foot"; then
+    sed -i "s|^[[:space:]]*border-color=.*|border-color=${HEX}ff|" "$_native_foot"
+  fi
   [ -f "$_snappy" ] && sed -i \
     -e "s|^border_color .*|border_color  = ${COLOR}ff|" \
     -e "s|^badge_bg .*|badge_bg      = ${COLOR}ff|" "$_snappy"
+
+  if [ -f "$_yazi" ]; then
+    _old_yazi_accent="$(theme_default_accent "$THEME" 2>/dev/null || true)"
+    if [ -n "$_old_yazi_accent" ]; then
+      _old_yazi_hex="${_old_yazi_accent#\#}"
+      sed -i "s|#${_old_yazi_hex}|${COLOR}|gI" "$_yazi"
+    fi
+  fi
 
   command -v argvus-system-monitor >/dev/null 2>&1 && argvus-system-monitor --apply "$THEME" >/dev/null 2>&1 || true
 
@@ -281,6 +337,10 @@ apply_application_colors() {
   [ -f "$_superfile" ] && sed -i \
     -e "s|^gradient_color = \[\"#[0-9A-Fa-f]*\",|gradient_color = [\"${COLOR}\",|" \
     -e "s|^modal_confirm_fg = .*|modal_confirm_fg = \"${ACCENT_TEXT}\"|" "$_superfile"
+  _native_superfile="${ARGVUS_CONFIG_HOME}/superfile"
+  if [ -f "$_superfile" ] && [ -f "$_native_superfile/config.toml" ] && [ -d "$_native_superfile/theme" ]; then
+    cp "$_superfile" "$_native_superfile/theme/${THEME}.toml"
+  fi
 }
 
 refresh_runtime() {
