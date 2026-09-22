@@ -25,6 +25,19 @@ get_active_monitor() {
   fi
 }
 
+if [ "${1:-}" = "--apply-static" ]; then
+  SELECTED_PATH="${2:-}"
+  [ -f "$SELECTED_PATH" ] || {
+    printf '%s\n' "wallpaper file not found" >&2
+    exit 1
+  }
+  CONFIG_PATH=$(printf '%s\n' "$SELECTED_PATH" | sed "s|^$HOME|~|")
+  sed -i "s|^[[:space:]]*path[[:space:]]*=.*$|  path =  ${CONFIG_PATH}|" "$HYPRPAPER_FILE"
+  persist_custom_wallpaper "$SELECTED_PATH"
+  sh "$(paths_config lock/sh/hyprlock-theme.sh)" --invalidate >/dev/null 2>&1 || true
+  exit 0
+fi
+
 if [ "${1:-}" = "--apply" ]; then
   SELECTED_PATH="${2:-}"
   [ -f "$SELECTED_PATH" ] || {
