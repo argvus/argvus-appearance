@@ -831,7 +831,7 @@ write_managed_css_block "$(paths_config taskbar/config/argvus-taskbar.css)" "* {
 #bluetooth,
 #custom-bluetooth,
 #custom-expand-icon,
-#custom-storage,
+#custom-removable-devices,
 #custom-recording,
 #custom-search,
 #pulseaudio,

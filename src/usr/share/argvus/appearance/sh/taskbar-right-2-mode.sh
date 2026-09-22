@@ -35,6 +35,11 @@ apply_mode() {
         s|^//||
       }' "$_taskbar_config"
       sed -i 's|^//\([[:space:]]*"custom/right-2-expander",\)$|\1|' "$_taskbar_config"
+      sed -i '/ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_BEGIN/,/ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_END/{
+        /ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_BEGIN/b
+        /ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_END/b
+        s|^\([[:space:]]*\)"on-click":.*$|\1"on-click": "argvus-removable-devices menu"|
+      }' "$_taskbar_config"
       ;;
     always-expanded)
       sed -i '/ARGVUS_RIGHT_2_AUTO_BEGIN/,/ARGVUS_RIGHT_2_AUTO_END/{
@@ -43,6 +48,11 @@ apply_mode() {
         s|^|//|
       }' "$_taskbar_config"
       sed -i 's|^\([[:space:]]*"custom/right-2-expander",\)$|//\1|' "$_taskbar_config"
+      sed -i '/ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_BEGIN/,/ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_END/{
+        /ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_BEGIN/b
+        /ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_END/b
+        s|^\([[:space:]]*\)"on-click":.*$|\1"on-click": "/usr/share/argvus/removable-devices/sh/removable-devices-menu.sh --root {x} {y}"|
+      }' "$_taskbar_config"
       ;;
   esac
 }

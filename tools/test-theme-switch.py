@@ -127,8 +127,8 @@ class ThemeSwitchTests(unittest.TestCase):
             "argvus-dark-aether": ("#3590bd", "#111316", "#B0BFCB"),
             "argvus-dark-silver": ("#595959", "#111316", "#B0BFCB"),
             "argvus-dark-slate": ("#7391a5", "#2F3541", "#A6B8C4"),
-            # accent-switch normalizes the active accent to lowercase after
-            # the Dunst palette is applied.
+            # HEX colors are case-insensitive; accent-switch writes the Dunst
+            # palette using its canonical uppercase representation.
             "argvus-dark-universe": ("#eeeeee", "#000000", "#AAAAAA"),
             "argvus-light-veil": ("#181818", "#f7f7f7", "#454545"),
         }
@@ -137,9 +137,10 @@ class ThemeSwitchTests(unittest.TestCase):
             with self.subTest(theme=theme):
                 self.apply(theme)
                 config = (self.user / "dunst/dunstrc").read_text()
-                self.assertIn(f'highlight = "{highlight}"', config)
-                self.assertIn(f'background = "{background}"', config)
-                self.assertIn(f'foreground = "{foreground}"', config)
+                normalized_config = config.casefold()
+                self.assertIn(f'highlight = "{highlight}"'.casefold(), normalized_config)
+                self.assertIn(f'background = "{background}"'.casefold(), normalized_config)
+                self.assertIn(f'foreground = "{foreground}"'.casefold(), normalized_config)
                 self.assertIn("[discord]", config)
 
     def test_restart_does_not_depend_on_dpms(self):
@@ -190,8 +191,11 @@ class ThemeSwitchTests(unittest.TestCase):
         self.apply("argvus-dark-aether")
 
         taskbar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
+        self.assertIn('"custom/removable-devices"', taskbar)
+        self.assertNotIn('"custom/storage"', taskbar)
         self.assertIn('//    "drawer": {', taskbar)
         self.assertIn('//      "custom/right-2-expander",', taskbar)
+        self.assertIn('"on-click": "/usr/share/argvus/removable-devices/sh/removable-devices-menu.sh --root {x} {y}"', taskbar)
 
         mode_file.write_text("auto\n")
         self.apply("argvus-dark-aether")
@@ -199,6 +203,11 @@ class ThemeSwitchTests(unittest.TestCase):
         taskbar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
         self.assertIn('    "drawer": {', taskbar)
         self.assertIn('      "custom/right-2-expander",', taskbar)
+        self.assertIn('"on-click": "argvus-removable-devices menu"', taskbar)
+        self.assertNotIn('"on-click": "/usr/share/argvus/removable-devices/sh/removable-devices-menu.sh --root {x} {y}"', taskbar)
+        css = (self.user / "waybar/argvus-taskbar.css").read_text()
+        self.assertIn("#custom-removable-devices", css)
+        self.assertNotIn("#custom-storage", css)
         self.assertIn(["argvus-widget-telemetry-toggle", "blocks", "apply"], self.commands())
 
     def test_partial_theme_directory_is_repaired_without_losing_edits(self):
