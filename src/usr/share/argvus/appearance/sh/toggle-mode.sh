@@ -142,11 +142,18 @@ wallpaper_is_custom() {
 find_theme_wallpaper() {
   _theme="$1"
   case "$_theme" in
+    argvus-onedark|argvus-onedark-float) _wall_name="argvus-onedark.png" ;;
+    argvus-dracula|argvus-dracula-float) _wall_name="argvus-dracula.png" ;;
     argvus-dark-aether|argvus-dark-aether-float) _wall_name="default.png" ;;
     argvus-dark-silver|argvus-dark-silver-float) _wall_name="argvus-dark-silver.png" ;;
     argvus-light-veil|argvus-light-veil-float) _wall_name="argvus-light-veil.png" ;;
+    argvus-frost|argvus-frost-float) _wall_name="argvus-frost.png" ;;
+    argvus-catppuccin-latte|argvus-catppuccin-latte-float) _wall_name="argvus-catppuccin-latte.png" ;;
     argvus-dark-slate|argvus-dark-slate-float) _wall_name="argvus-dark-slate.png" ;;
     argvus-dark-universe|argvus-dark-universe-float) _wall_name="argvus-dark-universe.png" ;;
+    argvus-gruvbox-dark-medium|argvus-gruvbox-dark-medium-float) _wall_name="argvus-gruvbox.png" ;;
+    argvus-rosepine|argvus-rosepine-float) _wall_name="argvus-rosepine.png" ;;
+    argvus-tokyo-night|argvus-tokyo-night-float) _wall_name="argvus-tokyo-night.png" ;;
     *) return 1 ;;
   esac
 

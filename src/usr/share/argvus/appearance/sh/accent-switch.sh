@@ -30,11 +30,18 @@ read_state() {
 
 theme_default_accent() {
   case "$1" in
+    argvus-onedark|argvus-onedark-float) printf '#61AFEF\n' ;;
+    argvus-dracula|argvus-dracula-float) printf '#BD93F9\n' ;;
     argvus-dark-aether|argvus-dark-aether-float) printf '#3590bd\n' ;;
     argvus-dark-silver|argvus-dark-silver-float) printf '#595959\n' ;;
     argvus-light-veil|argvus-light-veil-float) printf '#181818\n' ;;
+    argvus-rosepine|argvus-rosepine-float) printf '#C4A7E7\n' ;;
+    argvus-frost|argvus-frost-float) printf '#0969DA\n' ;;
+    argvus-catppuccin-latte|argvus-catppuccin-latte-float) printf '#1E66F5\n' ;;
     argvus-dark-slate|argvus-dark-slate-float) printf '#7391a5\n' ;;
     argvus-dark-universe|argvus-dark-universe-float) printf '#eeeeee\n' ;;
+    argvus-gruvbox-dark-medium|argvus-gruvbox-dark-medium-float) printf '#D79921\n' ;;
+    argvus-tokyo-night|argvus-tokyo-night-float) printf '#7AA2F7\n' ;;
     *) return 1 ;;
   esac
 }
@@ -401,7 +408,7 @@ fi
 
 THEME="$(read_state "$ACTIVE_FILE" "$DEFAULT_THEME")"
 case "$THEME" in
-  argvus-dark-aether|argvus-dark-aether-float|argvus-dark-silver|argvus-dark-silver-float|argvus-light-veil|argvus-light-veil-float|argvus-dark-slate|argvus-dark-slate-float|argvus-dark-universe|argvus-dark-universe-float) ;;
+  argvus-onedark|argvus-onedark-float|argvus-dracula|argvus-dracula-float|argvus-dark-aether|argvus-dark-aether-float|argvus-dark-silver|argvus-dark-silver-float|argvus-light-veil|argvus-light-veil-float|argvus-frost|argvus-frost-float|argvus-catppuccin-latte|argvus-catppuccin-latte-float|argvus-dark-slate|argvus-dark-slate-float|argvus-dark-universe|argvus-dark-universe-float|argvus-gruvbox-dark-medium|argvus-gruvbox-dark-medium-float|argvus-rosepine|argvus-rosepine-float|argvus-tokyo-night|argvus-tokyo-night-float) ;;
   *-dark-float) THEME="argvus-dark-aether-float" ;;
   *-light-float) THEME="argvus-light-veil-float" ;;
   *-light) THEME="argvus-light-veil" ;;

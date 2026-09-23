@@ -21,26 +21,47 @@ run_menu() {
 }
 
 while :; do
+  _onedark="$(argvus_tr appearance theme.family.onedark)"
+  _dracula="$(argvus_tr appearance theme.family.dracula)"
   _dark_aether="$(argvus_tr appearance theme.family.dark_aether)"
   _dark_silver="$(argvus_tr appearance theme.family.dark_silver)"
   _dark_slate="$(argvus_tr appearance theme.family.dark_slate)"
   _dark_universe="$(argvus_tr appearance theme.family.dark_universe)"
+  _gruvbox_dark_medium="$(argvus_tr appearance theme.family.gruvbox_dark_medium)"
   _light_veil="$(argvus_tr appearance theme.family.light_veil)"
+  _frost="$(argvus_tr appearance theme.family.frost)"
+  _catppuccin_latte="$(argvus_tr appearance theme.family.catppuccin_latte)"
+  _rosepine="$(argvus_tr appearance theme.family.rosepine)"
+  _tokyo_night="$(argvus_tr appearance theme.family.tokyo_night)"
   _family="$(run_menu "$(argvus_tr appearance theme.select)" \
+    "$_onedark" \
+    "$_dracula" \
     "$_dark_aether" \
     "$_dark_silver" \
     "$_dark_slate" \
     "$_dark_universe" \
-    "$_light_veil" || true)"
+    "$_gruvbox_dark_medium" \
+    "$_light_veil" \
+    "$_frost" \
+    "$_catppuccin_latte" \
+    "$_rosepine" \
+    "$_tokyo_night" || true)"
   _family="$(printf '%s' "$_family" | sed 's/[[:space:]]*$//')"
   [ -n "$_family" ] || exit 0
 
   case "$_family" in
+    "$_onedark") _theme='argvus-onedark' ;;
+    "$_dracula") _theme='argvus-dracula' ;;
     "$_dark_aether") _theme='argvus-dark-aether' ;;
     "$_dark_silver") _theme='argvus-dark-silver' ;;
     "$_dark_slate") _theme='argvus-dark-slate' ;;
     "$_dark_universe") _theme='argvus-dark-universe' ;;
+    "$_gruvbox_dark_medium") _theme='argvus-gruvbox-dark-medium' ;;
     "$_light_veil") _theme='argvus-light-veil' ;;
+    "$_frost") _theme='argvus-frost' ;;
+    "$_catppuccin_latte") _theme='argvus-catppuccin-latte' ;;
+    "$_rosepine") _theme='argvus-rosepine' ;;
+    "$_tokyo_night") _theme='argvus-tokyo-night' ;;
     *) continue ;;
   esac
 

@@ -69,6 +69,7 @@ class ThemeSwitchTests(unittest.TestCase):
             "ARGVUS_NO_RUNTIME": "1",
             "ARGVUS_THEME_LOCKED": "0",
             "ARGVUS_I18N_DIR": str(ROOT / "argvus-i18n/locales"),
+            "ARGVUS_BACKGROUNDS_DIR": str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds"),
             "TEST_COMMAND_LOG": str(self.log),
             "PATH": str(mockbin) + os.pathsep + os.environ["PATH"],
         }
@@ -112,7 +113,7 @@ class ThemeSwitchTests(unittest.TestCase):
                     self.assertIn(f"/{theme}/theme.rasi", rofi)
                     for version in ("gtk-3.0", "gtk-4.0"):
                         settings = (self.user / version / "settings.ini").read_text()
-                        prefer_dark = 0 if "light-veil" in theme else 1
+                        prefer_dark = 0 if ("light-veil" in theme or "frost" in theme or "catppuccin-latte" in theme) else 1
                         self.assertIn(f"gtk-application-prefer-dark-theme={prefer_dark}", settings)
                     palette = (self.base / "cache/argvus-control-center/theme.css").read_text()
                     self.assertIn("@define-color argvus_accent #", palette)
@@ -127,6 +128,7 @@ class ThemeSwitchTests(unittest.TestCase):
 
     def test_dunst_theme_follows_selected_theme(self):
         expected = {
+            "argvus-dracula": ("#BD93F9", "#282A36", "#6272A4"),
             "argvus-dark-aether": ("#3590bd", "#111316", "#B0BFCB"),
             "argvus-dark-silver": ("#595959", "#111316", "#B0BFCB"),
             "argvus-dark-slate": ("#7391a5", "#2F3541", "#A6B8C4"),
@@ -134,6 +136,11 @@ class ThemeSwitchTests(unittest.TestCase):
             # palette using its canonical uppercase representation.
             "argvus-dark-universe": ("#eeeeee", "#000000", "#AAAAAA"),
             "argvus-light-veil": ("#181818", "#f7f7f7", "#454545"),
+            "argvus-frost": ("#0969DA", "#F6F8FA", "#6E7781"),
+            "argvus-catppuccin-latte": ("#1E66F5", "#EFF1F5", "#5C5F77"),
+            "argvus-gruvbox-dark-medium": ("#D79921", "#282828", "#A89984"),
+            "argvus-rosepine": ("#C4A7E7", "#191724", "#E0DEF4"),
+            "argvus-tokyo-night": ("#7AA2F7", "#1A1B26", "#C0CAF5"),
         }
 
         for theme, (highlight, background, foreground) in expected.items():
@@ -170,6 +177,10 @@ class ThemeSwitchTests(unittest.TestCase):
         menu = self.system / "appearance/sh/theme-menu.sh"
         source = menu.read_text()
         self.assertIn("theme.family.dark_aether", source)
+        self.assertIn("theme.family.dracula", source)
+        self.assertIn("theme.family.catppuccin_latte", source)
+        self.assertIn("theme.family.rosepine", source)
+        self.assertIn('    "$_rosepine" \\\n    "$_tokyo_night" || true)', source)
         self.assertIn("theme.model.sticky", source)
         self.assertIn("theme.model.float", source)
         self.assertIn("-kb-accept-entry 'Return,KP_Enter,Right'", source)
@@ -191,6 +202,15 @@ class ThemeSwitchTests(unittest.TestCase):
         projection = self.greeter_state / str(os.getuid())
         self.assertEqual(projection.read_text(), "argvus-light-veil-float\n")
         self.assertFalse((self.greeter_state / f"{os.getuid()}.tmp").exists())
+
+    def test_catppuccin_latte_uses_its_packaged_wallpaper(self):
+        self.apply("argvus-catppuccin-latte")
+        self.assertEqual(
+            os.path.expanduser(
+                (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
+            ),
+            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/argvus-catppuccin-latte.png"),
+        )
 
     def test_theme_switch_preserves_taskbar_utility_group_mode(self):
         mode_file = self.base / "state/argvus/taskbar-right-2-mode"
