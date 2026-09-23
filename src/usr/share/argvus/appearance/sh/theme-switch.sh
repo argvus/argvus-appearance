@@ -736,6 +736,7 @@ fi
 theme_transition_begin
 
 printf '%s' "$THEME" > "$ACTIVE_FILE"
+publish_greeter_theme
 
 # ----- Per-theme waybar layout -----
 # Refresh the canonical mutable copies. The previous legacy `waybar/...`
@@ -1011,7 +1012,6 @@ fi
 
 apply_argvus_storage_theme
 apply_argvus_calendar_theme
-publish_greeter_theme
 
 # Theme application recreates managed consumer files. Reapply the persisted
 # effects state last so disabled effects keep their surfaces solid, while an

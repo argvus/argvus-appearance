@@ -44,6 +44,8 @@ class ThemeSwitchTests(unittest.TestCase):
         self.config = self.base / "config"
         self.user = self.config / "argvus"
         self.user.mkdir(parents=True)
+        self.greeter_state = self.base / "greeter-themes"
+        self.greeter_state.mkdir()
         self.log = self.base / "commands.jsonl"
         self.log.touch()
         mockbin = self.base / "bin"
@@ -58,6 +60,7 @@ class ThemeSwitchTests(unittest.TestCase):
             "ARGVUS_SYSTEM_CONFIG": str(self.system),
             "ARGVUS_BOOTSTRAP": str(self.system / "session/sh/bootstrap.sh"),
             "ARGVUS_CONFIG_HOME": str(self.config),
+            "ARGVUS_GREETER_THEME_STATE_DIR": str(self.greeter_state),
             "XDG_CONFIG_HOME": str(self.base / "native"),
             "XDG_CACHE_HOME": str(self.base / "cache"),
             "ARGVUS_CACHE_HOME": str(self.base / "cache/argvus"),
@@ -182,6 +185,12 @@ class ThemeSwitchTests(unittest.TestCase):
     def test_theme_switch_is_silent_on_success(self):
         result = self.apply("argvus-dark-aether")
         self.assertEqual(result.stdout, "")
+
+    def test_theme_is_published_for_pre_authentication_greeter(self):
+        self.apply("argvus-light-veil-float")
+        projection = self.greeter_state / str(os.getuid())
+        self.assertEqual(projection.read_text(), "argvus-light-veil-float\n")
+        self.assertFalse((self.greeter_state / f"{os.getuid()}.tmp").exists())
 
     def test_theme_switch_preserves_taskbar_utility_group_mode(self):
         mode_file = self.base / "state/argvus/taskbar-right-2-mode"
