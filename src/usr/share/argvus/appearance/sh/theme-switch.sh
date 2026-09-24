@@ -972,9 +972,19 @@ if [ -f "$SNAPPY_THEMES/$THEME/theme.ini" ]; then
   sync_snappy_switcher_theme
 fi
 
-if [ -d "$YAZI_SYSTEM_ROOT/flavors/$THEME.yazi" ]; then
+_yazi_theme="$THEME"
+case "$THEME" in
+  # Keep compatibility with the original Yazi flavor IDs while the official
+  # ARGVUS theme IDs use the dark family prefix consistently.
+  argvus-dark-rosepine) _yazi_theme='argvus-rosepine' ;;
+  argvus-dark-rosepine-float) _yazi_theme='argvus-rosepine-float' ;;
+  argvus-dark-sunset-float) _yazi_theme='argvus-dark-sunset' ;;
+  argvus-dark-hackerman-float) _yazi_theme='argvus-dark-hackerman' ;;
+esac
+
+if [ -d "$YAZI_SYSTEM_ROOT/flavors/$_yazi_theme.yazi" ]; then
   mkdir -p "$YAZI_CONFIG_ROOT/flavors/$THEME.yazi"
-  cp -R "$YAZI_SYSTEM_ROOT/flavors/$THEME.yazi/." "$YAZI_CONFIG_ROOT/flavors/$THEME.yazi/"
+  cp -R "$YAZI_SYSTEM_ROOT/flavors/$_yazi_theme.yazi/." "$YAZI_CONFIG_ROOT/flavors/$THEME.yazi/"
 fi
 
 if [ -f "$YAZI_CONFIG_ROOT/flavors/$THEME.yazi/flavor.toml" ]; then
