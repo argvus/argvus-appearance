@@ -25,6 +25,11 @@ The Control Panel launches theme selection through a transient user service so
 restarting the panel cannot terminate its own theme switch. The Control Center
 reads its own theme resources and an accent-only cache, not the calendar cache.
 
+The `SUPER + Shift + T` Rofi selector is hierarchical: choose the localized
+Dark or Light category, then the ARGVUS family, then Sticky or Float. The
+Control Center uses the same category and family hierarchy; imported custom
+profiles remain in a separate section.
+
 After applying a highlight color, `accent-switch.sh` also publishes the
 validated `#RRGGBB` value to the per-UID greeter projection at
 `/var/lib/argvus/greeter/themes/<uid>.accent`. This public file lets the

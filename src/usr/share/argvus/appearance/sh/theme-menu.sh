@@ -21,47 +21,74 @@ run_menu() {
 }
 
 while :; do
+  _dark_category="$(argvus_tr appearance theme.category.dark)"
+  _light_category="$(argvus_tr appearance theme.category.light)"
+  _category="$(run_menu "$(argvus_tr appearance theme.select)" \
+    "$_dark_category >" \
+    "$_light_category >" || true)"
+  _category="$(printf '%s' "$_category" | sed 's/[[:space:]]*>[[:space:]]*$//')"
+  [ -n "$_category" ] || exit 0
+
   _onedark="$(argvus_tr appearance theme.family.onedark)"
   _dracula="$(argvus_tr appearance theme.family.dracula)"
   _dark_aether="$(argvus_tr appearance theme.family.dark_aether)"
   _dark_silver="$(argvus_tr appearance theme.family.dark_silver)"
   _dark_slate="$(argvus_tr appearance theme.family.dark_slate)"
   _dark_universe="$(argvus_tr appearance theme.family.dark_universe)"
-  _gruvbox_dark_medium="$(argvus_tr appearance theme.family.gruvbox_dark_medium)"
+  _dark_gruvbox_high="$(argvus_tr appearance theme.family.dark_gruvbox_high)"
+  _dark_gruvbox="$(argvus_tr appearance theme.family.dark_gruvbox)"
   _light_veil="$(argvus_tr appearance theme.family.light_veil)"
+  _github_light="$(argvus_tr appearance theme.family.github_light)"
+  _solarized_light="$(argvus_tr appearance theme.family.solarized_light)"
   _frost="$(argvus_tr appearance theme.family.frost)"
   _catppuccin_latte="$(argvus_tr appearance theme.family.catppuccin_latte)"
-  _rosepine="$(argvus_tr appearance theme.family.rosepine)"
+  _dark_rosepine="$(argvus_tr appearance theme.family.dark_rosepine)"
   _tokyo_night="$(argvus_tr appearance theme.family.tokyo_night)"
-  _family="$(run_menu "$(argvus_tr appearance theme.select)" \
-    "$_onedark" \
-    "$_dracula" \
-    "$_dark_aether" \
-    "$_dark_silver" \
-    "$_dark_slate" \
-    "$_dark_universe" \
-    "$_gruvbox_dark_medium" \
-    "$_light_veil" \
-    "$_frost" \
-    "$_catppuccin_latte" \
-    "$_rosepine" \
-    "$_tokyo_night" || true)"
+  _solitude="$(argvus_tr appearance theme.family.solitude)"
+  case "$_category" in
+    "$_dark_category")
+      _family="$(run_menu "$_dark_category" \
+        "$_onedark >" \
+        "$_dracula >" \
+        "$_dark_aether >" \
+        "$_dark_silver >" \
+        "$_dark_slate >" \
+        "$_dark_universe >" \
+        "$_dark_gruvbox_high >" \
+        "$_dark_gruvbox >" \
+        "$_dark_rosepine >" \
+        "$_tokyo_night >" \
+        "$_solitude >" || true)" ;;
+    "$_light_category")
+      _family="$(run_menu "$_light_category" \
+        "$_light_veil >" \
+        "$_github_light >" \
+        "$_solarized_light >" \
+        "$_frost >" \
+        "$_catppuccin_latte >" || true)" ;;
+    *) continue ;;
+  esac
+  _family="$(printf '%s' "$_family" | sed 's/[[:space:]]*>[[:space:]]*$//')"
   _family="$(printf '%s' "$_family" | sed 's/[[:space:]]*$//')"
   [ -n "$_family" ] || exit 0
 
   case "$_family" in
     "$_onedark") _theme='argvus-onedark' ;;
-    "$_dracula") _theme='argvus-dracula' ;;
+    "$_dracula") _theme='argvus-dark-dracula' ;;
     "$_dark_aether") _theme='argvus-dark-aether' ;;
     "$_dark_silver") _theme='argvus-dark-silver' ;;
     "$_dark_slate") _theme='argvus-dark-slate' ;;
     "$_dark_universe") _theme='argvus-dark-universe' ;;
-    "$_gruvbox_dark_medium") _theme='argvus-gruvbox-dark-medium' ;;
+    "$_dark_gruvbox_high") _theme='argvus-dark-gruvbox-high' ;;
+    "$_dark_gruvbox") _theme='argvus-dark-gruvbox' ;;
     "$_light_veil") _theme='argvus-light-veil' ;;
-    "$_frost") _theme='argvus-frost' ;;
-    "$_catppuccin_latte") _theme='argvus-catppuccin-latte' ;;
-    "$_rosepine") _theme='argvus-rosepine' ;;
-    "$_tokyo_night") _theme='argvus-tokyo-night' ;;
+    "$_github_light") _theme='argvus-github-light' ;;
+    "$_solarized_light") _theme='argvus-light-solarized' ;;
+    "$_frost") _theme='argvus-light-frost' ;;
+    "$_catppuccin_latte") _theme='argvus-light-catppuccin-latte' ;;
+    "$_dark_rosepine") _theme='argvus-dark-rosepine' ;;
+    "$_tokyo_night") _theme='argvus-dark-tokio-night' ;;
+    "$_solitude") _theme='argvus-dark-solitude' ;;
     *) continue ;;
   esac
 

@@ -13,7 +13,7 @@ STATE_DIR="${ARGVUS_CONFIG_HOME}/argvus"
 ACCENT_FILE="${STATE_DIR}/.accent-color"
 ACTIVE_FILE="${STATE_DIR}/.active-theme"
 GREETER_THEME_STATE_DIR="${ARGVUS_GREETER_THEME_STATE_DIR:-/var/lib/argvus/greeter/themes}"
-DEFAULT_ACCENT="#3590bd"
+DEFAULT_ACCENT="#798186"
 DEFAULT_THEME="argvus-dark-aether"
 RUNTIME=1
 NOTIFY=1
@@ -31,17 +31,21 @@ read_state() {
 theme_default_accent() {
   case "$1" in
     argvus-onedark|argvus-onedark-float) printf '#61AFEF\n' ;;
-    argvus-dracula|argvus-dracula-float) printf '#BD93F9\n' ;;
+    argvus-dark-dracula|argvus-dark-dracula-float) printf '#BD93F9\n' ;;
     argvus-dark-aether|argvus-dark-aether-float) printf '#3590bd\n' ;;
     argvus-dark-silver|argvus-dark-silver-float) printf '#595959\n' ;;
     argvus-light-veil|argvus-light-veil-float) printf '#181818\n' ;;
-    argvus-rosepine|argvus-rosepine-float) printf '#C4A7E7\n' ;;
-    argvus-frost|argvus-frost-float) printf '#0969DA\n' ;;
-    argvus-catppuccin-latte|argvus-catppuccin-latte-float) printf '#1E66F5\n' ;;
+    argvus-github-light|argvus-github-light-float) printf '#0969DA\n' ;;
+    argvus-light-solarized|argvus-light-solarized-float) printf '#268BD2\n' ;;
+    argvus-dark-rosepine|argvus-dark-rosepine-float) printf '#C4A7E7\n' ;;
+    argvus-light-frost|argvus-light-frost-float) printf '#0969DA\n' ;;
+    argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float) printf '#1E66F5\n' ;;
     argvus-dark-slate|argvus-dark-slate-float) printf '#7391a5\n' ;;
     argvus-dark-universe|argvus-dark-universe-float) printf '#eeeeee\n' ;;
-    argvus-gruvbox-dark-medium|argvus-gruvbox-dark-medium-float) printf '#D79921\n' ;;
-    argvus-tokyo-night|argvus-tokyo-night-float) printf '#7AA2F7\n' ;;
+    argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float) printf '#D79921\n' ;;
+    argvus-dark-gruvbox|argvus-dark-gruvbox-float) printf '#D4BE98\n' ;;
+    argvus-dark-tokio-night|argvus-dark-tokio-night-float) printf '#7AA2F7\n' ;;
+    argvus-dark-solitude|argvus-dark-solitude-float) printf '#798186\n' ;;
     *) return 1 ;;
   esac
 }
@@ -408,7 +412,7 @@ fi
 
 THEME="$(read_state "$ACTIVE_FILE" "$DEFAULT_THEME")"
 case "$THEME" in
-  argvus-onedark|argvus-onedark-float|argvus-dracula|argvus-dracula-float|argvus-dark-aether|argvus-dark-aether-float|argvus-dark-silver|argvus-dark-silver-float|argvus-light-veil|argvus-light-veil-float|argvus-frost|argvus-frost-float|argvus-catppuccin-latte|argvus-catppuccin-latte-float|argvus-dark-slate|argvus-dark-slate-float|argvus-dark-universe|argvus-dark-universe-float|argvus-gruvbox-dark-medium|argvus-gruvbox-dark-medium-float|argvus-rosepine|argvus-rosepine-float|argvus-tokyo-night|argvus-tokyo-night-float) ;;
+  argvus-onedark|argvus-onedark-float|argvus-dark-dracula|argvus-dark-dracula-float|argvus-dark-aether|argvus-dark-aether-float|argvus-dark-silver|argvus-dark-silver-float|argvus-light-veil|argvus-light-veil-float|argvus-github-light|argvus-github-light-float|argvus-light-solarized|argvus-light-solarized-float|argvus-light-frost|argvus-light-frost-float|argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float|argvus-dark-slate|argvus-dark-slate-float|argvus-dark-universe|argvus-dark-universe-float|argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float|argvus-dark-gruvbox|argvus-dark-gruvbox-float|argvus-dark-rosepine|argvus-dark-rosepine-float|argvus-dark-tokio-night|argvus-dark-tokio-night-float|argvus-dark-solitude|argvus-dark-solitude-float) ;;
   *-dark-float) THEME="argvus-dark-aether-float" ;;
   *-light-float) THEME="argvus-light-veil-float" ;;
   *-light) THEME="argvus-light-veil" ;;
