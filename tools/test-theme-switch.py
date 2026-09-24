@@ -48,6 +48,7 @@ class ThemeSwitchTests(unittest.TestCase):
         self.greeter_state.mkdir()
         self.log = self.base / "commands.jsonl"
         self.log.touch()
+        self.splash_args = self.base / "splash-args"
         mockbin = self.base / "bin"
         mockbin.mkdir()
         for name in ("hyprctl", "systemctl", "argvus-sessionctl", "pgrep",
@@ -56,6 +57,18 @@ class ThemeSwitchTests(unittest.TestCase):
             script = mockbin / name
             script.write_text(MOCK)
             script.chmod(0o755)
+        splash = self.base / "theme-splash"
+        splash.write_text(
+            "#!/usr/bin/env sh\n"
+            "ready=''\n"
+            "for arg in \"$@\"; do\n"
+            "  if [ \"${previous:-}\" = --ready-file ]; then ready=\"$arg\"; fi\n"
+            "  previous=\"$arg\"\n"
+            "  printf '%s\\n' \"$arg\" >> \"$TEST_SPLASH_ARGS\"\n"
+            "done\n"
+            "[ -z \"$ready\" ] || printf 'READY\\n' > \"$ready\"\n"
+        )
+        splash.chmod(0o755)
         self.env = os.environ | {
             "ARGVUS_SYSTEM_CONFIG": str(self.system),
             "ARGVUS_BOOTSTRAP": str(self.system / "session/sh/bootstrap.sh"),
@@ -71,6 +84,8 @@ class ThemeSwitchTests(unittest.TestCase):
             "ARGVUS_I18N_DIR": str(ROOT / "argvus-i18n/locales"),
             "ARGVUS_BACKGROUNDS_DIR": str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds"),
             "TEST_COMMAND_LOG": str(self.log),
+            "TEST_SPLASH_ARGS": str(self.splash_args),
+            "ARGVUS_THEME_SPLASH_BIN": str(splash),
             "PATH": str(mockbin) + os.pathsep + os.environ["PATH"],
         }
 
@@ -169,6 +184,15 @@ class ThemeSwitchTests(unittest.TestCase):
                 self.assertEqual(commands.count(restart), 1)
                 self.assertFalse(any(c[0] == "hyprctl" and "dpms" in " ".join(c)
                                      for c in commands))
+
+    def test_runtime_splash_receives_selected_theme_and_generated_colors(self):
+        self.apply("argvus-dark-sunset", runtime=True)
+        args = self.splash_args.read_text().splitlines()
+        self.assertEqual(args[args.index("--theme") + 1], "argvus-dark-sunset")
+        self.assertEqual(args[args.index("--background") + 1], "#0F0F0F")
+        self.assertEqual(args[args.index("--foreground") + 1], "#EADCCC")
+        self.assertEqual(args[args.index("--accent") + 1], "#E2BE8A")
+        self.assertIn("--ready-file", args)
 
     def test_failed_global_reload_restores_display_and_reports_failure(self):
         self.env["TEST_RELOAD_FAIL"] = "1"

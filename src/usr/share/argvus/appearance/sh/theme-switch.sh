@@ -245,6 +245,7 @@ native_config_home() {
 THEME_TRANSITION_ACTIVE=0
 THEME_SPLASH_PID=0
 THEME_CONFIG_READY=0
+THEME_APPLY_STATUS=0
 
 theme_splash_color() {
   _key="$1"
@@ -259,7 +260,7 @@ theme_splash_color() {
 
 theme_splash_start() {
   [ "$RUNTIME" -eq 1 ] || return 0
-  _splash_bin='/usr/lib/argvus/theme-splash/splash'
+  _splash_bin="${ARGVUS_THEME_SPLASH_BIN:-/usr/lib/argvus/theme-splash/splash}"
   [ -x "$_splash_bin" ] || {
     printf '%s\n' 'argvus-appearance: argvus-theme-splash is unavailable; continuing without overlay' >&2
     return 0
@@ -268,10 +269,11 @@ theme_splash_start() {
   _splash_ready="${XDG_RUNTIME_DIR:-/tmp}/argvus-theme-splash.$$"
   rm -f "$_splash_ready"
   _splash_foreground="$(theme_splash_color text '#f4f4f4')"
+  _splash_background="$(theme_splash_color background '#101218')"
   _splash_accent="$(theme_splash_color accent '#7aa2f7')"
   "$_splash_bin" \
     --theme "$THEME" \
-    --background '#101218' \
+    --background "$_splash_background" \
     --foreground "$_splash_foreground" \
     --accent "$_splash_accent" \
     --ready-file "$_splash_ready" &
@@ -914,7 +916,12 @@ sed -i "s|^@import \".*themes/.*/theme.rasi\"$|@import \"${ROFI_THEMES}/${THEME}
 
 sed -i "s|^@import \".*mode.rasi\"$|@import \"${ROFI_MODE}\"|" "$ROFI_THEME"
 
-command -v argvus-terminal >/dev/null 2>&1 && argvus-terminal --apply "$THEME" >/dev/null 2>&1 || true
+if command -v argvus-terminal >/dev/null 2>&1; then
+  if ! argvus-terminal --apply "$THEME" >/dev/null 2>&1; then
+    argvus_tr appearance theme.terminal_apply_failed >&2
+    THEME_APPLY_STATUS=1
+  fi
+fi
 
 if [ -f "$FOOT_SYSTEM_THEMES/$THEME/theme.ini" ]; then
   mkdir -p "$FOOT_THEMES/$THEME"
@@ -1079,5 +1086,7 @@ fi
 
 THEME_CONFIG_READY=1
 if [ "$RUNTIME" -eq 1 ]; then
-  theme_transition_cleanup 0
+  theme_transition_cleanup "$THEME_APPLY_STATUS"
+else
+  exit "$THEME_APPLY_STATUS"
 fi
