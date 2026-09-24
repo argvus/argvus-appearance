@@ -160,6 +160,7 @@ find_theme_wallpaper() {
     argvus-dark-solitude|argvus-dark-solitude-float) _wall_name="argvus-solitude.png" ;;
     argvus-dark-sunset|argvus-dark-sunset-float) _wall_name="argvus-dark-sunset.png" ;;
     argvus-dark-hackerman|argvus-dark-hackerman-float) _wall_name="argvus-dark-hackerman.png" ;;
+    argvus-dark-monokai|argvus-dark-monokai-float) _wall_name="argvus-dark-monokai.png" ;;
     *) return 1 ;;
   esac
 

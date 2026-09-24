@@ -169,6 +169,7 @@ class ThemeSwitchTests(unittest.TestCase):
             "argvus-dark-solitude": ("#798186", "#101315", "#CACCCC"),
             "argvus-dark-sunset": ("#E2BE8A", "#0F0F0F", "#EADCCC"),
             "argvus-dark-hackerman": ("#82FB9C", "#0B0C16", "#DDF7FF"),
+            "argvus-dark-monokai": ("#78DCE8", "#2D2A2E", "#FCFCFA"),
         }
 
         for theme, (highlight, background, foreground) in expected.items():
@@ -333,6 +334,15 @@ class ThemeSwitchTests(unittest.TestCase):
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
             str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/argvus-dark-hackerman.png"),
+        )
+
+    def test_dark_monokai_uses_its_packaged_wallpaper(self):
+        self.apply("argvus-dark-monokai")
+        self.assertEqual(
+            os.path.expanduser(
+                (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
+            ),
+            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/argvus-dark-monokai.png"),
         )
 
     def test_theme_switch_preserves_taskbar_utility_group_mode(self):

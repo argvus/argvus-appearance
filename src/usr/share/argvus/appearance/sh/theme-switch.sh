@@ -474,6 +474,7 @@ find_theme_wallpaper() {
     argvus-dark-solitude|argvus-dark-solitude-float) _wall_name="argvus-solitude.png" ;;
     argvus-dark-sunset|argvus-dark-sunset-float) _wall_name="argvus-dark-sunset.png" ;;
     argvus-dark-hackerman|argvus-dark-hackerman-float) _wall_name="argvus-dark-hackerman.png" ;;
+    argvus-dark-monokai|argvus-dark-monokai-float) _wall_name="argvus-dark-monokai.png" ;;
     *) _wall_name="" ;;
   esac
 
@@ -668,6 +669,8 @@ apply_argvus_storage_theme() {
       _theme_name="argvus-dark-sunset.css" ;;
     argvus-dark-hackerman|argvus-dark-hackerman-float)
       _theme_name="argvus-dark-hackerman.css" ;;
+    argvus-dark-monokai|argvus-dark-monokai-float)
+      _theme_name="argvus-dark-monokai.css" ;;
     *)
       return 0 ;;
   esac
@@ -716,7 +719,8 @@ apply_argvus_calendar_theme() {
     argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float|argvus-dark-gruvbox|argvus-dark-gruvbox-float)
       _calendar_theme_name="${THEME}.css" ;;
     argvus-dark-rosepine|argvus-dark-rosepine-float|argvus-dark-solitude|argvus-dark-solitude-float|\
-    argvus-dark-sunset|argvus-dark-sunset-float|argvus-dark-hackerman|argvus-dark-hackerman-float)
+    argvus-dark-sunset|argvus-dark-sunset-float|argvus-dark-hackerman|argvus-dark-hackerman-float|\
+    argvus-dark-monokai|argvus-dark-monokai-float)
       _calendar_theme_name="${THEME}.css" ;;
     argvus-dark-tokio-night|argvus-dark-tokio-night-float)
       _calendar_theme_name="argvus-dark-tokio-night.css" ;;
@@ -771,7 +775,7 @@ publish_greeter_theme() {
   case "$THEME" in
     argvus-dark-dracula|argvus-dark-dracula-float|argvus-dark-aether|argvus-dark-aether-float|argvus-dark-silver|argvus-dark-silver-float|\
     argvus-dark-slate|argvus-dark-slate-float|argvus-dark-universe|argvus-dark-universe-float|\
-    argvus-light-veil|argvus-light-veil-float|argvus-github-light|argvus-github-light-float|argvus-light-solarized|argvus-light-solarized-float|argvus-light-frost|argvus-light-frost-float|argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float|argvus-light-gruvbox|argvus-light-gruvbox-float|argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float|argvus-dark-gruvbox|argvus-dark-gruvbox-float|argvus-dark-rosepine|argvus-dark-rosepine-float|argvus-dark-tokio-night|argvus-dark-tokio-night-float|argvus-dark-solitude|argvus-dark-solitude-float|argvus-dark-sunset|argvus-dark-sunset-float|argvus-dark-hackerman|argvus-dark-hackerman-float)
+    argvus-light-veil|argvus-light-veil-float|argvus-github-light|argvus-github-light-float|argvus-light-solarized|argvus-light-solarized-float|argvus-light-frost|argvus-light-frost-float|argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float|argvus-light-gruvbox|argvus-light-gruvbox-float|argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float|argvus-dark-gruvbox|argvus-dark-gruvbox-float|argvus-dark-rosepine|argvus-dark-rosepine-float|argvus-dark-tokio-night|argvus-dark-tokio-night-float|argvus-dark-solitude|argvus-dark-solitude-float|argvus-dark-sunset|argvus-dark-sunset-float|argvus-dark-hackerman|argvus-dark-hackerman-float|argvus-dark-monokai|argvus-dark-monokai-float)
       ;;
     *)
       return 0
@@ -851,7 +855,7 @@ for _waybar_style in "$(paths_config taskbar/config/argvus-taskbar.css)" \
 done
 
 case "$THEME" in
-  argvus-onedark | argvus-dark-dracula | argvus-dark-aether | argvus-dark-silver | argvus-light-veil | argvus-github-light | argvus-light-solarized | argvus-light-frost | argvus-light-catppuccin-latte | argvus-light-gruvbox | argvus-dark-slate | argvus-dark-universe | argvus-dark-gruvbox-high | argvus-dark-gruvbox | argvus-dark-rosepine | argvus-dark-tokio-night | argvus-dark-solitude | argvus-dark-sunset | argvus-dark-hackerman)
+  argvus-onedark | argvus-dark-dracula | argvus-dark-aether | argvus-dark-silver | argvus-light-veil | argvus-github-light | argvus-light-solarized | argvus-light-frost | argvus-light-catppuccin-latte | argvus-light-gruvbox | argvus-dark-slate | argvus-dark-universe | argvus-dark-gruvbox-high | argvus-dark-gruvbox | argvus-dark-rosepine | argvus-dark-tokio-night | argvus-dark-solitude | argvus-dark-sunset | argvus-dark-hackerman | argvus-dark-monokai)
     sed -i "s|\"margin-top\": [0-9]*|\"margin-top\": 0|" "$_waybar_cfg"
     sed -i "s|\"margin-left\": [0-9]*|\"margin-left\": 0|" "$_waybar_cfg"
     sed -i "s|\"margin-right\": [0-9]*|\"margin-right\": 0|" "$_waybar_cfg"
