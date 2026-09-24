@@ -710,16 +710,11 @@ apply_argvus_calendar_theme() {
       _calendar_theme_name="${THEME}.css" ;;
     argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float|argvus-dark-gruvbox|argvus-dark-gruvbox-float)
       _calendar_theme_name="${THEME}.css" ;;
-    argvus-dark-rosepine|argvus-dark-rosepine-float)
-      _calendar_theme_name="argvus-dark-rosepine.css" ;;
+    argvus-dark-rosepine|argvus-dark-rosepine-float|argvus-dark-solitude|argvus-dark-solitude-float|\
+    argvus-dark-sunset|argvus-dark-sunset-float|argvus-dark-hackerman|argvus-dark-hackerman-float)
+      _calendar_theme_name="${THEME}.css" ;;
     argvus-dark-tokio-night|argvus-dark-tokio-night-float)
       _calendar_theme_name="argvus-dark-tokio-night.css" ;;
-    argvus-dark-solitude|argvus-dark-solitude-float)
-      _calendar_theme_name="argvus-dark-solitude.css" ;;
-    argvus-dark-sunset|argvus-dark-sunset-float)
-      _calendar_theme_name="argvus-dark-sunset.css" ;;
-    argvus-dark-hackerman|argvus-dark-hackerman-float)
-      _calendar_theme_name="argvus-dark-hackerman.css" ;;
     *)
       return 0 ;;
   esac
@@ -736,7 +731,31 @@ apply_argvus_calendar_theme() {
   fi
 
   mkdir -p "$(dirname "$_calendar_theme_cache")"
-  cp "$_calendar_theme_src" "$_calendar_theme_cache"
+  _calendar_theme_base_src=""
+  case "$_calendar_theme_name" in
+    *-float.css)
+      _calendar_theme_base_name="${_calendar_theme_name%-float.css}.css"
+      _calendar_theme_base_src="$(dirname "$_calendar_theme_src")/${_calendar_theme_base_name}"
+      [ -f "$_calendar_theme_base_src" ] || return 0
+      ;;
+  esac
+  _calendar_theme_tmp="${_calendar_theme_cache}.$$"
+  if ! {
+    printf '/* argvus-theme: %s */\n' "$THEME"
+    if [ -n "$_calendar_theme_base_src" ]; then
+        cat "$_calendar_theme_base_src"
+        sed '/^[[:space:]]*@import[[:space:]]*url(/d' "$_calendar_theme_src"
+    else
+      cat "$_calendar_theme_src"
+    fi
+  } > "$_calendar_theme_tmp"; then
+    rm -f "$_calendar_theme_tmp"
+    return 0
+  fi
+  if ! mv -f "$_calendar_theme_tmp" "$_calendar_theme_cache"; then
+    rm -f "$_calendar_theme_tmp"
+    return 0
+  fi
   command -v argvus-taskbar-calendar >/dev/null 2>&1 && argvus-taskbar-calendar reload >/dev/null 2>&1 || true
 }
 

@@ -42,6 +42,11 @@ class ThemeSwitchTests(unittest.TestCase):
             if share.is_dir():
                 for component in share.iterdir():
                     shutil.copytree(component, self.system / component.name)
+        calendar_themes = ROOT / "argvus-taskbar-calendar/resources/themes"
+        shutil.copytree(
+            calendar_themes,
+            self.system / "argvus-taskbar-calendar/themes",
+        )
         self.config = self.base / "config"
         self.user = self.config / "argvus"
         self.user.mkdir(parents=True)
@@ -194,6 +199,28 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertEqual(args[args.index("--foreground") + 1], "#EADCCC")
         self.assertEqual(args[args.index("--accent") + 1], "#E2BE8A")
         self.assertIn("--ready-file", args)
+
+    def test_calendar_cache_materializes_selected_themes(self):
+        expected = {
+            "argvus-dark-gruvbox": "#282828",
+            "argvus-dark-sunset": "#0F0F0F",
+            "argvus-light-solarized": "#FDF6E3",
+            "argvus-light-catppuccin-latte": "#EFF1F5",
+            "argvus-light-frost": "#F6F8FA",
+        }
+
+        for theme, background in expected.items():
+            for selected in (theme, f"{theme}-float"):
+                with self.subTest(theme=selected):
+                    self.apply(selected)
+                    cache = self.base / "cache/argvus-taskbar-calendar/theme.css"
+                    contents = cache.read_text()
+                    self.assertTrue(contents.startswith(f"/* argvus-theme: {selected} */"))
+                    self.assertNotIn("@import", contents)
+                    self.assertIn("@define-color argvus_bg ", contents)
+                    self.assertIn(f"@define-color argvus_bg {background};", contents)
+                    if selected.endswith("-float"):
+                        self.assertIn("border-radius: 4px", contents)
 
     def test_failed_global_reload_restores_display_and_reports_failure(self):
         self.env["TEST_RELOAD_FAIL"] = "1"
