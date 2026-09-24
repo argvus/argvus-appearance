@@ -134,7 +134,7 @@ class ThemeSwitchTests(unittest.TestCase):
                     self.assertIn(f"/{theme}/theme.rasi", rofi)
                     for version in ("gtk-3.0", "gtk-4.0"):
                         settings = (self.user / version / "settings.ini").read_text()
-                        prefer_dark = 0 if ("light-veil" in theme or "github-light" in theme or "light-solarized" in theme or "frost" in theme or "catppuccin-latte" in theme) else 1
+                        prefer_dark = 0 if ("light-veil" in theme or "github-light" in theme or "light-solarized" in theme or "frost" in theme or "catppuccin-latte" in theme or "light-gruvbox" in theme) else 1
                         self.assertIn(f"gtk-application-prefer-dark-theme={prefer_dark}", settings)
                     palette = (self.base / "cache/argvus-control-center/theme.css").read_text()
                     self.assertIn("@define-color argvus_accent #", palette)
@@ -161,6 +161,7 @@ class ThemeSwitchTests(unittest.TestCase):
             "argvus-light-solarized": ("#268BD2", "#FDF6E3", "#839496"),
             "argvus-light-frost": ("#0969DA", "#F6F8FA", "#6E7781"),
             "argvus-light-catppuccin-latte": ("#1E66F5", "#EFF1F5", "#5C5F77"),
+            "argvus-light-gruvbox": ("#458588", "#FBF1C7", "#3C3836"),
             "argvus-dark-gruvbox-high": ("#D79921", "#282828", "#A89984"),
             "argvus-dark-gruvbox": ("#D4BE98", "#282828", "#A89984"),
             "argvus-dark-rosepine": ("#C4A7E7", "#191724", "#E0DEF4"),
@@ -207,6 +208,7 @@ class ThemeSwitchTests(unittest.TestCase):
             "argvus-light-solarized": "#FDF6E3",
             "argvus-light-catppuccin-latte": "#EFF1F5",
             "argvus-light-frost": "#F6F8FA",
+            "argvus-light-gruvbox": "#FBF1C7",
         }
 
         for theme, background in expected.items():
@@ -239,11 +241,13 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn("theme.family.dark_aether", source)
         self.assertIn("theme.family.dracula", source)
         self.assertIn("theme.family.catppuccin_latte", source)
+        self.assertIn("theme.family.light_gruvbox", source)
         self.assertIn("theme.family.dark_rosepine", source)
         self.assertIn('"$_dark_category >"', source)
         self.assertIn('"$_light_category >"', source)
         self.assertIn('"$_dark_gruvbox_high >"', source)
         self.assertIn('"$_catppuccin_latte >"', source)
+        self.assertIn('"$_light_gruvbox >"', source)
         self.assertIn("theme.model.sticky", source)
         self.assertIn("theme.model.float", source)
         self.assertIn("-kb-accept-entry 'Return,KP_Enter,Right'", source)
@@ -282,6 +286,15 @@ class ThemeSwitchTests(unittest.TestCase):
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
             str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/argvus-solarized-light.png"),
+        )
+
+    def test_light_gruvbox_uses_its_packaged_wallpaper(self):
+        self.apply("argvus-light-gruvbox")
+        self.assertEqual(
+            os.path.expanduser(
+                (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
+            ),
+            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/argvus-light-gruvbox.png"),
         )
 
     def test_official_superfile_themes_use_the_complete_schema(self):

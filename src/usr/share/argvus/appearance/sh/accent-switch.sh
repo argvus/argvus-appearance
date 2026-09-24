@@ -40,6 +40,7 @@ theme_default_accent() {
     argvus-dark-rosepine|argvus-dark-rosepine-float) printf '#C4A7E7\n' ;;
     argvus-light-frost|argvus-light-frost-float) printf '#0969DA\n' ;;
     argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float) printf '#1E66F5\n' ;;
+    argvus-light-gruvbox|argvus-light-gruvbox-float) printf '#458588\n' ;;
     argvus-dark-slate|argvus-dark-slate-float) printf '#7391a5\n' ;;
     argvus-dark-universe|argvus-dark-universe-float) printf '#eeeeee\n' ;;
     argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float) printf '#D79921\n' ;;
@@ -414,7 +415,7 @@ fi
 
 THEME="$(read_state "$ACTIVE_FILE" "$DEFAULT_THEME")"
 case "$THEME" in
-  argvus-onedark|argvus-onedark-float|argvus-dark-dracula|argvus-dark-dracula-float|argvus-dark-aether|argvus-dark-aether-float|argvus-dark-silver|argvus-dark-silver-float|argvus-light-veil|argvus-light-veil-float|argvus-github-light|argvus-github-light-float|argvus-light-solarized|argvus-light-solarized-float|argvus-light-frost|argvus-light-frost-float|argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float|argvus-dark-slate|argvus-dark-slate-float|argvus-dark-universe|argvus-dark-universe-float|argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float|argvus-dark-gruvbox|argvus-dark-gruvbox-float|argvus-dark-rosepine|argvus-dark-rosepine-float|argvus-dark-tokio-night|argvus-dark-tokio-night-float|argvus-dark-solitude|argvus-dark-solitude-float|argvus-dark-sunset|argvus-dark-sunset-float|argvus-dark-hackerman|argvus-dark-hackerman-float) ;;
+  argvus-onedark|argvus-onedark-float|argvus-dark-dracula|argvus-dark-dracula-float|argvus-dark-aether|argvus-dark-aether-float|argvus-dark-silver|argvus-dark-silver-float|argvus-light-veil|argvus-light-veil-float|argvus-github-light|argvus-github-light-float|argvus-light-solarized|argvus-light-solarized-float|argvus-light-frost|argvus-light-frost-float|argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float|argvus-light-gruvbox|argvus-light-gruvbox-float|argvus-dark-slate|argvus-dark-slate-float|argvus-dark-universe|argvus-dark-universe-float|argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float|argvus-dark-gruvbox|argvus-dark-gruvbox-float|argvus-dark-rosepine|argvus-dark-rosepine-float|argvus-dark-tokio-night|argvus-dark-tokio-night-float|argvus-dark-solitude|argvus-dark-solitude-float|argvus-dark-sunset|argvus-dark-sunset-float|argvus-dark-hackerman|argvus-dark-hackerman-float) ;;
   *-dark-float) THEME="argvus-dark-aether-float" ;;
   *-light-float) THEME="argvus-light-veil-float" ;;
   *-light) THEME="argvus-light-veil" ;;

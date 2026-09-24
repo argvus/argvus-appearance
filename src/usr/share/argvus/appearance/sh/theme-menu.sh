@@ -42,6 +42,7 @@ while :; do
   _solarized_light="$(argvus_tr appearance theme.family.solarized_light)"
   _frost="$(argvus_tr appearance theme.family.frost)"
   _catppuccin_latte="$(argvus_tr appearance theme.family.catppuccin_latte)"
+  _light_gruvbox="$(argvus_tr appearance theme.family.light_gruvbox)"
   _dark_rosepine="$(argvus_tr appearance theme.family.dark_rosepine)"
   _tokyo_night="$(argvus_tr appearance theme.family.tokyo_night)"
   _solitude="$(argvus_tr appearance theme.family.solitude)"
@@ -69,7 +70,8 @@ while :; do
         "$_github_light >" \
         "$_solarized_light >" \
         "$_frost >" \
-        "$_catppuccin_latte >" || true)" ;;
+        "$_catppuccin_latte >" \
+        "$_light_gruvbox >" || true)" ;;
     *) continue ;;
   esac
   _family="$(printf '%s' "$_family" | sed 's/[[:space:]]*>[[:space:]]*$//')"
@@ -90,6 +92,7 @@ while :; do
     "$_solarized_light") _theme='argvus-light-solarized' ;;
     "$_frost") _theme='argvus-light-frost' ;;
     "$_catppuccin_latte") _theme='argvus-light-catppuccin-latte' ;;
+    "$_light_gruvbox") _theme='argvus-light-gruvbox' ;;
     "$_dark_rosepine") _theme='argvus-dark-rosepine' ;;
     "$_tokyo_night") _theme='argvus-dark-tokio-night' ;;
     "$_solitude") _theme='argvus-dark-solitude' ;;

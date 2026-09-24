@@ -151,6 +151,7 @@ find_theme_wallpaper() {
     argvus-light-solarized|argvus-light-solarized-float) _wall_name="argvus-solarized-light.png" ;;
     argvus-light-frost|argvus-light-frost-float) _wall_name="argvus-frost.png" ;;
     argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float) _wall_name="argvus-catppuccin-latte.png" ;;
+    argvus-light-gruvbox|argvus-light-gruvbox-float) _wall_name="argvus-light-gruvbox.png" ;;
     argvus-dark-slate|argvus-dark-slate-float) _wall_name="argvus-dark-slate.png" ;;
     argvus-dark-universe|argvus-dark-universe-float) _wall_name="argvus-dark-universe.png" ;;
     argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float|argvus-dark-gruvbox|argvus-dark-gruvbox-float) _wall_name="argvus-gruvbox.png" ;;

@@ -357,7 +357,7 @@ refresh_managed_waybar_file() {
 
 gtk_theme_name_for_theme() {
   case "$1" in
-    argvus-light-veil|argvus-light-veil-float|argvus-github-light|argvus-github-light-float|argvus-light-solarized|argvus-light-solarized-float|argvus-light-frost|argvus-light-frost-float|argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float) printf '%s\n' "Adwaita" ;;
+    argvus-light-veil|argvus-light-veil-float|argvus-github-light|argvus-github-light-float|argvus-light-solarized|argvus-light-solarized-float|argvus-light-frost|argvus-light-frost-float|argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float|argvus-light-gruvbox|argvus-light-gruvbox-float) printf '%s\n' "Adwaita" ;;
     argvus-dark-*|argvus-dark-solitude|argvus-dark-solitude-float) printf '%s\n' "Adwaita-dark" ;;
     *) return 1 ;;
   esac
@@ -465,6 +465,7 @@ find_theme_wallpaper() {
     argvus-light-solarized|argvus-light-solarized-float) _wall_name="argvus-solarized-light.png" ;;
     argvus-light-frost|argvus-light-frost-float) _wall_name="argvus-frost.png" ;;
     argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float) _wall_name="argvus-catppuccin-latte.png" ;;
+    argvus-light-gruvbox|argvus-light-gruvbox-float) _wall_name="argvus-light-gruvbox.png" ;;
     argvus-dark-slate|argvus-dark-slate-float) _wall_name="argvus-dark-slate.png" ;;
     argvus-dark-universe|argvus-dark-universe-float) _wall_name="argvus-dark-universe.png" ;;
     argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float|argvus-dark-gruvbox|argvus-dark-gruvbox-float) _wall_name="argvus-gruvbox.png" ;;
@@ -649,6 +650,8 @@ apply_argvus_storage_theme() {
       _theme_name="argvus-light-frost.css" ;;
     argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float)
       _theme_name="argvus-light-catppuccin-latte.css" ;;
+    argvus-light-gruvbox|argvus-light-gruvbox-float)
+      _theme_name="argvus-light-gruvbox.css" ;;
     argvus-dark-universe|argvus-dark-universe-float)
       _theme_name="argvus-dark-universe.css" ;;
     argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float)
@@ -708,6 +711,8 @@ apply_argvus_calendar_theme() {
       _calendar_theme_name="${THEME}.css" ;;
     argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float)
       _calendar_theme_name="${THEME}.css" ;;
+    argvus-light-gruvbox|argvus-light-gruvbox-float)
+      _calendar_theme_name="${THEME}.css" ;;
     argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float|argvus-dark-gruvbox|argvus-dark-gruvbox-float)
       _calendar_theme_name="${THEME}.css" ;;
     argvus-dark-rosepine|argvus-dark-rosepine-float|argvus-dark-solitude|argvus-dark-solitude-float|\
@@ -766,7 +771,7 @@ publish_greeter_theme() {
   case "$THEME" in
     argvus-dark-dracula|argvus-dark-dracula-float|argvus-dark-aether|argvus-dark-aether-float|argvus-dark-silver|argvus-dark-silver-float|\
     argvus-dark-slate|argvus-dark-slate-float|argvus-dark-universe|argvus-dark-universe-float|\
-    argvus-light-veil|argvus-light-veil-float|argvus-github-light|argvus-github-light-float|argvus-light-solarized|argvus-light-solarized-float|argvus-light-frost|argvus-light-frost-float|argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float|argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float|argvus-dark-gruvbox|argvus-dark-gruvbox-float|argvus-dark-rosepine|argvus-dark-rosepine-float|argvus-dark-tokio-night|argvus-dark-tokio-night-float|argvus-dark-solitude|argvus-dark-solitude-float|argvus-dark-sunset|argvus-dark-sunset-float|argvus-dark-hackerman|argvus-dark-hackerman-float)
+    argvus-light-veil|argvus-light-veil-float|argvus-github-light|argvus-github-light-float|argvus-light-solarized|argvus-light-solarized-float|argvus-light-frost|argvus-light-frost-float|argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float|argvus-light-gruvbox|argvus-light-gruvbox-float|argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float|argvus-dark-gruvbox|argvus-dark-gruvbox-float|argvus-dark-rosepine|argvus-dark-rosepine-float|argvus-dark-tokio-night|argvus-dark-tokio-night-float|argvus-dark-solitude|argvus-dark-solitude-float|argvus-dark-sunset|argvus-dark-sunset-float|argvus-dark-hackerman|argvus-dark-hackerman-float)
       ;;
     *)
       return 0
@@ -846,7 +851,7 @@ for _waybar_style in "$(paths_config taskbar/config/argvus-taskbar.css)" \
 done
 
 case "$THEME" in
-  argvus-onedark | argvus-dark-dracula | argvus-dark-aether | argvus-dark-silver | argvus-light-veil | argvus-github-light | argvus-light-solarized | argvus-light-frost | argvus-light-catppuccin-latte | argvus-dark-slate | argvus-dark-universe | argvus-dark-gruvbox-high | argvus-dark-gruvbox | argvus-dark-rosepine | argvus-dark-tokio-night | argvus-dark-solitude | argvus-dark-sunset | argvus-dark-hackerman)
+  argvus-onedark | argvus-dark-dracula | argvus-dark-aether | argvus-dark-silver | argvus-light-veil | argvus-github-light | argvus-light-solarized | argvus-light-frost | argvus-light-catppuccin-latte | argvus-light-gruvbox | argvus-dark-slate | argvus-dark-universe | argvus-dark-gruvbox-high | argvus-dark-gruvbox | argvus-dark-rosepine | argvus-dark-tokio-night | argvus-dark-solitude | argvus-dark-sunset | argvus-dark-hackerman)
     sed -i "s|\"margin-top\": [0-9]*|\"margin-top\": 0|" "$_waybar_cfg"
     sed -i "s|\"margin-left\": [0-9]*|\"margin-left\": 0|" "$_waybar_cfg"
     sed -i "s|\"margin-right\": [0-9]*|\"margin-right\": 0|" "$_waybar_cfg"
@@ -1033,7 +1038,7 @@ printf '/* mode.css — reset on theme switch */\n' > "$MODE_CSS"
 GTK_MODE_FILE="${ARGVUS_CONFIG_HOME}/argvus/.gtk-mode"
 mkdir -p "$(dirname "$GTK_MODE_FILE")"
 case "$THEME" in
-  argvus-light-veil | argvus-light-veil-float | argvus-github-light | argvus-github-light-float | argvus-light-solarized | argvus-light-solarized-float | argvus-light-frost | argvus-light-frost-float | argvus-light-catppuccin-latte | argvus-light-catppuccin-latte-float)
+  argvus-light-veil | argvus-light-veil-float | argvus-github-light | argvus-github-light-float | argvus-light-solarized | argvus-light-solarized-float | argvus-light-frost | argvus-light-frost-float | argvus-light-catppuccin-latte | argvus-light-catppuccin-latte-float | argvus-light-gruvbox | argvus-light-gruvbox-float)
     _gtk_theme_name="$(gtk_theme_name_for_theme "$THEME")"
     apply_gtk_theme_files light "$_gtk_theme_name" 0
     apply_gtk_runtime_settings prefer-light "$_gtk_theme_name" Adwaita-dark
