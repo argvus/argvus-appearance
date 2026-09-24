@@ -45,6 +45,8 @@ while :; do
   _dark_rosepine="$(argvus_tr appearance theme.family.dark_rosepine)"
   _tokyo_night="$(argvus_tr appearance theme.family.tokyo_night)"
   _solitude="$(argvus_tr appearance theme.family.solitude)"
+  _dark_sunset="$(argvus_tr appearance theme.family.dark_sunset)"
+  _dark_hackerman="$(argvus_tr appearance theme.family.dark_hackerman)"
   case "$_category" in
     "$_dark_category")
       _family="$(run_menu "$_dark_category" \
@@ -58,7 +60,9 @@ while :; do
         "$_dark_gruvbox >" \
         "$_dark_rosepine >" \
         "$_tokyo_night >" \
-        "$_solitude >" || true)" ;;
+        "$_solitude >" \
+        "$_dark_sunset >" \
+        "$_dark_hackerman >" || true)" ;;
     "$_light_category")
       _family="$(run_menu "$_light_category" \
         "$_light_veil >" \
@@ -89,6 +93,8 @@ while :; do
     "$_dark_rosepine") _theme='argvus-dark-rosepine' ;;
     "$_tokyo_night") _theme='argvus-dark-tokio-night' ;;
     "$_solitude") _theme='argvus-dark-solitude' ;;
+    "$_dark_sunset") _theme='argvus-dark-sunset' ;;
+    "$_dark_hackerman") _theme='argvus-dark-hackerman' ;;
     *) continue ;;
   esac
 

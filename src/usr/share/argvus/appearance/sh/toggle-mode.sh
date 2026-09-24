@@ -157,6 +157,8 @@ find_theme_wallpaper() {
     argvus-dark-rosepine|argvus-dark-rosepine-float) _wall_name="argvus-rosepine.png" ;;
     argvus-dark-tokio-night|argvus-dark-tokio-night-float) _wall_name="argvus-tokyo-night.png" ;;
     argvus-dark-solitude|argvus-dark-solitude-float) _wall_name="argvus-solitude.png" ;;
+    argvus-dark-sunset|argvus-dark-sunset-float) _wall_name="argvus-dark-sunset.png" ;;
+    argvus-dark-hackerman|argvus-dark-hackerman-float) _wall_name="argvus-dark-hackerman.png" ;;
     *) return 1 ;;
   esac
 

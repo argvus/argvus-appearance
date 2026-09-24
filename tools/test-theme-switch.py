@@ -145,6 +145,8 @@ class ThemeSwitchTests(unittest.TestCase):
             "argvus-dark-rosepine": ("#C4A7E7", "#191724", "#E0DEF4"),
             "argvus-dark-tokio-night": ("#7AA2F7", "#1A1B26", "#C0CAF5"),
             "argvus-dark-solitude": ("#798186", "#101315", "#CACCCC"),
+            "argvus-dark-sunset": ("#E2BE8A", "#0F0F0F", "#EADCCC"),
+            "argvus-dark-hackerman": ("#82FB9C", "#0B0C16", "#DDF7FF"),
         }
 
         for theme, (highlight, background, foreground) in expected.items():
@@ -237,6 +239,24 @@ class ThemeSwitchTests(unittest.TestCase):
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
             str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/argvus-solitude.png"),
+        )
+
+    def test_dark_sunset_uses_its_packaged_wallpaper(self):
+        self.apply("argvus-dark-sunset")
+        self.assertEqual(
+            os.path.expanduser(
+                (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
+            ),
+            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/argvus-dark-sunset.png"),
+        )
+
+    def test_dark_hackerman_uses_its_packaged_wallpaper(self):
+        self.apply("argvus-dark-hackerman")
+        self.assertEqual(
+            os.path.expanduser(
+                (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
+            ),
+            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/argvus-dark-hackerman.png"),
         )
 
     def test_theme_switch_preserves_taskbar_utility_group_mode(self):
