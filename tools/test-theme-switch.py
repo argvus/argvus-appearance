@@ -345,6 +345,68 @@ class ThemeSwitchTests(unittest.TestCase):
             str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/argvus-dark-monokai.png"),
         )
 
+    def test_dark_monokai_float_applies_geometry_and_telemetry_transparency(self):
+        state_dir = self.base / "state/argvus"
+        state_dir.mkdir(parents=True, exist_ok=True)
+        (state_dir / "transparency").write_text("enabled\n")
+        self.apply("argvus-dark-monokai-float")
+
+        spaces = subprocess.run(
+            ["sh", str(self.system / "hyprland/sh/spaces-switch.sh"), "--status"],
+            env=self.env,
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout
+        self.assertIn("gaps_in=10", spaces)
+        self.assertIn("gaps_out_top=18", spaces)
+        self.assertIn("gaps_out_bottom=18", spaces)
+        self.assertIn("waybar_top=18", spaces)
+        self.assertIn("waybar_bottom=18", spaces)
+
+        borders = subprocess.run(
+            ["sh", str(self.system / "hyprland/sh/borders-switch.sh"), "--status"],
+            env=self.env,
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout
+        self.assertIn("rounded=1", borders)
+        self.assertIn("rounding=4", borders)
+
+        telemetry_theme = self.user / "waybar/themes/argvus-dark-monokai-float/widget-telemetry-theme.css"
+        self.assertIn("@define-color th-window-bg rgba(45, 42, 46, 0.35);", telemetry_theme.read_text())
+
+        telemetry_css = self.user / "waybar/argvus-widget-telemetry.css"
+        effects = self.system / "session/sh/effects-toggle.sh"
+        self.assertIn("@define-color th-window-bg-effective @th-window-bg;", telemetry_css.read_text())
+
+        (state_dir / "transparency").write_text("disabled\n")
+        subprocess.run(
+            ["sh", str(effects), "apply"],
+            env=self.env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        self.assertIn(
+            "@define-color th-window-bg-effective @th-background;",
+            telemetry_css.read_text(),
+        )
+
+        (state_dir / "transparency").write_text("enabled\n")
+        subprocess.run(
+            ["sh", str(effects), "apply"],
+            env=self.env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        self.assertIn(
+            "@define-color th-window-bg-effective @th-window-bg;",
+            telemetry_css.read_text(),
+        )
+
     def test_theme_switch_preserves_taskbar_utility_group_mode(self):
         mode_file = self.base / "state/argvus/taskbar-right-2-mode"
         mode_file.parent.mkdir(parents=True)
