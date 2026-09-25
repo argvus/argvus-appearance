@@ -155,6 +155,85 @@ class ThemeSwitchTests(unittest.TestCase):
                     )
         self.assertFalse(any(c[0] == "gsettings" for c in self.commands()))
 
+    def test_light_theme_surfaces_keep_transparency_for_sticky_and_float(self):
+        light_themes = {
+            "one-light": ("F0F0F1", "255, 255, 255"),
+            "everforest-light": ("FDF6E3", "255, 255, 255"),
+            "catppuccin-latte": ("EFF1F5", "230, 233, 239"),
+            "gruvbox-light": ("F2E5BC", "242, 229, 188"),
+            "argvus-light": ("F7F7F7", "235, 235, 235"),
+        }
+        for sticky, (panel_rgb, telemetry_rgb) in light_themes.items():
+            for theme in (sticky, f"{sticky}-float"):
+                with self.subTest(theme=theme):
+                    self.apply(theme)
+
+                    taskbar_theme = (self.user / f"waybar/themes/{theme}/theme.css").read_text()
+                    self.assertRegex(
+                        taskbar_theme,
+                        r"@define-color th-background-rgba .*0\.85\);",
+                    )
+                    self.assertRegex(
+                        taskbar_theme,
+                        r"@define-color th-mpris-bg .*0\.85\);",
+                    )
+
+                    telemetry_theme = (
+                        self.user / f"waybar/themes/{theme}/widget-telemetry-theme.css"
+                    ).read_text()
+                    expected_telemetry_rgb = telemetry_rgb
+                    if theme == "catppuccin-latte-float":
+                        expected_telemetry_rgb = "235, 235, 235"
+                    self.assertIn(
+                        f"@define-color th-window-bg     rgba({expected_telemetry_rgb}, 0.82);",
+                        telemetry_theme,
+                    )
+
+                    control_panel_theme = (
+                        self.system
+                        / "control-panel/config/quickshell/argvus-control-panel/themes"
+                        / theme
+                        / "Theme.qml"
+                    ).read_text()
+                    self.assertIn(
+                        f'readonly property color bgPanel:         "#D9{panel_rgb}"',
+                        control_panel_theme,
+                    )
+
+        state_dir = self.base / "state/argvus"
+        state_dir.mkdir(parents=True, exist_ok=True)
+        (state_dir / "transparency").write_text("enabled\n")
+        self.apply("one-light")
+
+        effects = self.system / "session/sh/effects-toggle.sh"
+        taskbar_css = self.user / "waybar/argvus-taskbar.css"
+        telemetry_css = self.user / "waybar/argvus-widget-telemetry.css"
+        self.assertIn(
+            "@define-color th-background-effective @th-background-rgba;",
+            taskbar_css.read_text(),
+        )
+        self.assertIn(
+            "@define-color th-window-bg-effective @th-window-bg;",
+            telemetry_css.read_text(),
+        )
+
+        (state_dir / "transparency").write_text("disabled\n")
+        subprocess.run(
+            ["sh", str(effects), "apply"],
+            env=self.env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        self.assertIn(
+            "@define-color th-background-effective @th-background;",
+            taskbar_css.read_text(),
+        )
+        self.assertIn(
+            "@define-color th-window-bg-effective @th-background;",
+            telemetry_css.read_text(),
+        )
+
     def test_dunst_theme_follows_selected_theme(self):
         expected = {
             "dracula": ("#BD93F9", "#282A36", "#6272A4"),
