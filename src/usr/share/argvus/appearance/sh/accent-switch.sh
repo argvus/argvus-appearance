@@ -14,7 +14,7 @@ ACCENT_FILE="${STATE_DIR}/.accent-color"
 ACTIVE_FILE="${STATE_DIR}/.active-theme"
 GREETER_THEME_STATE_DIR="${ARGVUS_GREETER_THEME_STATE_DIR:-/var/lib/argvus/greeter/themes}"
 DEFAULT_ACCENT="#798186"
-DEFAULT_THEME="argvus-dark-aether"
+DEFAULT_THEME="argvus-dark"
 RUNTIME=1
 NOTIFY=1
 
@@ -28,28 +28,36 @@ read_state() {
   fi
 }
 
+canonical_theme_id() {
+  case "$1" in
+    argvus-catppuccin-latte|argvus-light-catppuccin-latte) printf '%s\n' "catppuccin-latte" ;;
+    argvus-catppuccin-latte-float|argvus-light-catppuccin-latte-float) printf '%s\n' "catppuccin-latte-float" ;;
+    *) printf '%s\n' "$1" ;;
+  esac
+}
+
 theme_default_accent() {
   case "$1" in
-    argvus-onedark|argvus-onedark-float) printf '#61AFEF\n' ;;
-    argvus-dark-dracula|argvus-dark-dracula-float) printf '#BD93F9\n' ;;
-    argvus-dark-aether|argvus-dark-aether-float) printf '#3590bd\n' ;;
-    argvus-dark-silver|argvus-dark-silver-float) printf '#595959\n' ;;
-    argvus-light-veil|argvus-light-veil-float) printf '#181818\n' ;;
-    argvus-github-light|argvus-github-light-float) printf '#0969DA\n' ;;
-    argvus-light-solarized|argvus-light-solarized-float) printf '#268BD2\n' ;;
-    argvus-dark-rosepine|argvus-dark-rosepine-float) printf '#C4A7E7\n' ;;
-    argvus-light-frost|argvus-light-frost-float) printf '#0969DA\n' ;;
-    argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float) printf '#1E66F5\n' ;;
-    argvus-light-gruvbox|argvus-light-gruvbox-float) printf '#458588\n' ;;
-    argvus-dark-slate|argvus-dark-slate-float) printf '#7391a5\n' ;;
-    argvus-dark-universe|argvus-dark-universe-float) printf '#eeeeee\n' ;;
-    argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float) printf '#D79921\n' ;;
-    argvus-dark-gruvbox|argvus-dark-gruvbox-float) printf '#D4BE98\n' ;;
-    argvus-dark-tokio-night|argvus-dark-tokio-night-float) printf '#7AA2F7\n' ;;
-    argvus-dark-solitude|argvus-dark-solitude-float) printf '#798186\n' ;;
-    argvus-dark-sunset|argvus-dark-sunset-float) printf '#E2BE8A\n' ;;
-    argvus-dark-hackerman|argvus-dark-hackerman-float) printf '#82FB9C\n' ;;
-    argvus-dark-monokai|argvus-dark-monokai-float) printf '#78DCE8\n' ;;
+    one-dark|one-dark-float) printf '#61AFEF\n' ;;
+    dracula|dracula-float) printf '#BD93F9\n' ;;
+    argvus-dark|argvus-dark-float) printf '#3590bd\n' ;;
+    silver-dark|silver-dark-float) printf '#595959\n' ;;
+    argvus-light|argvus-light-float) printf '#181818\n' ;;
+    github-light|github-light-float) printf '#0969DA\n' ;;
+    solarized-light|solarized-light-float) printf '#268BD2\n' ;;
+    rose-pine|rose-pine-float) printf '#C4A7E7\n' ;;
+    frost|frost-float) printf '#0969DA\n' ;;
+    catppuccin-latte|catppuccin-latte-float) printf '#1E66F5\n' ;;
+    gruvbox-light|gruvbox-light-float) printf '#458588\n' ;;
+    slate-dark|slate-dark-float) printf '#7391a5\n' ;;
+    universe|universe-float) printf '#eeeeee\n' ;;
+    gruvbox-high-dark|gruvbox-high-dark-float) printf '#D79921\n' ;;
+    gruvbox-dark|gruvbox-dark-float) printf '#D4BE98\n' ;;
+    tokyo-night|tokyo-night-float) printf '#7AA2F7\n' ;;
+    solitude|solitude-float) printf '#798186\n' ;;
+    sunset|sunset-float) printf '#E2BE8A\n' ;;
+    hackerman|hackerman-float) printf '#82FB9C\n' ;;
+    monokai-dark|monokai-dark-float) printf '#78DCE8\n' ;;
     *) return 1 ;;
   esac
 }
@@ -394,7 +402,7 @@ case "${1:-}" in
   --theme-default)
     RUNTIME=0
     NOTIFY=0
-    _active_theme="$(read_state "$ACTIVE_FILE" "$DEFAULT_THEME")"
+    _active_theme="$(canonical_theme_id "$(read_state "$ACTIVE_FILE" "$DEFAULT_THEME")")"
     if ! REQUESTED="$(theme_default_accent "$_active_theme")"; then
       argvus_tr appearance accent.default_missing "theme=$_active_theme" >&2
       exit 1
@@ -414,12 +422,12 @@ if ! normalize_accent "$REQUESTED"; then
   exit 1
 fi
 
-THEME="$(read_state "$ACTIVE_FILE" "$DEFAULT_THEME")"
+THEME="$(canonical_theme_id "$(read_state "$ACTIVE_FILE" "$DEFAULT_THEME")")"
 case "$THEME" in
-  argvus-onedark|argvus-onedark-float|argvus-dark-dracula|argvus-dark-dracula-float|argvus-dark-aether|argvus-dark-aether-float|argvus-dark-silver|argvus-dark-silver-float|argvus-light-veil|argvus-light-veil-float|argvus-github-light|argvus-github-light-float|argvus-light-solarized|argvus-light-solarized-float|argvus-light-frost|argvus-light-frost-float|argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float|argvus-light-gruvbox|argvus-light-gruvbox-float|argvus-dark-slate|argvus-dark-slate-float|argvus-dark-universe|argvus-dark-universe-float|argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float|argvus-dark-gruvbox|argvus-dark-gruvbox-float|argvus-dark-rosepine|argvus-dark-rosepine-float|argvus-dark-tokio-night|argvus-dark-tokio-night-float|argvus-dark-solitude|argvus-dark-solitude-float|argvus-dark-sunset|argvus-dark-sunset-float|argvus-dark-hackerman|argvus-dark-hackerman-float|argvus-dark-monokai|argvus-dark-monokai-float) ;;
-  *-dark-float) THEME="argvus-dark-aether-float" ;;
-  *-light-float) THEME="argvus-light-veil-float" ;;
-  *-light) THEME="argvus-light-veil" ;;
+  one-dark|one-dark-float|dracula|dracula-float|argvus-dark|argvus-dark-float|silver-dark|silver-dark-float|argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float|slate-dark|slate-dark-float|universe|universe-float|gruvbox-high-dark|gruvbox-high-dark-float|gruvbox-dark|gruvbox-dark-float|rose-pine|rose-pine-float|tokyo-night|tokyo-night-float|solitude|solitude-float|sunset|sunset-float|hackerman|hackerman-float|monokai-dark|monokai-dark-float) ;;
+  *-dark-float) THEME="argvus-dark-float" ;;
+  *-light-float) THEME="argvus-light-float" ;;
+  *-light) THEME="argvus-light" ;;
   *) THEME="$DEFAULT_THEME" ;;
 esac
 

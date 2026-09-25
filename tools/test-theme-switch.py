@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -89,6 +90,7 @@ class ThemeSwitchTests(unittest.TestCase):
             "ARGVUS_THEME_LOCKED": "0",
             "ARGVUS_I18N_DIR": str(ROOT / "argvus-i18n/locales"),
             "ARGVUS_BACKGROUNDS_DIR": str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds"),
+            "WALLPAPER_ROOT": str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus"),
             "TEST_COMMAND_LOG": str(self.log),
             "TEST_SPLASH_ARGS": str(self.splash_args),
             "ARGVUS_THEME_SPLASH_BIN": str(splash),
@@ -130,11 +132,17 @@ class ThemeSwitchTests(unittest.TestCase):
                         for ref in re.findall(r'@import url\("([^"]+)"\)', css.read_text()):
                             self.assertTrue((css.parent / ref).is_file(), (theme, css, ref))
                     self.assertTrue((self.user / f"waybar/themes/{theme}/widget-telemetry-theme.css").is_file())
+                    if theme in ("one-dark", "one-dark-float"):
+                        telemetry_theme = (self.user / f"waybar/themes/{theme}/widget-telemetry-theme.css").read_text()
+                        self.assertIn(
+                            "@define-color th-window-bg     rgba(44, 49, 58, 0.35);",
+                            telemetry_theme,
+                        )
                     rofi = (self.user / "rofi/theme.rasi").read_text()
                     self.assertIn(f"/{theme}/theme.rasi", rofi)
                     for version in ("gtk-3.0", "gtk-4.0"):
                         settings = (self.user / version / "settings.ini").read_text()
-                        prefer_dark = 0 if ("light-veil" in theme or "github-light" in theme or "light-solarized" in theme or "frost" in theme or "catppuccin-latte" in theme or "light-gruvbox" in theme) else 1
+                        prefer_dark = 0 if ("argvus-light" in theme or "github-light" in theme or "solarized-light" in theme or "frost" in theme or "gruvbox-light" in theme or "catppuccin-latte" in theme) else 1
                         self.assertIn(f"gtk-application-prefer-dark-theme={prefer_dark}", settings)
                     palette = (self.base / "cache/argvus-control-center/theme.css").read_text()
                     self.assertIn("@define-color argvus_accent #", palette)
@@ -149,27 +157,27 @@ class ThemeSwitchTests(unittest.TestCase):
 
     def test_dunst_theme_follows_selected_theme(self):
         expected = {
-            "argvus-dark-dracula": ("#BD93F9", "#282A36", "#6272A4"),
-            "argvus-dark-aether": ("#3590bd", "#111316", "#B0BFCB"),
-            "argvus-dark-silver": ("#595959", "#111316", "#B0BFCB"),
-            "argvus-dark-slate": ("#7391a5", "#2F3541", "#A6B8C4"),
+            "dracula": ("#BD93F9", "#282A36", "#6272A4"),
+            "argvus-dark": ("#3590bd", "#111316", "#B0BFCB"),
+            "silver-dark": ("#595959", "#111316", "#B0BFCB"),
+            "slate-dark": ("#7391a5", "#2F3541", "#A6B8C4"),
             # HEX colors are case-insensitive; accent-switch writes the Dunst
             # palette using its canonical uppercase representation.
-            "argvus-dark-universe": ("#eeeeee", "#000000", "#AAAAAA"),
-            "argvus-light-veil": ("#181818", "#f7f7f7", "#454545"),
-            "argvus-github-light": ("#0969DA", "#FFFFFF", "#57606A"),
-            "argvus-light-solarized": ("#268BD2", "#FDF6E3", "#839496"),
-            "argvus-light-frost": ("#0969DA", "#F6F8FA", "#6E7781"),
-            "argvus-light-catppuccin-latte": ("#1E66F5", "#EFF1F5", "#5C5F77"),
-            "argvus-light-gruvbox": ("#458588", "#FBF1C7", "#3C3836"),
-            "argvus-dark-gruvbox-high": ("#D79921", "#282828", "#A89984"),
-            "argvus-dark-gruvbox": ("#D4BE98", "#282828", "#A89984"),
-            "argvus-dark-rosepine": ("#C4A7E7", "#191724", "#E0DEF4"),
-            "argvus-dark-tokio-night": ("#7AA2F7", "#1A1B26", "#C0CAF5"),
-            "argvus-dark-solitude": ("#798186", "#101315", "#CACCCC"),
-            "argvus-dark-sunset": ("#E2BE8A", "#0F0F0F", "#EADCCC"),
-            "argvus-dark-hackerman": ("#82FB9C", "#0B0C16", "#DDF7FF"),
-            "argvus-dark-monokai": ("#78DCE8", "#2D2A2E", "#FCFCFA"),
+            "universe": ("#eeeeee", "#000000", "#AAAAAA"),
+            "argvus-light": ("#181818", "#f7f7f7", "#454545"),
+            "github-light": ("#0969DA", "#FFFFFF", "#57606A"),
+            "solarized-light": ("#268BD2", "#FDF6E3", "#839496"),
+            "frost": ("#0969DA", "#F6F8FA", "#6E7781"),
+            "catppuccin-latte": ("#1E66F5", "#EFF1F5", "#5C5F77"),
+            "gruvbox-light": ("#458588", "#FBF1C7", "#3C3836"),
+            "gruvbox-high-dark": ("#D79921", "#282828", "#A89984"),
+            "gruvbox-dark": ("#D4BE98", "#282828", "#A89984"),
+            "rose-pine": ("#C4A7E7", "#191724", "#E0DEF4"),
+            "tokyo-night": ("#7AA2F7", "#1A1B26", "#C0CAF5"),
+            "solitude": ("#798186", "#101315", "#CACCCC"),
+            "sunset": ("#E2BE8A", "#0F0F0F", "#EADCCC"),
+            "hackerman": ("#82FB9C", "#0B0C16", "#DDF7FF"),
+            "monokai-dark": ("#78DCE8", "#2D2A2E", "#FCFCFA"),
         }
 
         for theme, (highlight, background, foreground) in expected.items():
@@ -182,11 +190,127 @@ class ThemeSwitchTests(unittest.TestCase):
                 self.assertIn(f'foreground = "{foreground}"'.casefold(), normalized_config)
                 self.assertIn("[discord]", config)
 
+    def test_theme_menu_enters_dark_category(self):
+        """The hierarchical Rofi menu must not abort on the Dark branch."""
+        rofi_step = self.base / "rofi-step"
+        selected_theme = self.base / "selected-theme"
+        rofi = self.base / "bin" / "rofi"
+        rofi.write_text(
+            "#!/bin/sh\n"
+            f"step_file={shlex.quote(str(rofi_step))}\n"
+            "step=$(cat \"$step_file\" 2>/dev/null || printf '0')\n"
+            "cat >/dev/null\n"
+            "case \"$step\" in\n"
+            "  0) printf '%s\\n' 'Dark >' ;;\n"
+            "  1) printf '%s\\n' 'Rosé Pine >' ;;\n"
+            "  2) printf '%s\\n' 'Sticky' ;;\n"
+            "  *) exit 1 ;;\n"
+            "esac\n"
+            "printf '%s\\n' $((step + 1)) >\"$step_file\"\n"
+        )
+        rofi.chmod(0o755)
+        theme_switch = self.system / "appearance/sh/theme-switch.sh"
+        theme_switch.write_text(
+            "#!/bin/sh\n"
+            f"printf '%s\\n' \"$1\" > {shlex.quote(str(selected_theme))}\n"
+        )
+        theme_switch.chmod(0o755)
+
+        result = subprocess.run(
+            ["sh", str(self.system / "appearance/sh/theme-menu.sh")],
+            env=self.env | {"ARGVUS_NO_RUNTIME": "1"},
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(selected_theme.read_text(), "rose-pine\n")
+        self.assertNotIn("unbound variable", result.stderr)
+
+    def test_theme_menu_left_returns_to_parent_menu(self):
+        """Cancelling a child Rofi menu with Left returns to its parent."""
+        rofi_step = self.base / "rofi-step"
+        selected_theme = self.base / "selected-theme"
+        rofi = self.base / "bin" / "rofi"
+        rofi.write_text(
+            "#!/bin/sh\n"
+            f"step_file={shlex.quote(str(rofi_step))}\n"
+            "step=$(cat \"$step_file\" 2>/dev/null || printf '0')\n"
+            "cat >/dev/null\n"
+            "case \"$step\" in\n"
+            "  0) printf '%s\\n' 'Dark >' ;;\n"
+            "  1) printf '%s\\n' $((step + 1)) >\"$step_file\"; exit 1 ;;\n"
+            "  2) printf '%s\\n' 'Light >' ;;\n"
+            "  3) printf '%s\\n' 'ARGVUS Light >' ;;\n"
+            "  4) printf '%s\\n' 'Sticky' ;;\n"
+            "  *) exit 1 ;;\n"
+            "esac\n"
+            "printf '%s\\n' $((step + 1)) >\"$step_file\"\n"
+        )
+        rofi.chmod(0o755)
+        theme_switch = self.system / "appearance/sh/theme-switch.sh"
+        theme_switch.write_text(
+            "#!/bin/sh\n"
+            f"printf '%s\\n' \"$1\" > {shlex.quote(str(selected_theme))}\n"
+        )
+        theme_switch.chmod(0o755)
+
+        result = subprocess.run(
+            ["sh", str(self.system / "appearance/sh/theme-menu.sh")],
+            env=self.env | {"ARGVUS_NO_RUNTIME": "1"},
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(selected_theme.read_text(), "argvus-light\n")
+
+    def test_theme_menu_model_left_returns_to_family_menu(self):
+        """Cancelling Sticky/Float with Left returns to the family list."""
+        rofi_step = self.base / "rofi-step"
+        selected_theme = self.base / "selected-theme"
+        rofi = self.base / "bin" / "rofi"
+        rofi.write_text(
+            "#!/bin/sh\n"
+            f"step_file={shlex.quote(str(rofi_step))}\n"
+            "step=$(cat \"$step_file\" 2>/dev/null || printf '0')\n"
+            "cat >/dev/null\n"
+            "case \"$step\" in\n"
+            "  0) printf '%s\\n' 'Dark >' ;;\n"
+            "  1) printf '%s\\n' 'ARGVUS Dark >' ;;\n"
+            "  2) printf '%s\\n' $((step + 1)) >\"$step_file\"; exit 1 ;;\n"
+            "  3) printf '%s\\n' 'ARGVUS Dark >' ;;\n"
+            "  4) printf '%s\\n' 'Float' ;;\n"
+            "  *) exit 1 ;;\n"
+            "esac\n"
+            "printf '%s\\n' $((step + 1)) >\"$step_file\"\n"
+        )
+        rofi.chmod(0o755)
+        theme_switch = self.system / "appearance/sh/theme-switch.sh"
+        theme_switch.write_text(
+            "#!/bin/sh\n"
+            f"printf '%s\\n' \"$1\" > {shlex.quote(str(selected_theme))}\n"
+        )
+        theme_switch.chmod(0o755)
+
+        result = subprocess.run(
+            ["sh", str(self.system / "appearance/sh/theme-menu.sh")],
+            env=self.env | {"ARGVUS_NO_RUNTIME": "1"},
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(selected_theme.read_text(), "argvus-dark-float\n")
+
     def test_restart_does_not_depend_on_dpms(self):
         for fail in (False, True):
             with self.subTest(fail_dpms=fail):
                 self.log.write_text("")
-                self.apply("argvus-dark-aether", runtime=True, fail_dpms=fail)
+                self.apply("argvus-dark", runtime=True, fail_dpms=fail)
                 commands = self.commands()
                 restart = ["argvus-sessionctl", "reload"]
                 self.assertEqual(commands.count(restart), 1)
@@ -194,9 +318,9 @@ class ThemeSwitchTests(unittest.TestCase):
                                      for c in commands))
 
     def test_runtime_splash_receives_selected_theme_and_generated_colors(self):
-        self.apply("argvus-dark-sunset", runtime=True)
+        self.apply("sunset", runtime=True)
         args = self.splash_args.read_text().splitlines()
-        self.assertEqual(args[args.index("--theme") + 1], "argvus-dark-sunset")
+        self.assertEqual(args[args.index("--theme") + 1], "sunset")
         self.assertEqual(args[args.index("--background") + 1], "#0F0F0F")
         self.assertEqual(args[args.index("--foreground") + 1], "#EADCCC")
         self.assertEqual(args[args.index("--accent") + 1], "#E2BE8A")
@@ -204,12 +328,12 @@ class ThemeSwitchTests(unittest.TestCase):
 
     def test_calendar_cache_materializes_selected_themes(self):
         expected = {
-            "argvus-dark-gruvbox": "#282828",
-            "argvus-dark-sunset": "#0F0F0F",
-            "argvus-light-solarized": "#FDF6E3",
-            "argvus-light-catppuccin-latte": "#EFF1F5",
-            "argvus-light-frost": "#F6F8FA",
-            "argvus-light-gruvbox": "#FBF1C7",
+            "gruvbox-dark": "#282828",
+            "sunset": "#0F0F0F",
+            "solarized-light": "#FDF6E3",
+            "catppuccin-latte": "#EFF1F5",
+            "frost": "#F6F8FA",
+            "gruvbox-light": "#FBF1C7",
         }
 
         for theme, background in expected.items():
@@ -227,7 +351,7 @@ class ThemeSwitchTests(unittest.TestCase):
 
     def test_failed_global_reload_restores_display_and_reports_failure(self):
         self.env["TEST_RELOAD_FAIL"] = "1"
-        result = self.apply("argvus-dark-aether", runtime=True, expected_status=1)
+        result = self.apply("argvus-dark", runtime=True, expected_status=1)
         self.assertNotIn("applied.", result.stdout)
         commands = self.commands()
         self.assertIn(["argvus-sessionctl", "reload"], commands)
@@ -239,11 +363,11 @@ class ThemeSwitchTests(unittest.TestCase):
         source = menu.read_text()
         self.assertIn("theme.category.dark", source)
         self.assertIn("theme.category.light", source)
-        self.assertIn("theme.family.dark_aether", source)
+        self.assertIn("theme.family.argvus_dark", source)
         self.assertIn("theme.family.dracula", source)
         self.assertIn("theme.family.catppuccin_latte", source)
-        self.assertIn("theme.family.light_gruvbox", source)
-        self.assertIn("theme.family.dark_rosepine", source)
+        self.assertIn("theme.family.gruvbox_light", source)
+        self.assertIn("theme.family.rose_pine", source)
         self.assertIn('"$_dark_category >"', source)
         self.assertIn('"$_light_category >"', source)
         self.assertIn('"$_dark_gruvbox_high >"', source)
@@ -255,6 +379,8 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn("-kb-cancel 'Escape,Left'", source)
         self.assertIn('theme.model.sticky)\") exec sh', source)
         self.assertIn('theme.model.float)\") exec sh', source)
+        self.assertLess(source.index('"$_dark_aether >"'), source.index('"$_onedark >"'))
+        self.assertLess(source.index('"$_light_veil >"'), source.index('"$_github_light >"'))
 
     def test_theme_menu_releases_rofi_arrow_bindings(self):
         switcher = (self.system / "appearance/sh/theme-switch.sh").read_text()
@@ -262,46 +388,53 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertNotIn("-kb-custom-1 Right", switcher)
 
     def test_theme_switch_is_silent_on_success(self):
-        result = self.apply("argvus-dark-aether")
+        result = self.apply("argvus-dark")
         self.assertEqual(result.stdout, "")
 
     def test_theme_is_published_for_pre_authentication_greeter(self):
-        self.apply("argvus-light-veil-float")
+        self.apply("argvus-light-float")
         projection = self.greeter_state / str(os.getuid())
-        self.assertEqual(projection.read_text(), "argvus-light-veil-float\n")
+        self.assertEqual(projection.read_text(), "argvus-light-float\n")
         self.assertFalse((self.greeter_state / f"{os.getuid()}.tmp").exists())
 
     def test_catppuccin_latte_uses_its_packaged_wallpaper(self):
-        self.apply("argvus-light-catppuccin-latte")
+        self.apply("catppuccin-latte")
         self.assertEqual(
             os.path.expanduser(
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
-            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/argvus-catppuccin-latte.png"),
+            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/light/catppuccin-latte-abstract-light.jxl"),
+        )
+
+    def test_legacy_catppuccin_id_is_migrated(self):
+        self.apply("argvus-light-catppuccin-latte")
+        self.assertEqual(
+            (self.user / ".active-theme").read_text(),
+            "catppuccin-latte\n",
         )
 
     def test_solarized_light_uses_its_packaged_wallpaper(self):
-        self.apply("argvus-light-solarized")
+        self.apply("solarized-light")
         self.assertEqual(
             os.path.expanduser(
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
-            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/argvus-solarized-light.png"),
+            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/light/solarized-abstract-light.jxl"),
         )
 
     def test_light_gruvbox_uses_its_packaged_wallpaper(self):
-        self.apply("argvus-light-gruvbox")
+        self.apply("gruvbox-light")
         self.assertEqual(
             os.path.expanduser(
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
-            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/argvus-light-gruvbox.png"),
+            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/light/gruvbox-abstract-light.jxl"),
         )
 
     def test_official_superfile_themes_use_the_complete_schema(self):
         theme_dir = self.system / "app-profiles/config/superfile/theme"
         expected = set(tomllib.loads(
-            (theme_dir / "argvus-github-light.toml").read_text()
+            (theme_dir / "github-light.toml").read_text()
         ))
 
         for theme_file in sorted(theme_dir.glob("*.toml")):
@@ -310,46 +443,55 @@ class ThemeSwitchTests(unittest.TestCase):
                 self.assertEqual(actual, expected)
 
     def test_solitude_uses_its_packaged_wallpaper(self):
-        self.apply("argvus-dark-solitude")
+        self.apply("solitude")
         self.assertEqual(
             os.path.expanduser(
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
-            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/argvus-solitude.png"),
+            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/dark/solitude-abstract-dark.jxl"),
         )
 
     def test_dark_sunset_uses_its_packaged_wallpaper(self):
-        self.apply("argvus-dark-sunset")
+        self.apply("sunset")
         self.assertEqual(
             os.path.expanduser(
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
-            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/argvus-dark-sunset.png"),
+            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/dark/sunset-abstract-dark.jxl"),
         )
 
     def test_dark_hackerman_uses_its_packaged_wallpaper(self):
-        self.apply("argvus-dark-hackerman")
+        self.apply("hackerman")
         self.assertEqual(
             os.path.expanduser(
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
-            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/argvus-dark-hackerman.png"),
+            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/dark/hackerman-abstract-dark.jxl"),
         )
 
     def test_dark_monokai_uses_its_packaged_wallpaper(self):
-        self.apply("argvus-dark-monokai")
+        self.apply("monokai-dark")
         self.assertEqual(
             os.path.expanduser(
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
-            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/argvus-dark-monokai.png"),
+            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/dark/monokai-abstract-dark.jxl"),
+        )
+
+    def test_dark_rose_pine_uses_its_packaged_wallpaper(self):
+        self.apply("rose-pine")
+        self.assertEqual(
+            os.path.expanduser(
+                (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
+            ),
+            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/dark/rose-pine-abstract-dark.jxl"),
         )
 
     def test_dark_monokai_float_applies_geometry_and_telemetry_transparency(self):
         state_dir = self.base / "state/argvus"
         state_dir.mkdir(parents=True, exist_ok=True)
         (state_dir / "transparency").write_text("enabled\n")
-        self.apply("argvus-dark-monokai-float")
+        self.apply("monokai-dark-float")
 
         spaces = subprocess.run(
             ["sh", str(self.system / "hyprland/sh/spaces-switch.sh"), "--status"],
@@ -374,8 +516,14 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn("rounded=1", borders)
         self.assertIn("rounding=4", borders)
 
-        telemetry_theme = self.user / "waybar/themes/argvus-dark-monokai-float/widget-telemetry-theme.css"
+        telemetry_theme = self.user / "waybar/themes/monokai-dark-float/widget-telemetry-theme.css"
         self.assertIn("@define-color th-window-bg rgba(45, 42, 46, 0.35);", telemetry_theme.read_text())
+
+        taskbar_theme = self.user / "waybar/themes/monokai-dark-float/theme.css"
+        taskbar_contents = taskbar_theme.read_text()
+        self.assertIn("@define-color th-background #2D2A2E;", taskbar_contents)
+        self.assertIn("@define-color th-background-rgba rgba(34, 31, 34, 0.92);", taskbar_contents)
+        self.assertNotIn("@import", taskbar_contents)
 
         telemetry_css = self.user / "waybar/argvus-widget-telemetry.css"
         effects = self.system / "session/sh/effects-toggle.sh"
@@ -412,7 +560,7 @@ class ThemeSwitchTests(unittest.TestCase):
         mode_file.parent.mkdir(parents=True)
         mode_file.write_text("always-expanded\n")
 
-        self.apply("argvus-dark-aether")
+        self.apply("argvus-dark")
 
         taskbar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
         self.assertIn('"custom/removable-devices"', taskbar)
@@ -422,7 +570,7 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn('"on-click": "/usr/share/argvus/removable-devices/sh/removable-devices-menu.sh --root {x} {y}"', taskbar)
 
         mode_file.write_text("auto\n")
-        self.apply("argvus-dark-aether")
+        self.apply("argvus-dark")
 
         taskbar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
         self.assertIn('    "drawer": {', taskbar)
@@ -435,7 +583,7 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn(["argvus-widget-telemetry-toggle", "blocks", "apply"], self.commands())
 
     def test_partial_theme_directory_is_repaired_without_losing_edits(self):
-        theme = "argvus-dark-aether"
+        theme = "argvus-dark"
         css = self.user / f"waybar/themes/{theme}/theme.css"
         css.parent.mkdir(parents=True)
         css.write_text("/* preserved custom palette */\n")
@@ -444,10 +592,10 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertTrue((css.parent / "widget-telemetry-theme.css").is_file())
 
     def test_optional_gtk_theme_uses_component_path(self):
-        custom = self.user / "gtk-4.0/themes/argvus-light-veil/gtk.css"
+        custom = self.user / "gtk-4.0/themes/argvus-light/gtk.css"
         custom.parent.mkdir(parents=True)
         custom.write_text("/* custom GTK override */\n")
-        self.apply("argvus-light-veil")
+        self.apply("argvus-light")
         self.assertEqual((self.user / "gtk-4.0/gtk.css").read_text(), custom.read_text())
 
     def test_theme_switch_resets_spacing_to_mode_defaults(self):
@@ -456,7 +604,7 @@ class ThemeSwitchTests(unittest.TestCase):
             "waybar_pos=bottom\ngaps_out_top=0\ngaps_out_left=0\n"
             "gaps_out_right=0\ngaps_out_bottom=0\n"
         )
-        self.apply("argvus-light-veil")
+        self.apply("argvus-light")
         bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
         self.assertIn('"position": "top"', bar)
         for edge in ("top", "left", "right"):
@@ -470,7 +618,7 @@ class ThemeSwitchTests(unittest.TestCase):
         for edge in ("top", "left", "right", "bottom"):
             self.assertIn(f"gaps_out_{edge}=0", spaces_status)
 
-        self.apply("argvus-light-veil-float")
+        self.apply("argvus-light-float")
         bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
         for edge in ("top", "left", "right", "bottom"):
             self.assertIn(f'"margin-{edge}": 18', bar)
@@ -577,7 +725,7 @@ class ThemeSwitchTests(unittest.TestCase):
 
     def test_theme_switch_resets_borders_to_mode_defaults(self):
         (self.user / ".borders").write_text("rounded=1\nrounding=10\n")
-        self.apply("argvus-dark-aether")
+        self.apply("argvus-dark")
         css = (self.user / "waybar/argvus-taskbar.css").read_text()
         telemetry_css = (self.user / "waybar/argvus-widget-telemetry.css").read_text()
         rofi = (self.user / "rofi/theme.rasi").read_text()
@@ -593,7 +741,7 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn("rounding=0", borders_status)
         self.assertIn("thickness=1", borders_status)
 
-        self.apply("argvus-dark-aether-float")
+        self.apply("argvus-dark-float")
         css = (self.user / "waybar/argvus-taskbar.css").read_text()
         telemetry_css = (self.user / "waybar/argvus-widget-telemetry.css").read_text()
         rofi = (self.user / "rofi/theme.rasi").read_text()

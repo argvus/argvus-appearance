@@ -84,7 +84,7 @@ else
 fi
 
 # Read current theme
-THEME="$(cat "$ARGVUS_CONFIG_HOME/argvus/.active-theme" 2>/dev/null || echo "argvus-dark-aether")"
+THEME="$(cat "$ARGVUS_CONFIG_HOME/argvus/.active-theme" 2>/dev/null || echo "argvus-dark")"
 HYPRPAPER_FILE="$(paths_config appearance/config/hypr/hyprpaper.conf)"
 HYPRPAPER_DIR="/usr/share/backgrounds/argvus"
 
@@ -140,33 +140,7 @@ wallpaper_is_custom() {
 }
 
 find_theme_wallpaper() {
-  _theme="$1"
-  case "$_theme" in
-    argvus-onedark|argvus-onedark-float) _wall_name="argvus-onedark.png" ;;
-    argvus-dark-dracula|argvus-dark-dracula-float) _wall_name="argvus-dracula.png" ;;
-    argvus-dark-aether|argvus-dark-aether-float) _wall_name="default.png" ;;
-    argvus-dark-silver|argvus-dark-silver-float) _wall_name="argvus-dark-silver.png" ;;
-    argvus-light-veil|argvus-light-veil-float) _wall_name="argvus-light-veil.png" ;;
-    argvus-github-light|argvus-github-light-float) _wall_name="argvus-github-light.png" ;;
-    argvus-light-solarized|argvus-light-solarized-float) _wall_name="argvus-solarized-light.png" ;;
-    argvus-light-frost|argvus-light-frost-float) _wall_name="argvus-frost.png" ;;
-    argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float) _wall_name="argvus-catppuccin-latte.png" ;;
-    argvus-light-gruvbox|argvus-light-gruvbox-float) _wall_name="argvus-light-gruvbox.png" ;;
-    argvus-dark-slate|argvus-dark-slate-float) _wall_name="argvus-dark-slate.png" ;;
-    argvus-dark-universe|argvus-dark-universe-float) _wall_name="argvus-dark-universe.png" ;;
-    argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float|argvus-dark-gruvbox|argvus-dark-gruvbox-float) _wall_name="argvus-gruvbox.png" ;;
-    argvus-dark-rosepine|argvus-dark-rosepine-float) _wall_name="argvus-rosepine.png" ;;
-    argvus-dark-tokio-night|argvus-dark-tokio-night-float) _wall_name="argvus-tokyo-night.png" ;;
-    argvus-dark-solitude|argvus-dark-solitude-float) _wall_name="argvus-solitude.png" ;;
-    argvus-dark-sunset|argvus-dark-sunset-float) _wall_name="argvus-dark-sunset.png" ;;
-    argvus-dark-hackerman|argvus-dark-hackerman-float) _wall_name="argvus-dark-hackerman.png" ;;
-    argvus-dark-monokai|argvus-dark-monokai-float) _wall_name="argvus-dark-monokai.png" ;;
-    *) return 1 ;;
-  esac
-
-  _wall="${HYPRPAPER_DIR}/${_wall_name}"
-  [ -f "$_wall" ] || return 1
-  printf '%s\n' "$_wall"
+  argvus_theme_wallpaper "$1"
 }
 
 # ==============================================================================
@@ -175,9 +149,9 @@ find_theme_wallpaper() {
 MODE_CSS="$(paths_config appearance/config/waybar/mode.css)"
 mkdir -p "$(dirname "$MODE_CSS")"
 
-if [ "$MODE" = "light" ] && [ "$THEME" = "argvus-dark-aether" ]; then
+if [ "$MODE" = "light" ] && [ "$THEME" = "argvus-dark" ]; then
   cat > "$MODE_CSS" << 'CSSEOF'
-/* mode.css — Light mode overrides for argvus-dark-aether */
+/* mode.css — Light mode overrides for argvus-dark */
 
 /* -- waybar/argvus-taskbar.css variables -- */
 @define-color th-foreground      #181818;
@@ -234,7 +208,7 @@ fi
 MODE_RASI="$(paths_config launcher/config/mode.rasi)"
 mkdir -p "$(dirname "$MODE_RASI")"
 
-if [ "$MODE" = "light" ] && [ "$THEME" = "argvus-dark-aether" ]; then
+if [ "$MODE" = "light" ] && [ "$THEME" = "argvus-dark" ]; then
   cat > "$MODE_RASI" << 'RASIEOC'
 * {
     th-bg:            rgba(204, 204, 204, 100%);

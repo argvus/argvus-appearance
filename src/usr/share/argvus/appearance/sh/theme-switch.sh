@@ -15,7 +15,55 @@ ARGVUS_HYPR_HELPER="${ARGVUS_SYSTEM_CONFIG}/appearance/sh/hypr.sh"
 ARGVUS_MUTABLE_CONFIG=1
 export ARGVUS_THEME_SWITCH=1
 
-THEME="${1:-}"
+canonical_theme_id() {
+  case "$1" in
+    argvus-dark-aether) printf '%s\n' "argvus-dark" ;;
+    argvus-dark-aether-float) printf '%s\n' "argvus-dark-float" ;;
+    argvus-light-veil) printf '%s\n' "argvus-light" ;;
+    argvus-light-veil-float) printf '%s\n' "argvus-light-float" ;;
+    argvus-onedark) printf '%s\n' "one-dark" ;;
+    argvus-onedark-float) printf '%s\n' "one-dark-float" ;;
+    argvus-dark-dracula) printf '%s\n' "dracula" ;;
+    argvus-dark-dracula-float) printf '%s\n' "dracula-float" ;;
+    argvus-dark-silver) printf '%s\n' "silver-dark" ;;
+    argvus-dark-silver-float) printf '%s\n' "silver-dark-float" ;;
+    argvus-dark-slate) printf '%s\n' "slate-dark" ;;
+    argvus-dark-slate-float) printf '%s\n' "slate-dark-float" ;;
+    argvus-dark-universe) printf '%s\n' "universe" ;;
+    argvus-dark-universe-float) printf '%s\n' "universe-float" ;;
+    argvus-dark-gruvbox-high) printf '%s\n' "gruvbox-high-dark" ;;
+    argvus-dark-gruvbox-high-float) printf '%s\n' "gruvbox-high-dark-float" ;;
+    argvus-dark-gruvbox) printf '%s\n' "gruvbox-dark" ;;
+    argvus-dark-gruvbox-float) printf '%s\n' "gruvbox-dark-float" ;;
+    argvus-github-light) printf '%s\n' "github-light" ;;
+    argvus-github-light-float) printf '%s\n' "github-light-float" ;;
+    argvus-light-solarized) printf '%s\n' "solarized-light" ;;
+    argvus-light-solarized-float) printf '%s\n' "solarized-light-float" ;;
+    argvus-light-frost) printf '%s\n' "frost" ;;
+    argvus-light-frost-float) printf '%s\n' "frost-float" ;;
+    argvus-light-gruvbox) printf '%s\n' "gruvbox-light" ;;
+    argvus-light-gruvbox-float) printf '%s\n' "gruvbox-light-float" ;;
+    argvus-dark-rose-pine|argvus-dark-rosepine) printf '%s\n' "rose-pine" ;;
+    argvus-dark-rose-pine-float|argvus-dark-rosepine-float) printf '%s\n' "rose-pine-float" ;;
+    argvus-dark-tokio-night|argvus-dark-tokyo-night) printf '%s\n' "tokyo-night" ;;
+    argvus-dark-tokio-night-float|argvus-dark-tokyo-night-float) printf '%s\n' "tokyo-night-float" ;;
+    argvus-dark-solitude) printf '%s\n' "solitude" ;;
+    argvus-dark-solitude-float) printf '%s\n' "solitude-float" ;;
+    argvus-dark-sunset) printf '%s\n' "sunset" ;;
+    argvus-dark-sunset-float) printf '%s\n' "sunset-float" ;;
+    argvus-dark-hackerman) printf '%s\n' "hackerman" ;;
+    argvus-dark-hackerman-float) printf '%s\n' "hackerman-float" ;;
+    argvus-dark-monokai) printf '%s\n' "monokai-dark" ;;
+    argvus-dark-monokai-float) printf '%s\n' "monokai-dark-float" ;;
+    argvus-catppuccin-latte) printf '%s\n' "catppuccin-latte" ;;
+    argvus-catppuccin-latte-float) printf '%s\n' "catppuccin-latte-float" ;;
+    argvus-light-catppuccin-latte) printf '%s\n' "catppuccin-latte" ;;
+    argvus-light-catppuccin-latte-float) printf '%s\n' "catppuccin-latte-float" ;;
+    *) printf '%s\n' "$1" ;;
+  esac
+}
+
+THEME="$(canonical_theme_id "${1:-}")"
 ACTIVE_FILE="${ARGVUS_CONFIG_HOME}/argvus/.active-theme"
 GREETER_THEME_STATE_DIR="${ARGVUS_GREETER_THEME_STATE_DIR:-/var/lib/argvus/greeter/themes}"
 RUNTIME=1
@@ -357,8 +405,8 @@ refresh_managed_waybar_file() {
 
 gtk_theme_name_for_theme() {
   case "$1" in
-    argvus-light-veil|argvus-light-veil-float|argvus-github-light|argvus-github-light-float|argvus-light-solarized|argvus-light-solarized-float|argvus-light-frost|argvus-light-frost-float|argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float|argvus-light-gruvbox|argvus-light-gruvbox-float) printf '%s\n' "Adwaita" ;;
-    argvus-dark-*|argvus-dark-solitude|argvus-dark-solitude-float) printf '%s\n' "Adwaita-dark" ;;
+    argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float) printf '%s\n' "Adwaita" ;;
+    argvus-dark-*|solitude|solitude-float) printf '%s\n' "Adwaita-dark" ;;
     *) return 1 ;;
   esac
 }
@@ -453,51 +501,16 @@ get_active_monitor() {
 }
 
 find_theme_wallpaper() {
-  _theme="$1"
+  _wall="$(argvus_theme_wallpaper "$1" 2>/dev/null || true)"
+  [ -n "$_wall" ] && { printf '%s\n' "$_wall"; return 0; }
 
-  case "$_theme" in
-    argvus-onedark|argvus-onedark-float) _wall_name="argvus-onedark.png" ;;
-    argvus-dark-dracula|argvus-dark-dracula-float) _wall_name="argvus-dracula.png" ;;
-    argvus-dark-aether|argvus-dark-aether-float) _wall_name="default.png" ;;
-    argvus-dark-silver|argvus-dark-silver-float) _wall_name="argvus-dark-silver.png" ;;
-    argvus-light-veil|argvus-light-veil-float) _wall_name="argvus-light-veil.png" ;;
-    argvus-github-light|argvus-github-light-float) _wall_name="argvus-github-light.png" ;;
-    argvus-light-solarized|argvus-light-solarized-float) _wall_name="argvus-solarized-light.png" ;;
-    argvus-light-frost|argvus-light-frost-float) _wall_name="argvus-frost.png" ;;
-    argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float) _wall_name="argvus-catppuccin-latte.png" ;;
-    argvus-light-gruvbox|argvus-light-gruvbox-float) _wall_name="argvus-light-gruvbox.png" ;;
-    argvus-dark-slate|argvus-dark-slate-float) _wall_name="argvus-dark-slate.png" ;;
-    argvus-dark-universe|argvus-dark-universe-float) _wall_name="argvus-dark-universe.png" ;;
-    argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float|argvus-dark-gruvbox|argvus-dark-gruvbox-float) _wall_name="argvus-gruvbox.png" ;;
-    argvus-dark-rosepine|argvus-dark-rosepine-float) _wall_name="argvus-rosepine.png" ;;
-    argvus-dark-tokio-night|argvus-dark-tokio-night-float) _wall_name="argvus-tokyo-night.png" ;;
-    argvus-dark-solitude|argvus-dark-solitude-float) _wall_name="argvus-solitude.png" ;;
-    argvus-dark-sunset|argvus-dark-sunset-float) _wall_name="argvus-dark-sunset.png" ;;
-    argvus-dark-hackerman|argvus-dark-hackerman-float) _wall_name="argvus-dark-hackerman.png" ;;
-    argvus-dark-monokai|argvus-dark-monokai-float) _wall_name="argvus-dark-monokai.png" ;;
-    *) _wall_name="" ;;
-  esac
-
-  if [ -n "$_wall_name" ]; then
-    _wall="${HYPRPAPER_DIR}/${_wall_name}"
-    if [ ! -f "$_wall" ]; then
-      argvus_tr appearance theme.wallpaper_missing "path=$_wall" >&2
-      return 1
-    fi
-    printf '%s\n' "$_wall"
-    return 0
-  fi
-
-  for _ext in jpeg jpg png webp; do
-    _wall="${HYPR_THEMES}/${_theme}/wallpaper.${_ext}"
-    [ -f "$_wall" ] && { printf '%s\n' "$_wall"; return 0; }
-
-    _wall="${HYPRPAPER_DIR}/${_theme}.${_ext}"
+  for _ext in jpeg jpg png webp jxl; do
+    _wall="${HYPR_THEMES}/${1}/wallpaper.${_ext}"
     [ -f "$_wall" ] && { printf '%s\n' "$_wall"; return 0; }
   done
 
   # Backward compatibility for older assets with display-case names.
-  find "$HYPRPAPER_DIR" -maxdepth 1 -type f -iname "${_theme}.*" | head -n1
+  find "$HYPRPAPER_DIR" -maxdepth 1 -type f -iname "${1}.*" | head -n1
 }
 
 theme_value() {
@@ -620,7 +633,7 @@ apply_wallpaper() {
 }
 
 # Sincroniza o tema do argvus-removable-devices com o tema ativo.
-# Mapeia: dark -> argvus-dark-aether.css, silver -> argvus-dark-silver.css, slate -> argvus-dark-slate.css, light -> argvus-light-veil.css
+# Mapeia: dark -> argvus-dark.css, silver -> silver-dark.css, slate -> slate-dark.css, light -> argvus-light.css
 apply_argvus_storage_theme() {
   _storage_theme_dir="$(paths_config removable-devices/config/themes)"
   _storage_theme_dest="$(paths_config removable-devices/config/theme.css)"
@@ -631,46 +644,46 @@ apply_argvus_storage_theme() {
   # 3. Diretório legado do sistema (/etc/argvus/taskbar/storage/themes)
   _theme_src=""
   case "$THEME" in
-    argvus-onedark|argvus-onedark-float)
-      _theme_name="argvus-onedark.css" ;;
-    argvus-dark-dracula|argvus-dark-dracula-float)
-      _theme_name="argvus-dark-dracula.css" ;;
-    argvus-dark-aether|argvus-dark-aether-float)
-      _theme_name="argvus-dark-aether.css" ;;
-    argvus-dark-silver|argvus-dark-silver-float)
-    _theme_name="argvus-dark-silver.css" ;;
-    argvus-dark-slate|argvus-dark-slate-float)
-      _theme_name="argvus-dark-slate.css" ;;
-    argvus-light-veil|argvus-light-veil-float)
-      _theme_name="argvus-light-veil.css" ;;
-    argvus-github-light|argvus-github-light-float)
-      _theme_name="argvus-github-light.css" ;;
-    argvus-light-solarized|argvus-light-solarized-float)
-      _theme_name="argvus-light-solarized.css" ;;
-    argvus-light-frost|argvus-light-frost-float)
-      _theme_name="argvus-light-frost.css" ;;
-    argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float)
-      _theme_name="argvus-light-catppuccin-latte.css" ;;
-    argvus-light-gruvbox|argvus-light-gruvbox-float)
-      _theme_name="argvus-light-gruvbox.css" ;;
-    argvus-dark-universe|argvus-dark-universe-float)
-      _theme_name="argvus-dark-universe.css" ;;
-    argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float)
-      _theme_name="argvus-dark-gruvbox-high.css" ;;
-    argvus-dark-gruvbox|argvus-dark-gruvbox-float)
-      _theme_name="argvus-dark-gruvbox.css" ;;
-    argvus-dark-rosepine|argvus-dark-rosepine-float)
-      _theme_name="argvus-dark-rosepine.css" ;;
-    argvus-dark-tokio-night|argvus-dark-tokio-night-float)
-      _theme_name="argvus-dark-tokio-night.css" ;;
-    argvus-dark-solitude|argvus-dark-solitude-float)
-      _theme_name="argvus-dark-solitude.css" ;;
-    argvus-dark-sunset|argvus-dark-sunset-float)
-      _theme_name="argvus-dark-sunset.css" ;;
-    argvus-dark-hackerman|argvus-dark-hackerman-float)
-      _theme_name="argvus-dark-hackerman.css" ;;
-    argvus-dark-monokai|argvus-dark-monokai-float)
-      _theme_name="argvus-dark-monokai.css" ;;
+    one-dark|one-dark-float)
+      _theme_name="one-dark.css" ;;
+    dracula|dracula-float)
+      _theme_name="dracula.css" ;;
+    argvus-dark|argvus-dark-float)
+      _theme_name="argvus-dark.css" ;;
+    silver-dark|silver-dark-float)
+    _theme_name="silver-dark.css" ;;
+    slate-dark|slate-dark-float)
+      _theme_name="slate-dark.css" ;;
+    argvus-light|argvus-light-float)
+      _theme_name="argvus-light.css" ;;
+    github-light|github-light-float)
+      _theme_name="github-light.css" ;;
+    solarized-light|solarized-light-float)
+      _theme_name="solarized-light.css" ;;
+    frost|frost-float)
+      _theme_name="frost.css" ;;
+    catppuccin-latte|catppuccin-latte-float)
+      _theme_name="catppuccin-latte.css" ;;
+    gruvbox-light|gruvbox-light-float)
+      _theme_name="gruvbox-light.css" ;;
+    universe|universe-float)
+      _theme_name="universe.css" ;;
+    gruvbox-high-dark|gruvbox-high-dark-float)
+      _theme_name="gruvbox-high-dark.css" ;;
+    gruvbox-dark|gruvbox-dark-float)
+      _theme_name="gruvbox-dark.css" ;;
+    rose-pine|rose-pine-float)
+      _theme_name="rose-pine.css" ;;
+    tokyo-night|tokyo-night-float)
+      _theme_name="tokyo-night.css" ;;
+    solitude|solitude-float)
+      _theme_name="solitude.css" ;;
+    sunset|sunset-float)
+      _theme_name="sunset.css" ;;
+    hackerman|hackerman-float)
+      _theme_name="hackerman.css" ;;
+    monokai-dark|monokai-dark-float)
+      _theme_name="monokai-dark.css" ;;
     *)
       return 0 ;;
   esac
@@ -688,7 +701,26 @@ apply_argvus_storage_theme() {
   elif [ -n "$_workspace_root" ] && [ -f "$_workspace_root/argvus-removable-devices/src/usr/share/argvus/removable-devices/config/themes/${_theme_name}" ]; then
     _theme_src="$_workspace_root/argvus-removable-devices/src/usr/share/argvus/removable-devices/config/themes/${_theme_name}"
   else
-    return 0
+    # Some consumers intentionally ship a smaller palette set. Keep them in
+    # sync with the active light/dark mode instead of silently retaining the
+    # previous theme when a family-specific stylesheet is unavailable.
+    case "$THEME" in
+      argvus-light*|catppuccin-latte*|frost*|github-light*|gruvbox-light*|solarized-light*)
+        _theme_name="argvus-light.css" ;;
+      *)
+        _theme_name="argvus-dark.css" ;;
+    esac
+    if [ -f "${_storage_theme_dir}/${_theme_name}" ]; then
+      _theme_src="${_storage_theme_dir}/${_theme_name}"
+    elif [ -f "$(paths_system_config removable-devices/config/themes/${_theme_name})" ]; then
+      _theme_src="$(paths_system_config removable-devices/config/themes/${_theme_name})"
+    elif [ -f "/etc/argvus/taskbar/storage/themes/${_theme_name}" ]; then
+      _theme_src="/etc/argvus/taskbar/storage/themes/${_theme_name}"
+    elif [ -n "$_workspace_root" ] && [ -f "$_workspace_root/argvus-removable-devices/src/usr/share/argvus/removable-devices/config/themes/${_theme_name}" ]; then
+      _theme_src="$_workspace_root/argvus-removable-devices/src/usr/share/argvus/removable-devices/config/themes/${_theme_name}"
+    else
+      return 0
+    fi
   fi
 
   mkdir -p "$(dirname "$_storage_theme_dest")"
@@ -702,28 +734,28 @@ apply_argvus_calendar_theme() {
   _calendar_theme_name=""
 
   case "$THEME" in
-    argvus-onedark|argvus-onedark-float|argvus-dark-dracula|argvus-dark-dracula-float|\
-    argvus-dark-aether|argvus-dark-aether-float|argvus-dark-silver|argvus-dark-silver-float|\
-    argvus-dark-slate|argvus-dark-slate-float)
+    one-dark|one-dark-float|dracula|dracula-float|\
+    argvus-dark|argvus-dark-float|silver-dark|silver-dark-float|\
+    slate-dark|slate-dark-float)
       _calendar_theme_name="${THEME}.css" ;;
-    argvus-dark-universe|argvus-dark-universe-float)
+    universe|universe-float)
       _calendar_theme_name="${THEME}.css" ;;
-    argvus-light-veil|argvus-light-veil-float|argvus-github-light|argvus-github-light-float|argvus-light-solarized|argvus-light-solarized-float)
+    argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float)
       _calendar_theme_name="${THEME}.css" ;;
-    argvus-light-frost|argvus-light-frost-float)
+    frost|frost-float)
       _calendar_theme_name="${THEME}.css" ;;
-    argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float)
+    catppuccin-latte|catppuccin-latte-float)
       _calendar_theme_name="${THEME}.css" ;;
-    argvus-light-gruvbox|argvus-light-gruvbox-float)
+    gruvbox-light|gruvbox-light-float)
       _calendar_theme_name="${THEME}.css" ;;
-    argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float|argvus-dark-gruvbox|argvus-dark-gruvbox-float)
+    gruvbox-high-dark|gruvbox-high-dark-float|gruvbox-dark|gruvbox-dark-float)
       _calendar_theme_name="${THEME}.css" ;;
-    argvus-dark-rosepine|argvus-dark-rosepine-float|argvus-dark-solitude|argvus-dark-solitude-float|\
-    argvus-dark-sunset|argvus-dark-sunset-float|argvus-dark-hackerman|argvus-dark-hackerman-float|\
-    argvus-dark-monokai|argvus-dark-monokai-float)
+    rose-pine|rose-pine-float|solitude|solitude-float|\
+    sunset|sunset-float|hackerman|hackerman-float|\
+    monokai-dark|monokai-dark-float)
       _calendar_theme_name="${THEME}.css" ;;
-    argvus-dark-tokio-night|argvus-dark-tokio-night-float)
-      _calendar_theme_name="argvus-dark-tokio-night.css" ;;
+    tokyo-night|tokyo-night-float)
+      _calendar_theme_name="tokyo-night.css" ;;
     *)
       return 0 ;;
   esac
@@ -773,9 +805,9 @@ apply_argvus_calendar_theme() {
 # this persistent projection avoids granting the greeter access to user homes.
 publish_greeter_theme() {
   case "$THEME" in
-    argvus-dark-dracula|argvus-dark-dracula-float|argvus-dark-aether|argvus-dark-aether-float|argvus-dark-silver|argvus-dark-silver-float|\
-    argvus-dark-slate|argvus-dark-slate-float|argvus-dark-universe|argvus-dark-universe-float|\
-    argvus-light-veil|argvus-light-veil-float|argvus-github-light|argvus-github-light-float|argvus-light-solarized|argvus-light-solarized-float|argvus-light-frost|argvus-light-frost-float|argvus-light-catppuccin-latte|argvus-light-catppuccin-latte-float|argvus-light-gruvbox|argvus-light-gruvbox-float|argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float|argvus-dark-gruvbox|argvus-dark-gruvbox-float|argvus-dark-rosepine|argvus-dark-rosepine-float|argvus-dark-tokio-night|argvus-dark-tokio-night-float|argvus-dark-solitude|argvus-dark-solitude-float|argvus-dark-sunset|argvus-dark-sunset-float|argvus-dark-hackerman|argvus-dark-hackerman-float|argvus-dark-monokai|argvus-dark-monokai-float)
+    dracula|dracula-float|argvus-dark|argvus-dark-float|silver-dark|silver-dark-float|\
+    slate-dark|slate-dark-float|universe|universe-float|\
+    argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float|gruvbox-high-dark|gruvbox-high-dark-float|gruvbox-dark|gruvbox-dark-float|rose-pine|rose-pine-float|tokyo-night|tokyo-night-float|solitude|solitude-float|sunset|sunset-float|hackerman|hackerman-float|monokai-dark|monokai-dark-float)
       ;;
     *)
       return 0
@@ -855,7 +887,7 @@ for _waybar_style in "$(paths_config taskbar/config/argvus-taskbar.css)" \
 done
 
 case "$THEME" in
-  argvus-onedark | argvus-dark-dracula | argvus-dark-aether | argvus-dark-silver | argvus-light-veil | argvus-github-light | argvus-light-solarized | argvus-light-frost | argvus-light-catppuccin-latte | argvus-light-gruvbox | argvus-dark-slate | argvus-dark-universe | argvus-dark-gruvbox-high | argvus-dark-gruvbox | argvus-dark-rosepine | argvus-dark-tokio-night | argvus-dark-solitude | argvus-dark-sunset | argvus-dark-hackerman | argvus-dark-monokai)
+  one-dark | dracula | argvus-dark | silver-dark | argvus-light | github-light | solarized-light | frost | catppuccin-latte | gruvbox-light | slate-dark | universe | gruvbox-high-dark | gruvbox-dark | rose-pine | tokyo-night | solitude | sunset | hackerman | monokai-dark)
     sed -i "s|\"margin-top\": [0-9]*|\"margin-top\": 0|" "$_waybar_cfg"
     sed -i "s|\"margin-left\": [0-9]*|\"margin-left\": 0|" "$_waybar_cfg"
     sed -i "s|\"margin-right\": [0-9]*|\"margin-right\": 0|" "$_waybar_cfg"
@@ -894,7 +926,7 @@ case "$THEME" in
 esac
 
 case "$THEME" in
-  argvus-dark-slate)
+  slate-dark)
     sed -i '/^window#waybar {/,/^}/s/border: .*;/border: none;/' "$(paths_config taskbar/config/argvus-taskbar.css)"
     ;;
   *)
@@ -1002,12 +1034,8 @@ fi
 
 _yazi_theme="$THEME"
 case "$THEME" in
-  # Keep compatibility with the original Yazi flavor IDs while the official
-  # ARGVUS theme IDs use the dark family prefix consistently.
-  argvus-dark-rosepine) _yazi_theme='argvus-rosepine' ;;
-  argvus-dark-rosepine-float) _yazi_theme='argvus-rosepine-float' ;;
-  argvus-dark-sunset-float) _yazi_theme='argvus-dark-sunset' ;;
-  argvus-dark-hackerman-float) _yazi_theme='argvus-dark-hackerman' ;;
+  sunset-float) _yazi_theme='sunset' ;;
+  hackerman-float) _yazi_theme='hackerman' ;;
 esac
 
 if [ -d "$YAZI_SYSTEM_ROOT/flavors/$_yazi_theme.yazi" ]; then
@@ -1042,7 +1070,7 @@ printf '/* mode.css — reset on theme switch */\n' > "$MODE_CSS"
 GTK_MODE_FILE="${ARGVUS_CONFIG_HOME}/argvus/.gtk-mode"
 mkdir -p "$(dirname "$GTK_MODE_FILE")"
 case "$THEME" in
-  argvus-light-veil | argvus-light-veil-float | argvus-github-light | argvus-github-light-float | argvus-light-solarized | argvus-light-solarized-float | argvus-light-frost | argvus-light-frost-float | argvus-light-catppuccin-latte | argvus-light-catppuccin-latte-float | argvus-light-gruvbox | argvus-light-gruvbox-float)
+  argvus-light | argvus-light-float | github-light | github-light-float | solarized-light | solarized-light-float | frost | frost-float | catppuccin-latte | catppuccin-latte-float | gruvbox-light | gruvbox-light-float)
     _gtk_theme_name="$(gtk_theme_name_for_theme "$THEME")"
     apply_gtk_theme_files light "$_gtk_theme_name" 0
     apply_gtk_runtime_settings prefer-light "$_gtk_theme_name" Adwaita-dark

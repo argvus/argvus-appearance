@@ -28,7 +28,8 @@ reads its own theme resources and an accent-only cache, not the calendar cache.
 The `SUPER + Shift + T` Rofi selector is hierarchical: choose the localized
 Dark or Light category, then the ARGVUS family, then Sticky or Float. The
 Control Center uses the same category and family hierarchy; imported custom
-profiles remain in a separate section.
+profiles remain in a separate section. In Rofi, Right advances to the selected
+level, Left returns one level, and Escape closes the selector from any level.
 
 After applying a highlight color, `accent-switch.sh` also publishes the
 validated `#RRGGBB` value to the per-UID greeter projection at

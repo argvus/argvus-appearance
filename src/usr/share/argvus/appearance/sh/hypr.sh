@@ -24,6 +24,39 @@ GET_HYPRLOCK_PATH=$(
 WALLPAPER_PATH="$GET_HYPRPAPER_PATH"
 HYPRLOCK_PATH="$GET_HYPRLOCK_PATH"
 
+# Official theme wallpapers are deliberately restricted to abstract assets.
+# Landscape files remain available to the manual wallpaper picker.
+argvus_theme_wallpaper() {
+  _theme="${1%-float}"
+  case "$_theme" in
+    argvus-dark) _wallpaper_name="argvus-dark.jxl" ;;
+    argvus-light) _wallpaper_name="argvus-light.jxl" ;;
+    dracula) _wallpaper_name="abstract/dark/dracula-abstract-dark.jxl" ;;
+    gruvbox-dark) _wallpaper_name="abstract/dark/gruvbox-abstract-dark.jxl" ;;
+    gruvbox-high-dark) _wallpaper_name="abstract/dark/gruvbox-high-abstract-dark.jxl" ;;
+    monokai-dark) _wallpaper_name="abstract/dark/monokai-abstract-dark.jxl" ;;
+    one-dark) _wallpaper_name="abstract/dark/one-dark-abstract-dark.jxl" ;;
+    rose-pine) _wallpaper_name="abstract/dark/rose-pine-abstract-dark.jxl" ;;
+    silver-dark) _wallpaper_name="abstract/dark/silver-abstract-dark.jxl" ;;
+    slate-dark) _wallpaper_name="abstract/dark/slate-abstract-dark.jxl" ;;
+    sunset) _wallpaper_name="abstract/dark/sunset-abstract-dark.jxl" ;;
+    tokyo-night) _wallpaper_name="abstract/dark/tokyo-night-abstract-dark.jxl" ;;
+    hackerman) _wallpaper_name="abstract/dark/hackerman-abstract-dark.jxl" ;;
+    solitude) _wallpaper_name="abstract/dark/solitude-abstract-dark.jxl" ;;
+    universe) _wallpaper_name="abstract/dark/universe-abstract-dark.jxl" ;;
+    catppuccin-latte) _wallpaper_name="abstract/light/catppuccin-latte-abstract-light.jxl" ;;
+    frost) _wallpaper_name="abstract/light/frost-abstract-light.jxl" ;;
+    github-light) _wallpaper_name="abstract/light/github-light-abstract-light.jxl" ;;
+    gruvbox-light) _wallpaper_name="abstract/light/gruvbox-abstract-light.jxl" ;;
+    solarized-light) _wallpaper_name="abstract/light/solarized-abstract-light.jxl" ;;
+    *) return 1 ;;
+  esac
+  _wallpaper_root="${WALLPAPER_ROOT:-${ARGVUS_BACKGROUNDS_DIR:-/usr/share/backgrounds}/argvus}"
+  _wallpaper_path="${_wallpaper_root}/${_wallpaper_name}"
+  [ -f "$_wallpaper_path" ] || return 1
+  printf '%s\n' "$_wallpaper_path"
+}
+
 # A custom wallpaper is independent from the active visual theme. Keep its
 # selected path in the user-owned ARGVUS state so the session service can
 # restore it without relying on a transient systemd manager environment.
@@ -130,6 +163,13 @@ hypr_apply_wallpaper() {
   systemctl --user stop argvus-wallpaper.service hyprpaper.service 2>/dev/null || true
   pkill -x swaybg 2>/dev/null || true
   pkill -x hyprpaper 2>/dev/null || true
+
+  # The packaged wallpapers are JPEG XL. Prefer the backend that can load the
+  # format before trying the low-power fallback, which may support fewer image
+  # codecs depending on the installed build.
+  case "$_wallpaper_path" in
+    *.jxl) hypr_apply_hyprpaper_wallpaper "$_wallpaper_path" && return 0 ;;
+  esac
 
   if hypr_low_power_session; then
     hypr_apply_swaybg_wallpaper "$_wallpaper_path" && return 0
