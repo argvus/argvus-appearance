@@ -43,6 +43,8 @@ while :; do
   _light_veil="$(argvus_tr appearance theme.family.argvus_light)"
   _github_light="$(argvus_tr appearance theme.family.github_light)"
   _solarized_light="$(argvus_tr appearance theme.family.solarized_light)"
+  _one_light="$(argvus_tr appearance theme.family.one_light)"
+  _everforest_light="$(argvus_tr appearance theme.family.everforest_light)"
   _frost="$(argvus_tr appearance theme.family.frost)"
   _catppuccin_latte="$(argvus_tr appearance theme.family.catppuccin_latte)"
   _light_gruvbox="$(argvus_tr appearance theme.family.gruvbox_light)"
@@ -80,6 +82,8 @@ while :; do
           "$_light_veil >" \
           "$_github_light >" \
           "$_solarized_light >" \
+          "$_one_light >" \
+          "$_everforest_light >" \
           "$_frost >" \
           "$_catppuccin_latte >" \
           "$_light_gruvbox >")" || break
@@ -102,6 +106,8 @@ while :; do
       "$_light_veil") _theme='argvus-light' ;;
       "$_github_light") _theme='github-light' ;;
       "$_solarized_light") _theme='solarized-light' ;;
+      "$_one_light") _theme='one-light' ;;
+      "$_everforest_light") _theme='everforest-light' ;;
       "$_frost") _theme='frost' ;;
       "$_catppuccin_latte") _theme='catppuccin-latte' ;;
       "$_light_gruvbox") _theme='gruvbox-light' ;;

@@ -44,6 +44,8 @@ theme_default_accent() {
     silver-dark|silver-dark-float) printf '#595959\n' ;;
     argvus-light|argvus-light-float) printf '#181818\n' ;;
     github-light|github-light-float) printf '#0969DA\n' ;;
+    one-light|one-light-float) printf '#4078F2\n' ;;
+    everforest-light|everforest-light-float) printf '#3A94C5\n' ;;
     solarized-light|solarized-light-float) printf '#268BD2\n' ;;
     rose-pine|rose-pine-float) printf '#C4A7E7\n' ;;
     frost|frost-float) printf '#0969DA\n' ;;
@@ -424,7 +426,7 @@ fi
 
 THEME="$(canonical_theme_id "$(read_state "$ACTIVE_FILE" "$DEFAULT_THEME")")"
 case "$THEME" in
-  one-dark|one-dark-float|dracula|dracula-float|argvus-dark|argvus-dark-float|silver-dark|silver-dark-float|argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float|slate-dark|slate-dark-float|universe|universe-float|gruvbox-high-dark|gruvbox-high-dark-float|gruvbox-dark|gruvbox-dark-float|rose-pine|rose-pine-float|tokyo-night|tokyo-night-float|solitude|solitude-float|sunset|sunset-float|hackerman|hackerman-float|monokai-dark|monokai-dark-float) ;;
+  one-dark|one-dark-float|dracula|dracula-float|argvus-dark|argvus-dark-float|silver-dark|silver-dark-float|argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|one-light|one-light-float|everforest-light|everforest-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float|slate-dark|slate-dark-float|universe|universe-float|gruvbox-high-dark|gruvbox-high-dark-float|gruvbox-dark|gruvbox-dark-float|rose-pine|rose-pine-float|tokyo-night|tokyo-night-float|solitude|solitude-float|sunset|sunset-float|hackerman|hackerman-float|monokai-dark|monokai-dark-float) ;;
   *-dark-float) THEME="argvus-dark-float" ;;
   *-light-float) THEME="argvus-light-float" ;;
   *-light) THEME="argvus-light" ;;

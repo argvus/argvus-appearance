@@ -49,6 +49,8 @@ argvus_theme_wallpaper() {
     github-light) _wallpaper_name="abstract/light/github-light-abstract-light.jxl" ;;
     gruvbox-light) _wallpaper_name="abstract/light/gruvbox-abstract-light.jxl" ;;
     solarized-light) _wallpaper_name="abstract/light/solarized-abstract-light.jxl" ;;
+    one-light) _wallpaper_name="abstract/light/one-light-abstract-light.jxl" ;;
+    everforest-light) _wallpaper_name="abstract/light/everforest-abstract-light.jxl" ;;
     *) return 1 ;;
   esac
   _wallpaper_root="${WALLPAPER_ROOT:-${ARGVUS_BACKGROUNDS_DIR:-/usr/share/backgrounds}/argvus}"

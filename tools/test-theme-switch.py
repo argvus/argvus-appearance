@@ -142,7 +142,7 @@ class ThemeSwitchTests(unittest.TestCase):
                     self.assertIn(f"/{theme}/theme.rasi", rofi)
                     for version in ("gtk-3.0", "gtk-4.0"):
                         settings = (self.user / version / "settings.ini").read_text()
-                        prefer_dark = 0 if ("argvus-light" in theme or "github-light" in theme or "solarized-light" in theme or "frost" in theme or "gruvbox-light" in theme or "catppuccin-latte" in theme) else 1
+                        prefer_dark = 0 if ("argvus-light" in theme or "github-light" in theme or "solarized-light" in theme or "one-light" in theme or "everforest-light" in theme or "frost" in theme or "gruvbox-light" in theme or "catppuccin-latte" in theme) else 1
                         self.assertIn(f"gtk-application-prefer-dark-theme={prefer_dark}", settings)
                     palette = (self.base / "cache/argvus-control-center/theme.css").read_text()
                     self.assertIn("@define-color argvus_accent #", palette)
@@ -167,6 +167,7 @@ class ThemeSwitchTests(unittest.TestCase):
             "argvus-light": ("#181818", "#f7f7f7", "#454545"),
             "github-light": ("#0969DA", "#FFFFFF", "#57606A"),
             "solarized-light": ("#268BD2", "#FDF6E3", "#839496"),
+            "everforest-light": ("#3A94C5", "#FDF6E3", "#829181"),
             "frost": ("#0969DA", "#F6F8FA", "#6E7781"),
             "catppuccin-latte": ("#1E66F5", "#EFF1F5", "#5C5F77"),
             "gruvbox-light": ("#458588", "#FBF1C7", "#3C3836"),
@@ -326,11 +327,20 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertEqual(args[args.index("--accent") + 1], "#E2BE8A")
         self.assertIn("--ready-file", args)
 
+    def test_runtime_splash_receives_one_light_colors(self):
+        self.apply("one-light", runtime=True)
+        args = self.splash_args.read_text().splitlines()
+        self.assertEqual(args[args.index("--theme") + 1], "one-light")
+        self.assertEqual(args[args.index("--background") + 1], "#FAFAFA")
+        self.assertEqual(args[args.index("--foreground") + 1], "#383A42")
+        self.assertEqual(args[args.index("--accent") + 1], "#4078F2")
+
     def test_calendar_cache_materializes_selected_themes(self):
         expected = {
             "gruvbox-dark": "#282828",
             "sunset": "#0F0F0F",
             "solarized-light": "#FDF6E3",
+            "everforest-light": "#FDF6E3",
             "catppuccin-latte": "#EFF1F5",
             "frost": "#F6F8FA",
             "gruvbox-light": "#FBF1C7",
@@ -429,6 +439,24 @@ class ThemeSwitchTests(unittest.TestCase):
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
             str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/light/gruvbox-abstract-light.jxl"),
+        )
+
+    def test_one_light_uses_its_packaged_wallpaper(self):
+        self.apply("one-light")
+        self.assertEqual(
+            os.path.expanduser(
+                (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
+            ),
+            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/light/one-light-abstract-light.jxl"),
+        )
+
+    def test_everforest_light_uses_its_packaged_wallpaper(self):
+        self.apply("everforest-light")
+        self.assertEqual(
+            os.path.expanduser(
+                (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
+            ),
+            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/light/everforest-abstract-light.jxl"),
         )
 
     def test_official_superfile_themes_use_the_complete_schema(self):

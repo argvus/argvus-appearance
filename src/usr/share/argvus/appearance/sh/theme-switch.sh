@@ -405,7 +405,7 @@ refresh_managed_waybar_file() {
 
 gtk_theme_name_for_theme() {
   case "$1" in
-    argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float) printf '%s\n' "Adwaita" ;;
+    argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|one-light|one-light-float|everforest-light|everforest-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float) printf '%s\n' "Adwaita" ;;
     argvus-dark-*|solitude|solitude-float) printf '%s\n' "Adwaita-dark" ;;
     *) return 1 ;;
   esac
@@ -660,6 +660,10 @@ apply_argvus_storage_theme() {
       _theme_name="github-light.css" ;;
     solarized-light|solarized-light-float)
       _theme_name="solarized-light.css" ;;
+    one-light|one-light-float)
+      _theme_name="argvus-light.css" ;;
+    everforest-light|everforest-light-float)
+      _theme_name="everforest-light.css" ;;
     frost|frost-float)
       _theme_name="frost.css" ;;
     catppuccin-latte|catppuccin-latte-float)
@@ -705,7 +709,7 @@ apply_argvus_storage_theme() {
     # sync with the active light/dark mode instead of silently retaining the
     # previous theme when a family-specific stylesheet is unavailable.
     case "$THEME" in
-      argvus-light*|catppuccin-latte*|frost*|github-light*|gruvbox-light*|solarized-light*)
+      argvus-light*|catppuccin-latte*|frost*|github-light*|gruvbox-light*|solarized-light*|one-light*|everforest-light*)
         _theme_name="argvus-light.css" ;;
       *)
         _theme_name="argvus-dark.css" ;;
@@ -740,13 +744,13 @@ apply_argvus_calendar_theme() {
       _calendar_theme_name="${THEME}.css" ;;
     universe|universe-float)
       _calendar_theme_name="${THEME}.css" ;;
-    argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float)
+    argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|one-light|one-light-float|everforest-light|everforest-light-float)
       _calendar_theme_name="${THEME}.css" ;;
     frost|frost-float)
       _calendar_theme_name="${THEME}.css" ;;
     catppuccin-latte|catppuccin-latte-float)
       _calendar_theme_name="${THEME}.css" ;;
-    gruvbox-light|gruvbox-light-float)
+    gruvbox-light|gruvbox-light-float|one-light|one-light-float|everforest-light|everforest-light-float)
       _calendar_theme_name="${THEME}.css" ;;
     gruvbox-high-dark|gruvbox-high-dark-float|gruvbox-dark|gruvbox-dark-float)
       _calendar_theme_name="${THEME}.css" ;;
@@ -807,7 +811,7 @@ publish_greeter_theme() {
   case "$THEME" in
     dracula|dracula-float|argvus-dark|argvus-dark-float|silver-dark|silver-dark-float|\
     slate-dark|slate-dark-float|universe|universe-float|\
-    argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float|gruvbox-high-dark|gruvbox-high-dark-float|gruvbox-dark|gruvbox-dark-float|rose-pine|rose-pine-float|tokyo-night|tokyo-night-float|solitude|solitude-float|sunset|sunset-float|hackerman|hackerman-float|monokai-dark|monokai-dark-float)
+    argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|one-light|one-light-float|everforest-light|everforest-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float|gruvbox-high-dark|gruvbox-high-dark-float|gruvbox-dark|gruvbox-dark-float|rose-pine|rose-pine-float|tokyo-night|tokyo-night-float|solitude|solitude-float|sunset|sunset-float|hackerman|hackerman-float|monokai-dark|monokai-dark-float)
       ;;
     *)
       return 0
@@ -887,7 +891,7 @@ for _waybar_style in "$(paths_config taskbar/config/argvus-taskbar.css)" \
 done
 
 case "$THEME" in
-  one-dark | dracula | argvus-dark | silver-dark | argvus-light | github-light | solarized-light | frost | catppuccin-latte | gruvbox-light | slate-dark | universe | gruvbox-high-dark | gruvbox-dark | rose-pine | tokyo-night | solitude | sunset | hackerman | monokai-dark)
+  one-dark | dracula | argvus-dark | silver-dark | argvus-light | github-light | solarized-light | one-light | everforest-light | frost | catppuccin-latte | gruvbox-light | slate-dark | universe | gruvbox-high-dark | gruvbox-dark | rose-pine | tokyo-night | solitude | sunset | hackerman | monokai-dark)
     sed -i "s|\"margin-top\": [0-9]*|\"margin-top\": 0|" "$_waybar_cfg"
     sed -i "s|\"margin-left\": [0-9]*|\"margin-left\": 0|" "$_waybar_cfg"
     sed -i "s|\"margin-right\": [0-9]*|\"margin-right\": 0|" "$_waybar_cfg"
@@ -1070,7 +1074,7 @@ printf '/* mode.css — reset on theme switch */\n' > "$MODE_CSS"
 GTK_MODE_FILE="${ARGVUS_CONFIG_HOME}/argvus/.gtk-mode"
 mkdir -p "$(dirname "$GTK_MODE_FILE")"
 case "$THEME" in
-  argvus-light | argvus-light-float | github-light | github-light-float | solarized-light | solarized-light-float | frost | frost-float | catppuccin-latte | catppuccin-latte-float | gruvbox-light | gruvbox-light-float)
+    argvus-light | argvus-light-float | github-light | github-light-float | solarized-light | solarized-light-float | one-light | one-light-float | everforest-light | everforest-light-float | frost | frost-float | catppuccin-latte | catppuccin-latte-float | gruvbox-light | gruvbox-light-float)
     _gtk_theme_name="$(gtk_theme_name_for_theme "$THEME")"
     apply_gtk_theme_files light "$_gtk_theme_name" 0
     apply_gtk_runtime_settings prefer-light "$_gtk_theme_name" Adwaita-dark
