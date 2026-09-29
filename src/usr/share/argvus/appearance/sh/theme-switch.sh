@@ -355,8 +355,21 @@ theme_transition_cleanup() {
   trap - EXIT HUP INT TERM
 
   if [ "$THEME_TRANSITION_ACTIVE" -eq 1 ]; then
-    # Reuse the exact lifecycle behind SUPER + Shift + R. It owns config
-    # synchronization and the complete service list, including idle and polkit.
+    # The reset is intentionally non-runtime while the transaction is being
+    # assembled. Apply its final geometry before restarting consumers; the
+    # session reload path skips projection while this lock is held.
+    _spaces_script="$(paths_config hyprland/sh/spaces-switch.sh)"
+    _borders_script="$(paths_config hyprland/sh/borders-switch.sh)"
+    if [ -f "$_spaces_script" ] && ! sh "$_spaces_script" --apply >/dev/null 2>&1; then
+      [ "$_status" -ne 0 ] || _status=1
+    fi
+    if [ -f "$_borders_script" ] && ! sh "$_borders_script" --apply >/dev/null 2>&1; then
+      [ "$_status" -ne 0 ] || _status=1
+    fi
+    # Reuse the lifecycle fan-out behind SUPER + Shift + R. The theme
+    # transaction already owns projection and must not re-enter projection
+    # while holding theme-switch.lock; argvus-sessionctl recognizes this
+    # marker and only restarts the affected consumers.
     if ! argvus-sessionctl reload >/dev/null 2>&1; then
       argvus_tr appearance theme.reload_failed >&2
       [ "$_status" -ne 0 ] || _status=1
@@ -853,6 +866,19 @@ if ! _theme_wallpaper="$(find_theme_wallpaper "$THEME")"; then
     exit 1
   fi
   _theme_wallpaper=""
+fi
+
+# Theme selection is also a write operation on the canonical configuration.
+# Keep the legacy marker below as a derived compatibility projection for the
+# current Hyprland Lua and shell consumers. During argvus-config projection the
+# canonical mutation already happened, so calling it again would re-enter the
+# transaction.
+if [ "${ARGVUS_PROJECTING:-0}" != 1 ] && command -v argvus-config >/dev/null 2>&1; then
+  if [ -n "$_theme_wallpaper" ]; then
+    argvus-config apply-theme "$THEME" --wallpaper "$_theme_wallpaper" --reset-wallpaper >/dev/null 2>&1 || true
+  else
+    argvus-config apply-theme "$THEME" >/dev/null 2>&1 || true
+  fi
 fi
 
 theme_transition_begin

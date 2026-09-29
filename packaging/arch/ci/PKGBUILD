@@ -10,6 +10,7 @@ options=('!debug')
 depends=(
   'util-linux'
   'argvus-i18n'
+  'argvus-config'
   'argvus-session'
   'argvus-fonts'
   'argvus-wallpapers'
