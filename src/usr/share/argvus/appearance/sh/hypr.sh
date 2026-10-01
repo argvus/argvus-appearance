@@ -24,10 +24,21 @@ GET_HYPRLOCK_PATH=$(
 WALLPAPER_PATH="$GET_HYPRPAPER_PATH"
 HYPRLOCK_PATH="$GET_HYPRLOCK_PATH"
 
-# Official theme wallpapers are deliberately restricted to abstract assets.
-# Landscape files remain available to the manual wallpaper picker.
+# Query theme wallpaper via CLI, with fallback to hardcoded map (for backwards compat)
 argvus_theme_wallpaper() {
   _theme="${1%-float}"
+  _wallpaper_root="${WALLPAPER_ROOT:-${ARGVUS_BACKGROUNDS_DIR:-/usr/share/backgrounds}/argvus}"
+
+  # Try CLI first (argvus-appearance themes get <id> wallpaper)
+  if command -v argvus-appearance >/dev/null 2>&1; then
+    _wallpaper_name="$(argvus-appearance themes get "$_theme" wallpaper 2>/dev/null || true)"
+    if [ -n "$_wallpaper_name" ]; then
+      _wallpaper_path="${_wallpaper_root}/${_wallpaper_name}"
+      [ -f "$_wallpaper_path" ] && printf '%s\n' "$_wallpaper_path" && return 0
+    fi
+  fi
+
+  # Fallback: hardcoded map for built-ins (no CLI available)
   case "$_theme" in
     argvus-dark) _wallpaper_name="argvus-dark.jxl" ;;
     argvus-light) _wallpaper_name="argvus-light.jxl" ;;
@@ -53,7 +64,6 @@ argvus_theme_wallpaper() {
     everforest-light) _wallpaper_name="abstract/light/everforest-abstract-light.jxl" ;;
     *) return 1 ;;
   esac
-  _wallpaper_root="${WALLPAPER_ROOT:-${ARGVUS_BACKGROUNDS_DIR:-/usr/share/backgrounds}/argvus}"
   _wallpaper_path="${_wallpaper_root}/${_wallpaper_name}"
   [ -f "$_wallpaper_path" ] || return 1
   printf '%s\n' "$_wallpaper_path"
@@ -62,17 +72,33 @@ argvus_theme_wallpaper() {
 # A custom wallpaper is independent from the active visual theme. Keep its
 # selected path in the user-owned ARGVUS state so the session service can
 # restore it without relying on a transient systemd manager environment.
-CUSTOM_WALLPAPER_STATE="$ARGVUS_CONFIG_HOME/argvus/.wallpaper-custom"
+CUSTOM_WALLPAPER_DIR="${ARGVUS_CONFIG_HOME}/argvus/data"
+CUSTOM_WALLPAPER_STATE="${CUSTOM_WALLPAPER_DIR}/.wallpaper-custom"
+CUSTOM_WALLPAPER_LEGACY="${ARGVUS_CONFIG_HOME}/argvus/.wallpaper-custom"
 
 persist_custom_wallpaper() {
   _wallpaper_path="$1"
-  mkdir -p "${CUSTOM_WALLPAPER_STATE%/*}"
+  mkdir -p "$CUSTOM_WALLPAPER_DIR"
   printf '%s\n' "$_wallpaper_path" > "$CUSTOM_WALLPAPER_STATE"
 }
 
+# Read the canonical marker first. The legacy root copy is read-only: it can
+# still hold a selection made before the data/ migration.
 read_custom_wallpaper() {
-  [ -f "$CUSTOM_WALLPAPER_STATE" ] || return 1
-  sed -n '1p' "$CUSTOM_WALLPAPER_STATE"
+  if [ -f "$CUSTOM_WALLPAPER_STATE" ]; then
+    sed -n '1p' "$CUSTOM_WALLPAPER_STATE"
+    return 0
+  fi
+  [ -f "$CUSTOM_WALLPAPER_LEGACY" ] || return 1
+  sed -n '1p' "$CUSTOM_WALLPAPER_LEGACY"
+}
+
+# Drop the custom selection so a theme change stays authoritative. Remove the
+# legacy root copy too: leaving it behind lets a pre-migration selection
+# resurrect the old wallpaper on the next session reload.
+clear_custom_wallpaper() {
+  rm -f "$CUSTOM_WALLPAPER_STATE" "$CUSTOM_WALLPAPER_LEGACY"
+  return 0
 }
 
 hypr_monitors() {
