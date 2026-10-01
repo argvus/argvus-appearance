@@ -9,7 +9,7 @@ ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}
 . "$ARGVUS_BOOTSTRAP"
 ARGVUS_MUTABLE_CONFIG=1
 
-STATE_DIR="${ARGVUS_CONFIG_HOME}/argvus"
+STATE_DIR="${ARGVUS_CONFIG_HOME}/argvus/data"
 ACCENT_FILE="${STATE_DIR}/.accent-color"
 ACTIVE_FILE="${STATE_DIR}/.active-theme"
 GREETER_THEME_STATE_DIR="${ARGVUS_GREETER_THEME_STATE_DIR:-/var/lib/argvus/greeter/themes}"
@@ -37,29 +37,38 @@ canonical_theme_id() {
 }
 
 theme_default_accent() {
-  case "$1" in
-    one-dark|one-dark-float) printf '#61AFEF\n' ;;
-    dracula|dracula-float) printf '#BD93F9\n' ;;
-    argvus-dark|argvus-dark-float) printf '#3590bd\n' ;;
-    silver-dark|silver-dark-float) printf '#595959\n' ;;
-    argvus-light|argvus-light-float) printf '#181818\n' ;;
-    github-light|github-light-float) printf '#0969DA\n' ;;
-    one-light|one-light-float) printf '#4078F2\n' ;;
-    everforest-light|everforest-light-float) printf '#3A94C5\n' ;;
-    solarized-light|solarized-light-float) printf '#268BD2\n' ;;
-    rose-pine|rose-pine-float) printf '#C4A7E7\n' ;;
-    frost|frost-float) printf '#0969DA\n' ;;
-    catppuccin-latte|catppuccin-latte-float) printf '#1E66F5\n' ;;
-    gruvbox-light|gruvbox-light-float) printf '#458588\n' ;;
-    slate-dark|slate-dark-float) printf '#7391a5\n' ;;
-    universe|universe-float) printf '#eeeeee\n' ;;
-    gruvbox-high-dark|gruvbox-high-dark-float) printf '#D79921\n' ;;
-    gruvbox-dark|gruvbox-dark-float) printf '#D4BE98\n' ;;
-    tokyo-night|tokyo-night-float) printf '#7AA2F7\n' ;;
-    solitude|solitude-float) printf '#798186\n' ;;
-    sunset|sunset-float) printf '#E2BE8A\n' ;;
-    hackerman|hackerman-float) printf '#82FB9C\n' ;;
-    monokai-dark|monokai-dark-float) printf '#78DCE8\n' ;;
+  _theme_id="${1%-float}"
+
+  # Try CLI first (argvus-appearance themes get <id> accent)
+  if command -v argvus-appearance >/dev/null 2>&1; then
+    _cli_accent="$(argvus-appearance themes get "$_theme_id" accent 2>/dev/null || true)"
+    [ -n "$_cli_accent" ] && printf '%s\n' "$_cli_accent" && return 0
+  fi
+
+  # Fallback: hardcoded map for backwards compatibility
+  case "$_theme_id" in
+    one-dark) printf '#61AFEF\n' ;;
+    dracula) printf '#BD93F9\n' ;;
+    argvus-dark) printf '#3590bd\n' ;;
+    silver-dark) printf '#595959\n' ;;
+    argvus-light) printf '#181818\n' ;;
+    github-light) printf '#0969DA\n' ;;
+    one-light) printf '#4078F2\n' ;;
+    everforest-light) printf '#3A94C5\n' ;;
+    solarized-light) printf '#268BD2\n' ;;
+    rose-pine) printf '#C4A7E7\n' ;;
+    frost) printf '#0969DA\n' ;;
+    catppuccin-latte) printf '#1E66F5\n' ;;
+    gruvbox-light) printf '#458588\n' ;;
+    slate-dark) printf '#7391a5\n' ;;
+    universe) printf '#eeeeee\n' ;;
+    gruvbox-high-dark) printf '#D79921\n' ;;
+    gruvbox-dark) printf '#D4BE98\n' ;;
+    tokyo-night) printf '#7AA2F7\n' ;;
+    solitude) printf '#798186\n' ;;
+    sunset) printf '#E2BE8A\n' ;;
+    hackerman) printf '#82FB9C\n' ;;
+    monokai-dark) printf '#78DCE8\n' ;;
     *) return 1 ;;
   esac
 }
@@ -68,6 +77,16 @@ read_accent_state() {
   _state_theme="$(read_state "$ACTIVE_FILE" "$DEFAULT_THEME")"
   _state_default="$(theme_default_accent "$_state_theme" 2>/dev/null || printf '%s\n' "$DEFAULT_ACCENT")"
   _state_accent="$(read_state "$ACCENT_FILE" "$_state_default")"
+
+  # The canonical document owns a deliberately chosen highlight color. Prefer it
+  # over the data/ marker so an accent picked in Control Center or Control Panel
+  # survives a session start, a service reload, or any other code path that
+  # rewrites the marker without the canonical key.
+  _canonical_accent="$(canonical_accent)"
+  if [ -n "$_canonical_accent" ]; then
+    _state_accent="$_canonical_accent"
+  fi
+
   case "$_state_accent" in
     blue) _state_accent="#3590BD" ;;
     slate-blue) _state_accent="#7391A5" ;;
@@ -83,6 +102,15 @@ read_accent_state() {
     \#??????|??????) printf '%s\n' "$_state_accent" ;;
     *) printf '%s\n' "$_state_default" ;;
   esac
+}
+
+# Returns the canonical highlight color when, and only when, the user owns it
+# (`/appearance/accent_custom` is true). Prints nothing otherwise so the caller
+# keeps using the theme default or the existing marker.
+canonical_accent() {
+  command -v argvus-config >/dev/null 2>&1 || return 0
+  [ "$(argvus-config get /appearance/accent_custom --raw 2>/dev/null)" = "true" ] || return 0
+  argvus-config get /appearance/accent --raw 2>/dev/null | sed -n '1{s/\r$//;s/^[[:space:]]*//;s/[[:space:]]*$//;p;}'
 }
 
 select_accent() {
@@ -280,6 +308,43 @@ apply_rofi() {
     "$_file"
 }
 
+apply_mode_overlays() {
+  # The mode overlays are imported after the per-theme files in every Waybar,
+  # telemetry and Rofi aggregate, so they are the last word on the rendered
+  # color. Light mode (`toggle-mode.sh`) writes hardcoded grays there, which used
+  # to overwrite the accent entirely.
+  #
+  # Only the variables that actually carry the accent in the dark theme are
+  # rewritten. The foreground, window and status variables stay as Light mode
+  # chose them, because they exist to keep text readable on a light background;
+  # tinting them with the accent would trade legibility for consistency.
+  # Translucent values keep their Light-mode alpha, since that alpha is a
+  # deliberate contrast choice rather than part of the accent.
+  _mode_css="$(paths_config "appearance/config/waybar/mode.css")"
+  if [ -f "$_mode_css" ]; then
+    sed -i \
+      -e "s|^@define-color th-decorate .*|@define-color th-decorate        ${COLOR};|" \
+      -e "s|^@define-color th-power .*|@define-color th-power           ${COLOR};|" \
+      -e "s|^\(@define-color th-decorate-rgba *\)rgba([^,]*,[^,]*,[^,]*,\ *\([^),]*\))|\1rgba(${RED}, ${GREEN}, ${BLUE}, \2)|" \
+      -e "s|^\(@define-color th-border-rights *\)rgba([^,]*,[^,]*,[^,]*,\ *\([^),]*\))|\1rgba(${RED}, ${GREEN}, ${BLUE}, \2)|" \
+      -e "s|^\(@define-color th-mpris-border *\)rgba([^,]*,[^,]*,[^,]*,\ *\([^),]*\))|\1rgba(${RED}, ${GREEN}, ${BLUE}, \2)|" \
+      "$_mode_css"
+  fi
+
+  # `th-fg` is the accent in the dark theme, `th-row-alt` and `th-border-color`
+  # are accent-tinted. `th-fg-selected` is deliberately excluded: it is the text
+  # color drawn on the highlighted row and must stay contrasting.
+  _mode_rasi="$(paths_config "launcher/config/mode.rasi")"
+  if [ -f "$_mode_rasi" ]; then
+    sed -i \
+      -e "s|^[[:space:]]*th-fg:.*|    th-fg:            rgb(${RED}, ${GREEN}, ${BLUE});|" \
+      -e "s|^\([[:space:]]*th-row-alt:[[:space:]]*\)rgba([^,]*,[^,]*,[^,]*,\ *\([^),]*\))|\1rgba(${RED}, ${GREEN}, ${BLUE}, \2)|" \
+      -e "s|^\([[:space:]]*th-border-color:[[:space:]]*\)rgba([^,]*,[^,]*,[^,]*,\ *\([^),]*\))|\1rgba(${RED}, ${GREEN}, ${BLUE}, \2)|" \
+      -e "s|^\([[:space:]]*th-border-color:[[:space:]]*\)rgb([^,)]*,[^,)]*,[^,)]*)|\1rgb(${RED}, ${GREEN}, ${BLUE})|" \
+      "$_mode_rasi"
+  fi
+}
+
 apply_qt_palette() {
   _file="$(paths_config "appearance/config/qt6ct/colors/${THEME}.conf")"
   [ -f "$_file" ] || return 0
@@ -321,7 +386,6 @@ apply_application_colors() {
   _hyprlock="$(paths_config lock/config/hyprlock.conf)"
   _hyprtoolkit="$(paths_config appearance/config/hypr/hyprtoolkit.conf)"
   _dunst="$(paths_config notifications/config/dunstrc)"
-  _foot="$(paths_config app-profiles/config/foot/foot.ini)"
   sync_snappy_switcher_theme
   _snappy="${ARGVUS_CONFIG_HOME}/snappy-switcher/themes/${THEME}.ini"
   _yazi="$(paths_config "app-profiles/config/yazi/flavors/${THEME}.yazi/flavor.toml")"
@@ -338,11 +402,6 @@ apply_application_colors() {
       set_dunst_section_value "$_dunst" "$_section" highlight "$COLOR"
     done
   fi
-  [ -f "$_foot" ] && sed -i "s|^[[:space:]]*border-color=.*|border-color=${HEX}ff|" "$_foot"
-  _native_foot="${ARGVUS_CONFIG_HOME}/foot/foot.ini"
-  if [ -f "$_native_foot" ] && grep -q 'argvus.*/foot/themes' "$_native_foot"; then
-    sed -i "s|^[[:space:]]*border-color=.*|border-color=${HEX}ff|" "$_native_foot"
-  fi
   [ -f "$_snappy" ] && sed -i \
     -e "s|^border_color .*|border_color  = ${COLOR}ff|" \
     -e "s|^badge_bg .*|badge_bg      = ${COLOR}ff|" "$_snappy"
@@ -350,8 +409,25 @@ apply_application_colors() {
   if [ -f "$_yazi" ]; then
     _old_yazi_accent="$(theme_default_accent "$THEME" 2>/dev/null || true)"
     if [ -n "$_old_yazi_accent" ]; then
+      # The theme default may be written in either case in the TOML, so match
+      # case-insensitively. `I` is a GNU sed extension and is rejected by other
+      # sed implementations, so build the lowercase pattern explicitly instead.
       _old_yazi_hex="${_old_yazi_accent#\#}"
-      sed -i "s|#${_old_yazi_hex}|${COLOR}|gI" "$_yazi"
+      _old_yazi_upper="$(printf '%s' "$_old_yazi_hex" | tr 'a-f' 'A-F')"
+      # Build a per-digit character class covering both cases of each hex digit,
+      # so any case combination matches exactly this accent and nothing else.
+      # A blanket six-digit class would also rewrite unrelated colors such as
+      # `#111111`, and the GNU `I` flag is not portable.
+      _old_yazi_pattern="$(
+        _index=1
+        while [ "$_index" -le 6 ]; do
+          _lower_digit="$(printf '%s' "$_old_yazi_hex" | cut -c"$_index")"
+          _upper_digit="$(printf '%s' "$_old_yazi_upper" | cut -c"$_index")"
+          printf '[%s%s]' "$_lower_digit" "$_upper_digit"
+          _index=$((_index + 1))
+        done
+      )"
+      sed -i -e "s|#${_old_yazi_pattern}|${COLOR}|g" "$_yazi"
     fi
   fi
 
@@ -442,6 +518,7 @@ apply_theme_references
 apply_waybar
 apply_control_center
 apply_rofi
+apply_mode_overlays
 apply_qt_palette
 apply_quickshell
 apply_application_colors
