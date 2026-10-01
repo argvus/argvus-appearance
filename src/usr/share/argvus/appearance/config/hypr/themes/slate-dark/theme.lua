@@ -11,6 +11,4 @@ return {
   gaps_in = 1,
   gaps_out = 1,
   border_size = 1,
-  file_manager_opacity = "1 1",
-  term_opacity = "1 1",
 }
