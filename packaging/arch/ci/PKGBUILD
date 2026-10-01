@@ -14,7 +14,7 @@ depends=(
   'argvus-session'
   'argvus-fonts'
   'argvus-wallpapers'
-  'argvus-theme-splash'
+  'argvus-loading-theme'
   'brightnessctl'
   'fontconfig'
   'gtk3'
