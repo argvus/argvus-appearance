@@ -64,7 +64,26 @@ canonical_theme_id() {
 }
 
 THEME="$(canonical_theme_id "${1:-}")"
-ACTIVE_FILE="${ARGVUS_CONFIG_HOME}/argvus/.active-theme"
+
+# Sticky/Float is an independent setting (/layout/variant), decoupled from
+# theme selection. Callers always pass a bare family id now, but strip a
+# legacy "-float" suffix defensively (older menus/profiles may still send
+# one) and resolve the actual on-disk variant from the current mode instead
+# of from the caller's choice, so switching themes never changes the mode.
+if [ -n "$THEME" ]; then
+  THEME_FAMILY="${THEME%-float}"
+  if command -v argvus-config >/dev/null 2>&1; then
+    THEME_VARIANT="$(argvus-config get /layout/variant --raw 2>/dev/null || true)"
+  else
+    THEME_VARIANT=""
+  fi
+  case "$THEME_VARIANT" in
+    float) THEME="${THEME_FAMILY}-float" ;;
+    *) THEME="$THEME_FAMILY" ;;
+  esac
+fi
+
+ACTIVE_FILE="${ARGVUS_CONFIG_HOME}/argvus/data/.active-theme"
 GREETER_THEME_STATE_DIR="${ARGVUS_GREETER_THEME_STATE_DIR:-/var/lib/argvus/greeter/themes}"
 RUNTIME=1
 mkdir -p "${ACTIVE_FILE%/*}"
@@ -82,6 +101,88 @@ if [ "${ARGVUS_NO_RUNTIME:-0}" = 1 ]; then
   RUNTIME=0
 fi
 
+THEME_TRANSITION_ACTIVE=0
+LOADING_THEME_PID=0
+THEME_CONFIG_READY=0
+THEME_APPLY_STATUS=0
+
+loading_theme_pid_file() {
+  printf '%s/argvus-loading-theme.pid\n' "${XDG_RUNTIME_DIR:-/tmp}"
+}
+
+loading_theme_color() {
+  _key="$1"
+  _fallback="$2"
+  _file="$(paths_config "appearance/config/hypr/themes/${THEME}/hyprtoolkit.conf")"
+  _color=""
+  if [ -f "$_file" ]; then
+    _color="$(sed -n "s|^[[:space:]]*${_key}[[:space:]]*=[[:space:]]*0xFF\([[:xdigit:]]\{6\}\)[[:space:]]*$|#\1|p" "$_file" | head -n 1)"
+  fi
+  [ -n "$_color" ] && printf '%s\n' "$_color" || printf '%s\n' "$_fallback"
+}
+
+# Get theme metadata via CLI (fallback to file-based config if CLI unavailable)
+get_theme_metadata() {
+  _theme_id="$1"
+  _field="$2"
+  _fallback="$3"
+
+  # Try CLI first (argvus-appearance themes get)
+  if command -v argvus-appearance >/dev/null 2>&1; then
+    _value="$(argvus-appearance themes get "$_theme_id" "$_field" 2>/dev/null || true)"
+    [ -n "$_value" ] && printf '%s\n' "$_value" && return 0
+  fi
+
+  # Fallback: return provided fallback value
+  printf '%s\n' "$_fallback"
+}
+
+loading_theme_start() {
+  [ "$RUNTIME" -eq 1 ] || return 0
+  _splash_bin="${ARGVUS_LOADING_THEME_BIN:-/usr/lib/argvus/loading-theme/splash}"
+  [ -x "$_splash_bin" ] || {
+    printf '%s\n' 'argvus-appearance: argvus-loading-theme is unavailable; continuing without overlay' >&2
+    return 0
+  }
+
+  _splash_ready="${XDG_RUNTIME_DIR:-/tmp}/argvus-loading-theme.$$"
+  rm -f "$_splash_ready"
+  _splash_foreground="$(loading_theme_color text '#f4f4f4')"
+  _splash_background="$(loading_theme_color background '#101218')"
+  _splash_accent="$(loading_theme_color accent '#7aa2f7')"
+  "$_splash_bin" \
+    --theme "$THEME" \
+    --background "$_splash_background" \
+    --foreground "$_splash_foreground" \
+    --accent "$_splash_accent" \
+    --ready-file "$_splash_ready" &
+  LOADING_THEME_PID=$!
+
+  _splash_wait=0
+  while [ ! -s "$_splash_ready" ] && kill -0 "$LOADING_THEME_PID" 2>/dev/null; do
+    [ "$_splash_wait" -ge 40 ] && break
+    sleep 0.05
+    _splash_wait=$((_splash_wait + 1))
+  done
+  if [ ! -s "$_splash_ready" ]; then
+    printf '%s\n' 'argvus-appearance: argvus-loading-theme did not become ready; continuing without overlay' >&2
+    kill -TERM "$LOADING_THEME_PID" 2>/dev/null || true
+    wait "$LOADING_THEME_PID" 2>/dev/null || true
+    LOADING_THEME_PID=0
+  else
+    printf '%s\n' "$LOADING_THEME_PID" >"$(loading_theme_pid_file)"
+  fi
+  rm -f "$_splash_ready"
+}
+
+loading_theme_stop() {
+  [ "$LOADING_THEME_PID" -gt 0 ] || return 0
+  kill "$LOADING_THEME_PID" 2>/dev/null || true
+  wait "$LOADING_THEME_PID" 2>/dev/null || true
+  rm -f "$(loading_theme_pid_file)"
+  LOADING_THEME_PID=0
+}
+
 if [ -z "$THEME" ]; then
   # The selector uses the same two-pass transaction as the removable-device
   # menu: the first Rofi closes before the model submenu opens.
@@ -93,7 +194,23 @@ fi
 if [ "${ARGVUS_THEME_LOCKED:-0}" != 1 ]; then
   _theme_lock="$(paths_cache theme-switch.lock)"
   mkdir -p "${_theme_lock%/*}"
-  exec env ARGVUS_THEME_LOCKED=1 flock --exclusive --close "$_theme_lock" sh "$0" "$THEME"
+  loading_theme_start
+  trap 'loading_theme_stop' EXIT
+  env ARGVUS_THEME_LOCKED=1 ARGVUS_LOADING_THEME_EXTERNAL=1 \
+    flock --exclusive --close "$_theme_lock" sh "$0" "$THEME"
+  _theme_status=$?
+  # Session preparation materializes files with NO_RUNTIME=1. Do not reload
+  # systemd components while their startup transaction is still in progress.
+  if [ "$_theme_status" -eq 0 ] \
+    && [ "${ARGVUS_NO_RUNTIME:-0}" != 1 ] \
+    && [ "${ARGVUS_CONFIG_SERVICE:-0}" != 1 ] \
+    && [ "${ARGVUS_PROJECTING:-0}" != 1 ] \
+    && command -v systemctl >/dev/null 2>&1; then
+    systemctl --user reload argvus-config.service >/dev/null 2>&1 || _theme_status=$?
+  fi
+  loading_theme_stop
+  trap - EXIT
+  exit "$_theme_status"
 fi
 
 ensure_theme_parent() {
@@ -231,7 +348,7 @@ sync_snappy_switcher_theme() {
 font_state_value() {
   _key="$1"
   _fallback="$2"
-  _fonts_file="${ARGVUS_CONFIG_HOME}/argvus/fonts.conf"
+  _fonts_file="${ARGVUS_CONFIG_HOME}/argvus/data/generated/fonts.conf"
   if [ -f "$_fonts_file" ]; then
     _value="$(sed -n "s|^${_key}=||p" "$_fonts_file" | head -n1)"
     [ -n "$_value" ] && { printf '%s\n' "$_value"; return 0; }
@@ -287,69 +404,6 @@ native_config_home() {
   printf '%s\n' "${XDG_CONFIG_HOME:-$HOME/.config}"
 }
 
-# A theme switch rewrites several live surfaces and also reloads applications
-# such as Kitty. The standalone layer-shell splash keeps the transition visible
-# while services are restarted and configuration is synchronized.
-THEME_TRANSITION_ACTIVE=0
-THEME_SPLASH_PID=0
-THEME_CONFIG_READY=0
-THEME_APPLY_STATUS=0
-
-theme_splash_color() {
-  _key="$1"
-  _fallback="$2"
-  _file="$(paths_config "appearance/config/hypr/themes/${THEME}/hyprtoolkit.conf")"
-  _color=""
-  if [ -f "$_file" ]; then
-    _color="$(sed -n "s|^[[:space:]]*${_key}[[:space:]]*=[[:space:]]*0xFF\([[:xdigit:]]\{6\}\)[[:space:]]*$|#\1|p" "$_file" | head -n 1)"
-  fi
-  [ -n "$_color" ] && printf '%s\n' "$_color" || printf '%s\n' "$_fallback"
-}
-
-theme_splash_start() {
-  [ "$RUNTIME" -eq 1 ] || return 0
-  _splash_bin="${ARGVUS_THEME_SPLASH_BIN:-/usr/lib/argvus/theme-splash/splash}"
-  [ -x "$_splash_bin" ] || {
-    printf '%s\n' 'argvus-appearance: argvus-theme-splash is unavailable; continuing without overlay' >&2
-    return 0
-  }
-
-  _splash_ready="${XDG_RUNTIME_DIR:-/tmp}/argvus-theme-splash.$$"
-  rm -f "$_splash_ready"
-  _splash_foreground="$(theme_splash_color text '#f4f4f4')"
-  _splash_background="$(theme_splash_color background '#101218')"
-  _splash_accent="$(theme_splash_color accent '#7aa2f7')"
-  "$_splash_bin" \
-    --theme "$THEME" \
-    --background "$_splash_background" \
-    --foreground "$_splash_foreground" \
-    --accent "$_splash_accent" \
-    --ready-file "$_splash_ready" &
-  THEME_SPLASH_PID=$!
-
-  # Readiness is a bounded startup handshake, not a visual-animation poll.
-  _splash_wait=0
-  while [ ! -s "$_splash_ready" ] && kill -0 "$THEME_SPLASH_PID" 2>/dev/null; do
-    [ "$_splash_wait" -ge 40 ] && break
-    sleep 0.05
-    _splash_wait=$((_splash_wait + 1))
-  done
-  if [ ! -s "$_splash_ready" ]; then
-    printf '%s\n' 'argvus-appearance: argvus-theme-splash did not become ready; continuing without overlay' >&2
-    kill -TERM "$THEME_SPLASH_PID" 2>/dev/null || true
-    wait "$THEME_SPLASH_PID" 2>/dev/null || true
-    THEME_SPLASH_PID=0
-  fi
-  rm -f "$_splash_ready"
-}
-
-theme_splash_stop() {
-  [ "$THEME_SPLASH_PID" -gt 0 ] || return 0
-  kill "$THEME_SPLASH_PID" 2>/dev/null || true
-  wait "$THEME_SPLASH_PID" 2>/dev/null || true
-  THEME_SPLASH_PID=0
-}
-
 theme_transition_cleanup() {
   _status="${1:-0}"
   trap - EXIT HUP INT TERM
@@ -366,18 +420,17 @@ theme_transition_cleanup() {
     if [ -f "$_borders_script" ] && ! sh "$_borders_script" --apply >/dev/null 2>&1; then
       [ "$_status" -ne 0 ] || _status=1
     fi
-    # Reuse the lifecycle fan-out behind SUPER + Shift + R. The theme
-    # transaction already owns projection and must not re-enter projection
-    # while holding theme-switch.lock; argvus-sessionctl recognizes this
-    # marker and only restarts the affected consumers.
-    if ! argvus-sessionctl reload >/dev/null 2>&1; then
-      argvus_tr appearance theme.reload_failed >&2
-      [ "$_status" -ne 0 ] || _status=1
-    fi
+    # Runtime application is owned by the outer argvus-config.service reload.
+    # Re-entering argvus-sessionctl here used to perform a second full reload
+    # while theme-switch.lock was held, leaving Hyprland exec children stuck.
+    # Keep this cleanup limited to the transactional generated-file updates;
+    # the outer wrapper applies the final canonical projection exactly once.
     THEME_TRANSITION_ACTIVE=0
   fi
 
-  theme_splash_stop
+  if [ "${ARGVUS_LOADING_THEME_EXTERNAL:-0}" != 1 ]; then
+    loading_theme_stop
+  fi
 
   if [ "$_status" -eq 0 ] && [ "$THEME_CONFIG_READY" -eq 1 ]; then
     :
@@ -393,7 +446,9 @@ theme_transition_begin() {
   trap 'exit 130' INT
   trap 'exit 143' TERM
   THEME_TRANSITION_ACTIVE=1
-  theme_splash_start
+  if [ "${ARGVUS_LOADING_THEME_EXTERNAL:-0}" != 1 ]; then
+    loading_theme_start
+  fi
 
   for _unit in \
     argvus-taskbar.service \
@@ -486,9 +541,6 @@ ROFI_THEMES="$(optional_theme_parent launcher/config/themes "$THEME")"
 ROFI_CONFIG="$(paths_config launcher/config/config.rasi)"
 ROFI_THEME="$(paths_config launcher/config/theme.rasi)"
 ROFI_MODE="$(paths_config launcher/config/mode.rasi)"
-FOOT_CONFIG="$(paths_config app-profiles/config/foot/foot.ini)"
-FOOT_THEMES="$(optional_theme_parent app-profiles/config/foot/themes "$THEME")"
-FOOT_SYSTEM_THEMES="$(paths_system_config app-profiles/config/foot/themes)"
 YAZI_CONFIG_ROOT="$(paths_config app-profiles/config/yazi)"
 YAZI_SYSTEM_ROOT="$(paths_system_config app-profiles/config/yazi)"
 SNAPPY_THEMES="$(optional_theme_parent app-profiles/config/snappy-switcher/themes "$THEME")"
@@ -556,70 +608,6 @@ set_dunst_section_value() {
   ' "$_file" > "$_tmp" && mv "$_tmp" "$_file"
 }
 
-should_manage_foot_config() {
-  _conf="$1"
-  [ -f "$_conf" ] || return 0
-  grep -q 'argvus.*/foot/themes' "$_conf"
-}
-
-foot_color_value() {
-  _file="$1"
-  _key="$2"
-  sed -n "s|^[[:space:]]*${_key}[[:space:]]*=[[:space:]]*\\([0-9A-Fa-f][0-9A-Fa-f ]*\\).*|\\1|p" "$_file" | head -n1
-}
-
-send_foot_palette_to_pty() {
-  _tty="$1"
-  _theme_file="$2"
-  [ -w "$_tty" ] || return 0
-
-  _fg="$(foot_color_value "$_theme_file" foreground)"
-  _bg="$(foot_color_value "$_theme_file" background)"
-  _sel_fg="$(foot_color_value "$_theme_file" selection-foreground)"
-  _sel_bg="$(foot_color_value "$_theme_file" selection-background)"
-  _cursor="$(foot_color_value "$_theme_file" cursor | awk '{print $2}')"
-
-  {
-    [ -n "$_fg" ] && printf '\033]10;#%s\a' "$_fg"
-    [ -n "$_bg" ] && printf '\033]11;#%s\a' "$_bg"
-    [ -n "$_cursor" ] && printf '\033]12;#%s\a' "$_cursor"
-    [ -n "$_sel_bg" ] && printf '\033]17;#%s\a' "$_sel_bg"
-    [ -n "$_sel_fg" ] && printf '\033]19;#%s\a' "$_sel_fg"
-
-    _idx=0
-    for _key in regular0 regular1 regular2 regular3 regular4 regular5 regular6 regular7 \
-      bright0 bright1 bright2 bright3 bright4 bright5 bright6 bright7; do
-      _value="$(foot_color_value "$_theme_file" "$_key")"
-      [ -n "$_value" ] && printf '\033]4;%s;#%s\a' "$_idx" "$_value"
-      _idx=$((_idx + 1))
-    done
-  } > "$_tty" 2>/dev/null || true
-}
-
-apply_running_foot_theme() {
-  _theme_file="$1"
-  [ "$RUNTIME" -eq 1 ] || return 0
-  [ -f "$_theme_file" ] || return 0
-
-  for _pid in $(pgrep -x foot 2>/dev/null) $(pgrep -x footclient 2>/dev/null); do
-    for _fd in 0 1 2; do
-      _tty="$(readlink "/proc/$_pid/fd/$_fd" 2>/dev/null || true)"
-      case "$_tty" in
-        /dev/pts/*|/dev/tty*) send_foot_palette_to_pty "$_tty" "$_theme_file" ;;
-      esac
-    done
-
-    for _child in $(pgrep -P "$_pid" 2>/dev/null); do
-      for _fd in 0 1 2; do
-        _tty="$(readlink "/proc/$_child/fd/$_fd" 2>/dev/null || true)"
-        case "$_tty" in
-          /dev/pts/*|/dev/tty*) send_foot_palette_to_pty "$_tty" "$_theme_file" ;;
-        esac
-      done
-    done
-  done
-}
-
 apply_dunst_theme() {
   _dunstrc="$(paths_config notifications/config/dunstrc)"
   _theme_helper="$(paths_system_config notifications/sh/theme.sh)"
@@ -652,7 +640,7 @@ apply_argvus_storage_theme() {
   _storage_theme_dest="$(paths_config removable-devices/config/theme.css)"
 
   # Tenta encontrar os arquivos de tema em ordem de prioridade:
-  # 1. Diretório do usuário (~/.config/argvus/removable-devices/themes)
+  # 1. Diretório do usuário (~/.config/argvus/data/removable-devices/themes)
   # 2. Diretório canônico do sistema (/usr/share/argvus/removable-devices/config/themes)
   # 3. Diretório legado do sistema (/etc/argvus/taskbar/storage/themes)
   _theme_src=""
@@ -874,11 +862,23 @@ fi
 # canonical mutation already happened, so calling it again would re-enter the
 # transaction.
 if [ "${ARGVUS_PROJECTING:-0}" != 1 ] && command -v argvus-config >/dev/null 2>&1; then
-  if [ -n "$_theme_wallpaper" ]; then
-    argvus-config apply-theme "$THEME" --wallpaper "$_theme_wallpaper" --reset-wallpaper >/dev/null 2>&1 || true
+  # Clear the canonical accent override in the same transaction as the theme
+  # write, so the official theme default is what gets persisted.
+  if [ "${ARGVUS_ACCENT_OFFICIAL:-0}" = 1 ]; then
+    _theme_accent_flag="--reset-accent"
   else
-    argvus-config apply-theme "$THEME" >/dev/null 2>&1 || true
+    _theme_accent_flag=""
   fi
+  # /appearance/theme stores the canonical family id, never the -float
+  # suffix: the variant is owned by /layout/variant (mode-switch.sh), not by
+  # theme selection.
+  if [ -n "$_theme_wallpaper" ]; then
+    argvus-config apply-theme "$THEME_FAMILY" $_theme_accent_flag \
+      --wallpaper "$_theme_wallpaper" --reset-wallpaper >/dev/null 2>&1 || true
+  else
+    argvus-config apply-theme "$THEME_FAMILY" $_theme_accent_flag >/dev/null 2>&1 || true
+  fi
+  unset _theme_accent_flag
 fi
 
 theme_transition_begin
@@ -1013,26 +1013,6 @@ if command -v argvus-terminal >/dev/null 2>&1; then
   fi
 fi
 
-if [ -f "$FOOT_SYSTEM_THEMES/$THEME/theme.ini" ]; then
-  mkdir -p "$FOOT_THEMES/$THEME"
-  cp "$FOOT_SYSTEM_THEMES/$THEME/theme.ini" "$FOOT_THEMES/$THEME/theme.ini"
-fi
-
-if [ -f "$FOOT_THEMES/$THEME/theme.ini" ]; then
-  sed -i "s|^include = .*/foot/themes/.*/theme.ini|include = ${FOOT_THEMES}/${THEME}/theme.ini|" "$FOOT_CONFIG"
-  sed -i "s|^font=.*|font=${ARGVUS_TERMINAL_FAMILY}:size=${ARGVUS_TERMINAL_SIZE}, Noto Color Emoji:size=12|" "$FOOT_CONFIG"
-  _native_foot="${ARGVUS_CONFIG_HOME}/foot/foot.ini"
-  if should_manage_foot_config "$_native_foot"; then
-    mkdir -p "${_native_foot%/*}"
-    if [ ! -f "$_native_foot" ]; then
-      cp "$FOOT_CONFIG" "$_native_foot"
-    fi
-    sed -i "s|^include = .*/foot/themes/.*/theme.ini|include = ${FOOT_THEMES}/${THEME}/theme.ini|" "$_native_foot"
-    sed -i "s|^font=.*|font=${ARGVUS_TERMINAL_FAMILY}:size=${ARGVUS_TERMINAL_SIZE}, Noto Color Emoji:size=12|" "$_native_foot"
-  fi
-  apply_running_foot_theme "$FOOT_THEMES/$THEME/theme.ini"
-fi
-
 apply_dunst_theme
 
 if [ -f "$HYPR_THEMES/$THEME/hyprtoolkit.conf" ]; then
@@ -1097,7 +1077,7 @@ fi
 # Reset GTK mode to match the selected theme.
 MODE_CSS="$(paths_config appearance/config/waybar/mode.css)"
 printf '/* mode.css — reset on theme switch */\n' > "$MODE_CSS"
-GTK_MODE_FILE="${ARGVUS_CONFIG_HOME}/argvus/.gtk-mode"
+GTK_MODE_FILE="${ARGVUS_CONFIG_HOME}/argvus/data/.gtk-mode"
 mkdir -p "$(dirname "$GTK_MODE_FILE")"
 case "$THEME" in
     argvus-light | argvus-light-float | github-light | github-light-float | solarized-light | solarized-light-float | one-light | one-light-float | everforest-light | everforest-light-float | frost | frost-float | catppuccin-latte | catppuccin-latte-float | gruvbox-light | gruvbox-light-float)
@@ -1112,9 +1092,21 @@ case "$THEME" in
     ;;
 esac
 
-# Every theme owns its default accent. A manual accent remains active only until
-# the user switches themes, including when switching back to the same theme.
-if ! sh "$(paths_config appearance/sh/accent-switch.sh)" --theme-default >/dev/null 2>&1; then
+# A theme owns its default accent, so an explicit official-theme selection
+# restores the theme default and clears the canonical override. A highlight
+# color the user picked deliberately is canonical state
+# (`/appearance/accent_custom`) and survives every other theme change, such as
+# session startup, configuration projection and custom profile applies, where
+# the new theme only owns backgrounds.
+if [ "${ARGVUS_ACCENT_OFFICIAL:-0}" != 1 ] \
+  && command -v argvus-config >/dev/null 2>&1 \
+  && [ "$(argvus-config get /appearance/accent_custom --raw 2>/dev/null)" = "true" ]; then
+  _accent_mode="--apply-static"
+else
+  _accent_mode="--theme-default"
+fi
+
+if ! sh "$(paths_config appearance/sh/accent-switch.sh)" "$_accent_mode" >/dev/null 2>&1; then
   argvus_tr appearance theme.accent_restore_failed "theme=$THEME" >&2
   exit 1
 fi
@@ -1151,7 +1143,7 @@ fi
 # A theme change is an explicit request to use the theme's wallpaper. Clear
 # the independent custom selection so the new theme also remains active after
 # the next logout/login cycle.
-rm -f "$ARGVUS_CONFIG_HOME/argvus/.wallpaper-custom"
+clear_custom_wallpaper
 if ! apply_wallpaper "$_theme_wallpaper"; then
   argvus_tr appearance theme.wallpaper_prepare_failed "theme=$THEME" >&2
   exit 1
@@ -1160,11 +1152,6 @@ fi
 if [ "$RUNTIME" -eq 1 ]; then
   # Signal running kitty instances to reload config (SIGUSR1)
   for _pid in $(pgrep -x kitty 2>/dev/null); do
-    kill -USR1 "$_pid" 2>/dev/null || true
-  done
-
-  # Signal running foot instances to use their dark color theme.
-  for _pid in $(pgrep -x foot 2>/dev/null) $(pgrep -x footclient 2>/dev/null); do
     kill -USR1 "$_pid" 2>/dev/null || true
   done
 fi
