@@ -8,11 +8,17 @@ wallpaper, notification, idle and polkit lifecycle. Waybar must
 restart even if blanking the display fails: a CSS reload does not update its
 layer-shell margins. Signal cleanup restores the services and display.
 
-Applying a Sticky theme resets taskbar margins to `0,0,0,0`, borders to
-disabled with rounding `0`, and window gaps to `3/1`. Applying a Float theme
-resets taskbar margins to `20,20,20,1`, borders to enabled with rounding `4`,
-and window gaps to `3/1`. The Control Panel can then change and apply these
-values until the next theme switch, which acts as the mode reset.
+Sticky/Float is the layout mode (`/layout/variant` in `argvus-config`,
+`sticky` or `float`) and is independent of the active theme: selecting a
+theme never changes it, and switching the mode never changes the theme. The
+mode is applied with `appearance/sh/layout-mode-switch.sh <sticky|float>`,
+triggered either from the `SUPER + Shift + M` Rofi picker
+(`appearance/sh/layout-mode-menu.sh`) or from Control Center's
+`Appearance > Mode` screen. Applying Sticky resets taskbar margins, border
+rounding and window gaps to the sticky defaults; applying Float resets them to
+the float defaults (see `reset_layout_geometry` in `argvus-config`). The
+Control Panel can then change and apply its own values until the next mode
+switch or theme switch, both of which reset to the active mode's defaults.
 
 Packaged files remain under `/usr/share/argvus/<component>/{config,sh,docs}`.
 Managed user copies retain their compatibility paths under
@@ -26,10 +32,11 @@ restarting the panel cannot terminate its own theme switch. The Control Center
 reads its own theme resources and an accent-only cache, not the calendar cache.
 
 The `SUPER + Shift + T` Rofi selector is hierarchical: choose the localized
-Dark or Light category, then the ARGVUS family, then Sticky or Float. The
-Control Center uses the same category and family hierarchy; imported custom
-profiles remain in a separate section. In Rofi, Right advances to the selected
-level, Left returns one level, and Escape closes the selector from any level.
+Dark or Light category, then the ARGVUS family, which applies immediately
+under whichever mode is already active. The Control Center uses the same
+category and family hierarchy; imported custom profiles remain in a separate
+section. In Rofi, Right advances to the selected level, Left returns one
+level, and Escape closes the selector from any level.
 
 After applying a highlight color, `accent-switch.sh` also publishes the
 validated `#RRGGBB` value to the per-UID greeter projection at
