@@ -10,7 +10,7 @@ ARGVUS_MUTABLE_CONFIG=1
 font_state_value() {
   _key="$1"
   _fallback="$2"
-  _fonts_file="${ARGVUS_CONFIG_HOME}/argvus/fonts.conf"
+  _fonts_file="${ARGVUS_CONFIG_HOME}/argvus/data/generated/fonts.conf"
   if [ -f "$_fonts_file" ]; then
     _value="$(sed -n "s|^${_key}=||p" "$_fonts_file" | head -n1)"
     [ -n "$_value" ] && { printf '%s\n' "$_value"; return 0; }
@@ -57,7 +57,7 @@ apply_gtk_settings_files() {
     done
   done
 
-  GTK_MODE_FILE="$ARGVUS_CONFIG_HOME/argvus/.gtk-mode"
+  GTK_MODE_FILE="$ARGVUS_CONFIG_HOME/argvus/data/.gtk-mode"
   mkdir -p "$(dirname "$GTK_MODE_FILE")"
   printf '%s\n' "$_mode" > "$GTK_MODE_FILE"
 }
@@ -84,7 +84,9 @@ else
 fi
 
 # Read current theme
-THEME="$(cat "$ARGVUS_CONFIG_HOME/argvus/.active-theme" 2>/dev/null || echo "argvus-dark")"
+THEME="$(sed -n '1p' "$ARGVUS_CONFIG_HOME/argvus/data/.active-theme" 2>/dev/null || true)"
+[ -n "$THEME" ] || THEME="$(sed -n '1p' "$ARGVUS_CONFIG_HOME/argvus/.active-theme" 2>/dev/null || true)"
+[ -n "$THEME" ] || THEME="argvus-dark"
 HYPRPAPER_FILE="$(paths_config appearance/config/hypr/hyprpaper.conf)"
 HYPRPAPER_DIR="/usr/share/backgrounds/argvus"
 
