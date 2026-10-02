@@ -898,6 +898,13 @@ _taskbar_right_2_mode_script="$(paths_config appearance/sh/taskbar-right-2-mode.
 if [ -x "$_taskbar_right_2_mode_script" ]; then
   "$_taskbar_right_2_mode_script" apply
 fi
+# The managed Waybar file is recreated above (pristine system copy), so the
+# user's icon visibility and date/time format preferences must be re-derived
+# from the canonical config onto it, same as after a Control Center change.
+_taskbar_widgets_mode_script="$(paths_config appearance/sh/taskbar-widgets-mode.sh)"
+if [ -x "$_taskbar_widgets_mode_script" ]; then
+  "$_taskbar_widgets_mode_script" apply
+fi
 # The managed Waybar file is recreated above, so restore the user's sparse
 # telemetry block preferences before the session components are restarted.
 if command -v argvus-widget-telemetry-toggle >/dev/null 2>&1; then

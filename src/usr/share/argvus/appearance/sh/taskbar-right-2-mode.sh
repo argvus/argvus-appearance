@@ -12,12 +12,19 @@ ARGVUS_MUTABLE_CONFIG=1
 MODE_FILE="${ARGVUS_STATE_HOME}/taskbar-right-2-mode"
 
 mode() {
+  if command -v argvus-config >/dev/null 2>&1; then
+    _expanded="$(argvus-config get /taskbar/icons/utilities/expanded --effective --raw 2>/dev/null || true)"
+    case "$_expanded" in
+      true) printf '%s\n' always-expanded; return 0 ;;
+      false) printf '%s\n' auto; return 0 ;;
+    esac
+  fi
   if [ -r "$MODE_FILE" ]; then
     case "$(sed -n '1p' "$MODE_FILE")" in
       auto|always-expanded) sed -n '1p' "$MODE_FILE"; return 0 ;;
     esac
   fi
-  printf '%s\n' auto
+  printf '%s\n' always-expanded
 }
 
 apply_mode() {
@@ -67,6 +74,11 @@ case "${1:-status}" in
   set)
     case "${2:-}" in
       auto|always-expanded)
+        if command -v argvus-config >/dev/null 2>&1; then
+          _expanded=false
+          [ "$2" = always-expanded ] && _expanded=true
+          argvus-config patch "{\"/taskbar/icons/utilities/expanded\": ${_expanded}}" || true
+        fi
         mkdir -p "${MODE_FILE%/*}"
         _temporary_mode_file="$(mktemp "${MODE_FILE}.tmp.XXXXXX")"
         printf '%s\n' "$2" > "$_temporary_mode_file"
