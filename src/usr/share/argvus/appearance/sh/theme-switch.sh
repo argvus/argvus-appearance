@@ -106,6 +106,12 @@ LOADING_THEME_PID=0
 THEME_CONFIG_READY=0
 THEME_APPLY_STATUS=0
 
+# Services that are stopped during theme transition and must be managed on
+# completion. If the theme hasn't changed (same canonical state), reload_targets
+# stays empty, but these services were stopped; explicitly restart the ones that
+# were active before the transition so the user-visible state remains consistent.
+THEME_TRANSITION_UNITS="argvus-taskbar.service argvus-widget-telemetry.service argvus-control-panel.service argvus-dunst.service argvus-snappy-switcher.service argvus-wallpaper.service"
+
 loading_theme_pid_file() {
   printf '%s/argvus-loading-theme.pid\n' "${XDG_RUNTIME_DIR:-/tmp}"
 }
@@ -183,6 +189,23 @@ loading_theme_stop() {
   LOADING_THEME_PID=0
 }
 
+record_active_units() {
+  _active_units=""
+  for _unit in $THEME_TRANSITION_UNITS; do
+    if systemctl --user is-active --quiet "$_unit" 2>/dev/null; then
+      _active_units="$_active_units $_unit"
+    fi
+  done
+  printf '%s\n' "$_active_units"
+}
+
+restart_recorded_units() {
+  _units="$1"
+  for _unit in $_units; do
+    [ -n "$_unit" ] && systemctl --user start "$_unit" >/dev/null 2>&1 || true
+  done
+}
+
 if [ -z "$THEME" ]; then
   # The selector uses the same two-pass transaction as the removable-device
   # menu: the first Rofi closes before the model submenu opens.
@@ -192,6 +215,10 @@ fi
 # Serialize the complete transaction, including cleanup. Close the lock FD in
 # children so a wallpaper process cannot keep the next theme switch blocked.
 if [ "${ARGVUS_THEME_LOCKED:-0}" != 1 ]; then
+  _recorded_units=""
+  if command -v systemctl >/dev/null 2>&1; then
+    _recorded_units="$(record_active_units)"
+  fi
   _theme_lock="$(paths_cache theme-switch.lock)"
   mkdir -p "${_theme_lock%/*}"
   loading_theme_start
@@ -207,6 +234,10 @@ if [ "${ARGVUS_THEME_LOCKED:-0}" != 1 ]; then
     && [ "${ARGVUS_PROJECTING:-0}" != 1 ] \
     && command -v systemctl >/dev/null 2>&1; then
     systemctl --user reload argvus-config.service >/dev/null 2>&1 || _theme_status=$?
+    # If the theme hasn't changed, reload_targets stays empty and services
+    # stopped in theme_transition_begin won't be restarted. Restart the ones
+    # that were active, ensuring wallpaper and other UI components come back.
+    restart_recorded_units "$_recorded_units"
   fi
   loading_theme_stop
   trap - EXIT
@@ -450,13 +481,7 @@ theme_transition_begin() {
     loading_theme_start
   fi
 
-  for _unit in \
-    argvus-taskbar.service \
-    argvus-widget-telemetry.service \
-    argvus-control-panel.service \
-    argvus-dunst.service \
-    argvus-snappy-switcher.service \
-    argvus-wallpaper.service; do
+  for _unit in $THEME_TRANSITION_UNITS; do
     systemctl --user stop "$_unit" >/dev/null 2>&1 || true
   done
 }
