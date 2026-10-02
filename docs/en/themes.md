@@ -54,7 +54,7 @@ sh /usr/share/argvus/appearance/sh/accent-switch.sh '#17d174'
 
 The color accepts a valid six-digit RGB value. An explicit custom accent survives theme selection; theme-owned accents follow the selected manifest. **Reset to theme default** clears the custom-override state. Borders and other accent consumers are projected from the selected theme. The logical state is stored in `$XDG_CONFIG_HOME/argvus/config.json`; `.active-theme`, `.accent-color` and `.accent-custom` are legacy migration inputs only, and every file below `$XDG_CONFIG_HOME/argvus/data/generated` is written by `argvus-config` alone.
 
-Theme changes propagate to the compositor, shell surfaces, applications, lock screen and notifications. See [wallpapers](./wallpapers/) and [configuration and state](../../developer-guide/architecture/configuration-and-state/).
+Theme changes propagate to the compositor, shell surfaces, applications, lock screen and notifications. See [wallpapers](/docs/argvus-appearance/wallpapers/) and [configuration and state](../../developer-guide/architecture/configuration-and-state/).
 
 `argvus-config` projects the theme into every ARGVUS-owned surface — compositor, Waybar and telemetry profiles, Quickshell, Rofi, Dunst, Hyprlock, Yazi, Superfile, terminal and Qt profiles, GTK, the removable-devices stylesheet and the Hyprtoolkit overlay colors — and then `accent-switch.sh --apply` reconciles the external consumers. Float therefore applies rounded Rofi windows as well as rounded compositor, taskbar and shell surfaces; Rofi actions launched by ARGVUS resolve this projected configuration rather than the packaged Sticky default.
 
