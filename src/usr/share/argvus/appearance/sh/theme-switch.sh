@@ -790,9 +790,13 @@ apply_argvus_calendar_theme() {
       return 0 ;;
   esac
 
+  # Read-only lookup: paths_config would create the user theme directory even
+  # when no calendar theme exists, so use paths_read_config and let the user
+  # override live under data/taskbar/calendar/themes/.
+  _calendar_user_theme="$(paths_read_config "taskbar/calendar/themes/${_calendar_theme_name}")"
   _calendar_theme_src=""
-  if [ -f "$(paths_config "argvus-taskbar-calendar/themes/${_calendar_theme_name}")" ]; then
-    _calendar_theme_src="$(paths_config "argvus-taskbar-calendar/themes/${_calendar_theme_name}")"
+  if [ -f "$_calendar_user_theme" ]; then
+    _calendar_theme_src="$_calendar_user_theme"
   elif [ -f "/etc/argvus/taskbar/calendar/themes/${_calendar_theme_name}" ]; then
     _calendar_theme_src="/etc/argvus/taskbar/calendar/themes/${_calendar_theme_name}"
   elif [ -n "$_workspace_root" ] && [ -f "$_workspace_root/argvus-taskbar-calendar/resources/themes/${_calendar_theme_name}" ]; then
