@@ -36,6 +36,9 @@ canonical_theme_id() {
   esac
 }
 
+ARGVUS_MANIFEST_HELPER="${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/appearance/sh/theme-manifest.sh"
+[ -r "$ARGVUS_MANIFEST_HELPER" ] && . "$ARGVUS_MANIFEST_HELPER"
+
 theme_default_accent() {
   _theme_id="${1%-float}"
 
@@ -44,6 +47,10 @@ theme_default_accent() {
     _cli_accent="$(argvus-appearance themes get "$_theme_id" accent 2>/dev/null || true)"
     [ -n "$_cli_accent" ] && printf '%s\n' "$_cli_accent" && return 0
   fi
+
+  # The manifest owns the default accent of every drop-in theme.
+  _manifest_accent="$(theme_manifest_value "$_theme_id" accent 2>/dev/null || true)"
+  [ -n "$_manifest_accent" ] && printf '%s\n' "$_manifest_accent" && return 0
 
   # Fallback: hardcoded map for backwards compatibility
   case "$_theme_id" in
@@ -501,6 +508,9 @@ if ! normalize_accent "$REQUESTED"; then
 fi
 
 THEME="$(canonical_theme_id "$(read_state "$ACTIVE_FILE" "$DEFAULT_THEME")")"
+# An installed manifest is an explicit theme identity: keep it as-is. Only
+# legacy IDs without a manifest go through the built-in normalization below.
+if ! theme_manifest_exists "$THEME"; then
 case "$THEME" in
   one-dark|one-dark-float|dracula|dracula-float|argvus-dark|argvus-dark-float|silver-dark|silver-dark-float|argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|one-light|one-light-float|everforest-light|everforest-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float|slate-dark|slate-dark-float|universe|universe-float|gruvbox-high-dark|gruvbox-high-dark-float|gruvbox-dark|gruvbox-dark-float|rose-pine|rose-pine-float|tokyo-night|tokyo-night-float|solitude|solitude-float|sunset|sunset-float|hackerman|hackerman-float|monokai-dark|monokai-dark-float) ;;
   *-dark-float) THEME="argvus-dark-float" ;;
@@ -508,6 +518,7 @@ case "$THEME" in
   *-light) THEME="argvus-light" ;;
   *) THEME="$DEFAULT_THEME" ;;
 esac
+fi
 
 mkdir -p "$STATE_DIR"
 printf '%s\n' "$THEME" > "$ACTIVE_FILE"

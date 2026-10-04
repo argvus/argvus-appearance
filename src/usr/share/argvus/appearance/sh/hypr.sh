@@ -24,6 +24,9 @@ GET_HYPRLOCK_PATH=$(
 WALLPAPER_PATH="$GET_HYPRPAPER_PATH"
 HYPRLOCK_PATH="$GET_HYPRLOCK_PATH"
 
+ARGVUS_MANIFEST_HELPER="${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/appearance/sh/theme-manifest.sh"
+[ -r "$ARGVUS_MANIFEST_HELPER" ] && . "$ARGVUS_MANIFEST_HELPER"
+
 # Query theme wallpaper via CLI, with fallback to hardcoded map (for backwards compat)
 argvus_theme_wallpaper() {
   _theme="${1%-float}"
@@ -36,6 +39,13 @@ argvus_theme_wallpaper() {
       _wallpaper_path="${_wallpaper_root}/${_wallpaper_name}"
       [ -f "$_wallpaper_path" ] && printf '%s\n' "$_wallpaper_path" && return 0
     fi
+  fi
+
+  # The manifest wallpaper is relative to the wallpaper root, like the CLI value.
+  _wallpaper_name="$(theme_manifest_value "$_theme" wallpaper 2>/dev/null || true)"
+  if [ -n "$_wallpaper_name" ]; then
+    _wallpaper_path="${_wallpaper_root}/${_wallpaper_name}"
+    [ -f "$_wallpaper_path" ] && printf '%s\n' "$_wallpaper_path" && return 0
   fi
 
   # Fallback: hardcoded map for built-ins (no CLI available)

@@ -9,6 +9,9 @@ ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}
 # Wallpaper runtime helpers live with the appearance component. Load them
 # explicitly; bootstrap only provides shared session APIs and does not
 # implicitly source appearance-owned scripts.
+ARGVUS_MANIFEST_HELPER="${ARGVUS_SYSTEM_CONFIG}/appearance/sh/theme-manifest.sh"
+[ -r "$ARGVUS_MANIFEST_HELPER" ] && . "$ARGVUS_MANIFEST_HELPER"
+
 ARGVUS_HYPR_HELPER="${ARGVUS_SYSTEM_CONFIG}/appearance/sh/hypr.sh"
 [ -r "$ARGVUS_HYPR_HELPER" ] && . "$ARGVUS_HYPR_HELPER"
 
@@ -496,7 +499,30 @@ refresh_managed_waybar_file() {
   cp "$_system_path" "$_managed_path"
 }
 
+# Built-in light families that predate manifest-driven themes. New themes are
+# classified by gtk_scheme in their manifest and never need an entry here.
+gtk_mode_for_theme() {
+  if theme_manifest_exists "$1"; then
+    case "$(theme_manifest_table_value "$1" appearance gtk_scheme)" in
+      prefer-light) printf '%s\n' light ;;
+      *) printf '%s\n' dark ;;
+    esac
+    return 0
+  fi
+  case "$1" in
+    argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|one-light|one-light-float|everforest-light|everforest-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float) printf '%s\n' light ;;
+    *) printf '%s\n' dark ;;
+  esac
+}
+
 gtk_theme_name_for_theme() {
+  if theme_manifest_exists "$1"; then
+    case "$(theme_manifest_table_value "$1" appearance gtk_scheme)" in
+      prefer-light) printf '%s\n' "Adwaita" ;;
+      *) printf '%s\n' "Adwaita-dark" ;;
+    esac
+    return 0
+  fi
   case "$1" in
     argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|one-light|one-light-float|everforest-light|everforest-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float) printf '%s\n' "Adwaita" ;;
     argvus-dark-*|solitude|solitude-float) printf '%s\n' "Adwaita-dark" ;;
@@ -715,7 +741,10 @@ apply_argvus_storage_theme() {
     monokai-dark|monokai-dark-float)
       _theme_name="monokai-dark.css" ;;
     *)
-      return 0 ;;
+      # Drop-in themes name their removable-devices stylesheet in the manifest.
+      _theme_name="$(theme_manifest_table_value "$THEME" appearance removable_devices_css 2>/dev/null || true)"
+      [ -n "$_theme_name" ] || return 0
+      _theme_name="${_theme_name}.css" ;;
   esac
 
   # Tenta o diretório do usuário
@@ -787,7 +816,10 @@ apply_argvus_calendar_theme() {
     tokyo-night|tokyo-night-float)
       _calendar_theme_name="tokyo-night.css" ;;
     *)
-      return 0 ;;
+      # Drop-in themes name their calendar stylesheet in the manifest.
+      _calendar_theme_name="$(theme_manifest_table_value "$THEME" appearance calendar_css 2>/dev/null || true)"
+      [ -n "$_calendar_theme_name" ] || return 0
+      _calendar_theme_name="${_calendar_theme_name}.css" ;;
   esac
 
   # Read-only lookup: paths_config would create the user theme directory even
@@ -838,7 +870,7 @@ apply_argvus_calendar_theme() {
 # greeter. The private .active-theme remains the user-facing source of truth;
 # this persistent projection avoids granting the greeter access to user homes.
 publish_greeter_theme() {
-  case "$THEME" in
+  theme_manifest_exists "$THEME" || case "$THEME" in
     dracula|dracula-float|argvus-dark|argvus-dark-float|silver-dark|silver-dark-float|\
     slate-dark|slate-dark-float|universe|universe-float|\
     argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|one-light|one-light-float|everforest-light|everforest-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float|gruvbox-high-dark|gruvbox-high-dark-float|gruvbox-dark|gruvbox-dark-float|rose-pine|rose-pine-float|tokyo-night|tokyo-night-float|solitude|solitude-float|sunset|sunset-float|hackerman|hackerman-float|monokai-dark|monokai-dark-float)
@@ -1115,8 +1147,8 @@ MODE_CSS="$(paths_config appearance/config/waybar/mode.css)"
 printf '/* mode.css — reset on theme switch */\n' > "$MODE_CSS"
 GTK_MODE_FILE="${ARGVUS_CONFIG_HOME}/argvus/data/.gtk-mode"
 mkdir -p "$(dirname "$GTK_MODE_FILE")"
-case "$THEME" in
-    argvus-light | argvus-light-float | github-light | github-light-float | solarized-light | solarized-light-float | one-light | one-light-float | everforest-light | everforest-light-float | frost | frost-float | catppuccin-latte | catppuccin-latte-float | gruvbox-light | gruvbox-light-float)
+case "$(gtk_mode_for_theme "$THEME")" in
+    light)
     _gtk_theme_name="$(gtk_theme_name_for_theme "$THEME")"
     apply_gtk_theme_files light "$_gtk_theme_name" 0
     apply_gtk_runtime_settings prefer-light "$_gtk_theme_name" Adwaita-dark
