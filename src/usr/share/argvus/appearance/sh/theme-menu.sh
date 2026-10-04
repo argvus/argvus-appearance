@@ -71,9 +71,9 @@ while :; do
   _themes_list="$(themes_for_category "$_cat_filter")"
 
   # Left/Escape returns to the category menu.
+  # Themes are leaves, so their names are shown without a submenu marker.
   _selected="$(printf '%s\n' "$_themes_list" |
-    awk -F'\t' '{ print $2 " >" }' | run_menu "$_category")" || continue
-  _selected="$(printf '%s' "$_selected" | sed 's/[[:space:]]*>[[:space:]]*$//')"
+    awk -F'\t' '{ print $2 }' | run_menu "$_category")" || continue
   [ -n "$_selected" ] || continue
 
   _theme_id="$(printf '%s\n' "$_themes_list" |

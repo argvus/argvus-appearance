@@ -300,7 +300,7 @@ class ThemeSwitchTests(unittest.TestCase):
             "cat >/dev/null\n"
             "case \"$step\" in\n"
             "  0) printf '%s\\n' 'Dark >' ;;\n"
-            "  1) printf '%s\\n' 'ARGVUS Dark >' ;;\n"
+            "  1) printf '%s\\n' 'ARGVUS Dark' ;;\n"
             "  *) exit 1 ;;\n"
             "esac\n"
             "printf '%s\\n' $((step + 1)) >\"$step_file\"\n"
@@ -339,7 +339,7 @@ class ThemeSwitchTests(unittest.TestCase):
             "  0) printf '%s\\n' 'Dark >' ;;\n"
             "  1) printf '%s\\n' $((step + 1)) >\"$step_file\"; exit 1 ;;\n"
             "  2) printf '%s\\n' 'Light >' ;;\n"
-            "  3) printf '%s\\n' 'ARGVUS Light >' ;;\n"
+            "  3) printf '%s\\n' 'ARGVUS Light' ;;\n"
             "  *) exit 1 ;;\n"
             "esac\n"
             "printf '%s\\n' $((step + 1)) >\"$step_file\"\n"
@@ -391,10 +391,11 @@ class ThemeSwitchTests(unittest.TestCase):
         )
 
         items = rofi_input.read_text().splitlines()
-        self.assertEqual(items[0], "ARGVUS Dark >")
+        self.assertEqual(items[0], "ARGVUS Dark")
         # Drop-in packages are listed from their manifests, without the CLI.
-        self.assertIn("One Dark >", items)
-        self.assertNotIn("One Light >", items)
+        self.assertIn("One Dark", items)
+        self.assertNotIn("One Light", items)
+        self.assertFalse(any(item.endswith(">") for item in items))
 
     def test_restart_does_not_depend_on_dpms(self):
         for fail in (False, True):
