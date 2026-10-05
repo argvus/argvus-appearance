@@ -1199,9 +1199,17 @@ fi
 
 # Apply the selected mode's border defaults to both the taskbar CSS and
 # Hyprland. The Control Panel can then create a new user override.
+# Note: --reset clears .borders to apply variant defaults; afterwards --apply-static
+# respects the user's layout.json settings (rounded, rounding) when determining effective values.
 _borders_script="$(paths_config hyprland/sh/borders-switch.sh)"
 if [ -f "$_borders_script" ]; then
   if ! ARGVUS_NO_RUNTIME=1 sh "$_borders_script" --reset; then
+    argvus_tr appearance theme.borders_failed "theme=$THEME" >&2
+    exit 1
+  fi
+  # After reset, reapply borders respecting the user's configuration from layout.json.
+  # This ensures that rounded=false is honored even after theme/mode changes.
+  if ! ARGVUS_NO_RUNTIME=1 sh "$_borders_script" --apply-static; then
     argvus_tr appearance theme.borders_failed "theme=$THEME" >&2
     exit 1
   fi
