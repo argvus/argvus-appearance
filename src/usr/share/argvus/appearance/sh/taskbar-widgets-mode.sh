@@ -202,7 +202,7 @@ apply_mode() {
   fi
   if ! grep -q '"image#argvus-logo":' "$_target_config"; then
     insert_block_before '"custom/right-2-expander":' '  "image#argvus-logo": {
-    "path": "/usr/share/argvus/svg/ARGVUS-menu.svg",
+    "path": "/usr/share/argvus/svg/menu-default-dark.svg",
     "size": 20,
     "tooltip": false,
     "on-click": "argvus-launcher"
@@ -229,7 +229,24 @@ apply_mode() {
   case "$_launcher_icon_path" in
     null) _launcher_icon_path='' ;;
   esac
-  [ -n "$_launcher_icon_path" ] || _launcher_icon_path='/usr/share/argvus/svg/ARGVUS-menu.svg'
+  # No custom icon: fall back to the active theme's own menu icon
+  # (/usr/share/argvus/svg/menu-<id>.svg, shipped by each argvus-theme-*
+  # package), or to argvus-branding's menu-default-dark.svg/menu-default-light.svg
+  # for the built-in ARGVUS Dark/ARGVUS Light themes (which have no manifest
+  # and thus no dedicated icon).
+  if [ -z "$_launcher_icon_path" ]; then
+    _active_theme="$(cat "${ARGVUS_CONFIG_HOME}/argvus/data/.active-theme" 2>/dev/null || true)"
+    [ -n "$_active_theme" ] || _active_theme='argvus-dark'
+    _active_theme_family="${_active_theme%-float}"
+    case "$_active_theme_family" in
+      argvus-dark)  _launcher_icon_path='/usr/share/argvus/svg/menu-default-dark.svg' ;;
+      argvus-light) _launcher_icon_path='/usr/share/argvus/svg/menu-default-light.svg' ;;
+      *)
+        _launcher_icon_path="/usr/share/argvus/svg/menu-${_active_theme_family}.svg"
+        [ -f "$_launcher_icon_path" ] || _launcher_icon_path='/usr/share/argvus/svg/menu-default-dark.svg'
+        ;;
+    esac
+  fi
 
   if [ "$_audio_player_enabled" = true ]; then
     _left2_modules='["custom/spotify-mpris","mpris"]'
