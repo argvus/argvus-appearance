@@ -135,6 +135,27 @@ replace_field_array() {
   ' "$_file" > "${_file}.tmp" && mv "${_file}.tmp" "$_file"
 }
 
+# Inserts $2 (one or more literal lines, already newline-joined) immediately
+# before the first line matching $1 in $3. Used to seed a block that
+# `replace_group_modules`/`replace_in_block` cannot create on their own: a
+# per-user config generated before a block existed in the system template
+# has no line to match against, so those helpers would silently no-op.
+insert_block_before() {
+  _anchor="$1"
+  _block="$2"
+  _file="$3"
+  awk -v anchor="$_anchor" -v block="$_block" '
+    BEGIN { done = 0 }
+    {
+      if (!done && index($0, anchor) > 0) {
+        print block
+        done = 1
+      }
+      print
+    }
+  ' "$_file" > "${_file}.tmp" && mv "${_file}.tmp" "$_file"
+}
+
 # Replaces the first line matching $2 (a JSON field, e.g. '"format":') found
 # at/after the line matching $1 (a block key) with $3.
 replace_in_block() {
@@ -168,8 +189,28 @@ apply_mode() {
     return 1
   }
 
+  # Upgrade path: a per-user config generated before this feature shipped
+  # has no "group/left0"/"image#argvus-logo" blocks at all — the
+  # replace_group_modules/replace_in_block calls below only mutate an
+  # existing block, they can never create one. Seed both once, mirroring
+  # the system template, so those calls have something to edit.
+  if ! grep -q '"group/left0":' "$_target_config"; then
+    insert_block_before '"group/left1":' '  "group/left0": {
+    "orientation": "inherit",
+    "modules": ["image#argvus-logo"]
+  },' "$_target_config"
+  fi
+  if ! grep -q '"image#argvus-logo":' "$_target_config"; then
+    insert_block_before '"custom/right-2-expander":' '  "image#argvus-logo": {
+    "path": "/usr/share/argvus/svg/ARGVUS-menu.svg",
+    "size": 20,
+    "tooltip": false,
+    "on-click": "argvus-launcher"
+  },' "$_target_config"
+  fi
+
   _audio_player_enabled="$(config_bool /taskbar/icons/audio_player_enabled true)"
-  _launcher_enabled="$(config_bool /taskbar/icons/launcher_enabled true)"
+  _launcher_enabled="$(config_bool /taskbar/icons/launcher_enabled false)"
   _network_enabled="$(config_bool /taskbar/icons/network_enabled true)"
   _power_profile_enabled="$(config_bool /taskbar/icons/power_profile_enabled true)"
   _keyboard_layout_enabled="$(config_bool /taskbar/icons/keyboard_layout_enabled true)"
@@ -180,6 +221,15 @@ apply_mode() {
   _date_format="$(config_str /taskbar/date/format weekday_day_month)"
   _time_seconds_enabled="$(config_bool /taskbar/time/seconds_enabled false)"
   _time_format="$(config_str /taskbar/time/format 24h)"
+  _launcher_icon_path="$(config_str /taskbar/icons/launcher_custom_icon_path '')"
+  # `argvus-config get --raw` prints the literal text "null" for a JSON null
+  # value (it only special-cases Value::String; see main.rs's get_value),
+  # unlike config_bool's "true"/"false" case match — so the unset default
+  # must be caught here too, or it would be written verbatim as the path.
+  case "$_launcher_icon_path" in
+    null) _launcher_icon_path='' ;;
+  esac
+  [ -n "$_launcher_icon_path" ] || _launcher_icon_path='/usr/share/argvus/svg/ARGVUS-menu.svg'
 
   if [ "$_audio_player_enabled" = true ]; then
     _left2_modules='["custom/spotify-mpris","mpris"]'
@@ -189,11 +239,11 @@ apply_mode() {
   replace_group_modules '"group/left2":' "$_left2_modules" "$_target_config"
 
   if [ "$_launcher_enabled" = true ]; then
-    _search_modules='["custom/search"]'
+    _left0_modules='["image#argvus-logo"]'
   else
-    _search_modules='[]'
+    _left0_modules='[]'
   fi
-  replace_group_modules '"group/right-search":' "$_search_modules" "$_target_config"
+  replace_group_modules '"group/left0":' "$_left0_modules" "$_target_config"
 
   _right1_canonical="$(extract_group_modules '"group/right-1":' "$_system_config")"
   [ -n "$_right1_canonical" ] || _right1_canonical='[]'
@@ -223,30 +273,40 @@ apply_mode() {
   # modules-left/modules-right array that references it. Always recompute
   # from the system (unfiltered) arrays, same rationale as the per-group
   # filtering above: re-adding a previously hidden group must work too.
+  _left0_present=false
+  [ "$_left0_modules" = '[]' ] || _left0_present=true
   _left2_present=false
   [ "$_left2_modules" = '[]' ] || _left2_present=true
-  _search_present=false
-  [ "$_search_modules" = '[]' ] || _search_present=true
   _right1_present=false
   [ "$_right1_filtered" = '[]' ] || _right1_present=true
 
   _modules_left_canonical="$(extract_field_array '"modules-left":' "$_system_config")"
   _modules_left_filtered="$(printf '%s' "$_modules_left_canonical" | jq -c \
+    --argjson left0 "$_left0_present" \
     --argjson left2 "$_left2_present" '
-    map(select(. != "group/left2" or $left2))
+    map(select(
+      (. != "group/left0" or $left0) and
+      (. != "group/left2" or $left2)
+    ))
   ')"
   replace_field_array '"modules-left":' "$_modules_left_filtered" "$_target_config"
 
   _modules_right_canonical="$(extract_field_array '"modules-right":' "$_system_config")"
   _modules_right_filtered="$(printf '%s' "$_modules_right_canonical" | jq -c \
-    --argjson search "$_search_present" \
     --argjson icons "$_right1_present" '
-    map(select(
-      (. != "group/right-search" or $search) and
-      (. != "group/right-1" or $icons)
-    ))
+    map(select(. != "group/right-1" or $icons))
   ')"
   replace_field_array '"modules-right":' "$_modules_right_filtered" "$_target_config"
+
+  replace_in_block '"image#argvus-logo":' '"path":' \
+    "    \"path\": \"${_launcher_icon_path}\"," \
+    "$_target_config"
+  # Keeps a previously seeded block (see the "group/left0" migration above)
+  # in sync with the system template's icon size, since that seed only
+  # fires once — a size-only change otherwise never reaches it again.
+  replace_in_block '"image#argvus-logo":' '"size":' \
+    '    "size": 20,' \
+    "$_target_config"
 
   replace_in_block '"custom/date":' '"exec":' \
     "    \"exec\": \"/usr/share/argvus/taskbar/sh/waybar-date.sh ${_date_format}\"," \
