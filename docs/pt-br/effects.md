@@ -1,12 +1,12 @@
 ---
 title: Efeitos
-description: Configure animações, intensidade global do blur e efeitos por superfície.
+description: Configure animações, o blur global do Hyprland e a transparência por superfície.
 slug: pt/0.4.0/docs/user-guide/appearance/effects
 ---
 
-**Control Center → Aparência → Efeitos** contém somente **Animações** e **Intensidade do blur**. Os controles de ativação de Transparência e Blur ficam nas páginas de cada superfície.
+**Control Center → Hyprland** contém **Animações** e **Blur**. Os controles de ativação de Transparência ficam nas páginas de cada superfície.
 
-Os controles das superfícies são independentes. A página de Configuração da Central de Controle possui seu próprio valor de Transparência e controle de ativação do Blur; o blur usa a intensidade global.
+Os controles das superfícies são independentes. A página de Configuração da Central de Controle possui seu próprio valor de Transparência e controle de ativação do Blur; o blur usa os valores globais de Blur.
 
 A Central de Controle é iniciada pelo Foot com um perfil dedicado gerado em `$XDG_CONFIG_HOME/argvus/data/control-center/foot.ini`. No Foot 1.28, a transparência é projetada para `[colors-dark] alpha` e o controle de Blur para `[colors-dark] blur`; a configuração normal do Foot e o terminal ARGVUS permanecem independentes.
 
@@ -14,7 +14,7 @@ A Central de Controle é iniciada pelo Foot com um perfil dedicado gerado em `$X
 
 Cada superfície possui um submenu **Transparência**, com seu próprio controle de ativação e valor.
 
-A página **Aparência → Inicializadores** controla os fluxos oficiais baseados em Rofi: launcher principal, seletor de emoji, calculadora, clipboard, cheatsheets e menus Rofi de dispositivos removíveis. O valor de Transparência é o alpha final do fundo; `50` resulta em opacidade aproximada de `0,50`, enquanto texto, ícones e linhas selecionadas permanecem opacos. O controle de Blur habilita a layer `rofi` usando a intensidade global existente.
+A página **Aparência → Inicializadores** controla os fluxos oficiais baseados em Rofi: launcher principal, seletor de emoji, calculadora, clipboard, cheatsheets e menus Rofi de dispositivos removíveis. O valor de Transparência é o alpha final do fundo; `50` resulta em opacidade aproximada de `0,50`, enquanto texto, ícones e linhas selecionadas permanecem opacos. O controle de Blur habilita a layer `rofi` usando as configurações globais de Blur.
 
 Cada valor vai de `0%` (opaco) a `100%` (totalmente transparente). Use `+` e `-` em passos de 5% e selecione **Aplicar** na página da superfície. Sair da tela descarta um rascunho não aplicado.
 
@@ -22,15 +22,27 @@ Use `↑` e `↓` para mover entre **Ativar** e **Valor**. Na linha **Valor**, `
 
 ## Blur
 
-Cada superfície possui seu próprio controle de ativação de **Blur**. As surfaces de layer e janela do Hyprland usam uma intensidade global do compositor. Use **Efeitos → Intensidade do blur**, ajuste o rascunho com `+` e `-` em passos de 5% e selecione **Aplicar**. O valor fica em `/effects/blur_global_value` e é compartilhado por toda superfície ativada; não existe slider por superfície.
+O Blur é uma única configuração global do Hyprland, compartilhada por toda superfície que a ativa. Abra **Control Center → Hyprland → Blur**. A página tem o controle **Ligar** e a lista **Valores** com os parâmetros de `decoration:blur` do Hyprland, com os nomes usados pelo Hyprland:
 
-O mesmo fluxo de teclado vale para Blur: `↑/↓` navega entre as opções, `+/-` ajusta o valor e `Tab` abre **Ações** para aplicar.
+| Linha | Chave de configuração | Padrão | Faixa | Passo de `←/→` |
+|---|---|---|---|---|
+| Tamanho | `effects.blur_size` | `6` | 1–64 | 1 |
+| Passagens | `effects.blur_passes` | `2` | 1–8 | 1 |
+| Brilho | `effects.blur_brightness` | `1` | 0–2 | 0,05 |
+| Ruído | `effects.blur_noise` | `0,00` | 0–1 | 0,01 |
+| Contraste | `effects.blur_contrast` | `0,900000` | 0–2 | 0,05 |
+| Vibrância | `effects.blur_vibrancy` | `0,100000` | 0–1 | 0,01 |
+| Escurecimento da vibrância | `effects.blur_vibrancy_darkness` | `0` | 0–1 | 0,01 |
 
-O Hyprland expõe o raio e o número de passagens do blur de forma global no compositor, mas não permite um raio de GPU independente em cada regra de layer. O ARGVUS mapeia o valor global diretamente para esses parâmetros; cada superfície apenas entra ou sai do blur global. Alterar o enable de uma superfície não altera a intensidade global.
+Use `↑/↓` para navegar, `←/→` (ou `+/-`) para alterar o valor selecionado pelo passo, e `Enter` para digitar um valor exato; valores fora da faixa são recusados. Nada é gravado durante a edição: o controle e os valores permanecem no rascunho até selecionar **[ Aplicar ]** no fim da página. Aplicar grava todos os valores alterados em uma única chamada e depois recarrega o Hyprland. Sair da página com um rascunho não aplicado pede confirmação.
+
+Os valores são enviados ao Hyprland como estão; o ARGVUS não os deriva mais de uma porcentagem. Alterar o controle de uma superfície não altera os valores.
 
 ## Estado canônico e arquivos de compatibilidade
 
-As preferências lógicas ficam em `$XDG_CONFIG_HOME/argvus/config.json`. Animações usam `effects.animations`, enquanto a intensidade do blur usa `effects.blur_global_value`; estados de ativação e valores de transparência das superfícies usam chaves como `effects.blur_control-center_enabled` e `effects.transparency_control-center_value`. O terminal usa o mesmo `effects.blur_global_value`; não existe toggle global de Blur nem intensidade separada para o terminal. Os valores são limitados a `0–100` e estado desativado continua diferente de override ausente.
+As preferências lógicas ficam em `$XDG_CONFIG_HOME/argvus/config.json`. Animações usam `effects.animations`. O controle global de Blur é `effects.blur_global_enabled`, e os valores de Blur usam as chaves `effects.blur_*` listadas acima. Estados de ativação e valores de transparência das superfícies usam chaves como `effects.blur_control-center_enabled` e `effects.transparency_control-center_value`. Os valores de transparência são limitados a `0–100`; cada valor de Blur fica limitado à sua própria faixa, e o `argvus-config` recusa gravações fora dela. Estado desativado continua diferente de override ausente.
+
+O percentual antigo `effects.blur_global_value` não é mais lido. Um perfil que ainda o contenha mantém a chave no disco sem efeito, e o Blur usa os padrões acima até que os valores sejam aplicados.
 
 ```text
 $XDG_CONFIG_HOME/argvus/config.json

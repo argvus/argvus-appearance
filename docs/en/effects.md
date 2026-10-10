@@ -1,11 +1,11 @@
 ---
 title: Effects
-description: Configure animations, global blur intensity and per-surface effects.
+description: Configure animations, the global Hyprland blur and per-surface transparency.
 ---
 
-**Control Center → Appearance → Effects** contains only **Animations** and **Blur intensity**. Transparency and blur enable switches are per-surface settings in their respective Appearance pages.
+**Control Center → Hyprland** contains **Animations** and **Blur**. Transparency enable switches are per-surface settings in their respective Appearance pages.
 
-Surface switches are independent. The Control Center Configuration page has its own Transparency value and Blur enable switch; its blur uses the global intensity.
+Surface switches are independent. The Control Center Configuration page has its own Transparency value and Blur enable switch; its blur uses the global Blur values.
 
 The Control Center is launched through Foot with a dedicated generated profile at `$XDG_CONFIG_HOME/argvus/data/control-center/foot.ini`. With Foot 1.28, transparency is projected to `[colors-dark] alpha` and the surface Blur switch to `[colors-dark] blur`; the normal Foot configuration and ARGVUS terminal remain independent.
 
@@ -13,7 +13,7 @@ The Control Center is launched through Foot with a dedicated generated profile a
 
 Each surface has its own **Transparency** submenu with an enable switch and value.
 
-The **Appearance → Launchers** page controls the official Rofi-based launcher and picker flows: the main launcher, emoji picker, calculator, clipboard picker, cheatsheets and Rofi removable-device menus. Its Transparency value is the final background alpha, so `50` means an effective background opacity of approximately `0.50`; text, icons and selected rows remain opaque. Its Blur switch opts the `rofi` layer into the existing global blur intensity.
+The **Appearance → Launchers** page controls the official Rofi-based launcher and picker flows: the main launcher, emoji picker, calculator, clipboard picker, cheatsheets and Rofi removable-device menus. Its Transparency value is the final background alpha, so `50` means an effective background opacity of approximately `0.50`; text, icons and selected rows remain opaque. Its Blur switch opts the `rofi` layer into the global Blur settings.
 
 Each value ranges from `0%` (opaque) to `100%` (fully transparent). Use `+` and `-` in 5% steps, then select **Apply** on the surface page. Leaving the page discards an un-applied draft.
 
@@ -21,15 +21,27 @@ Use `↑` and `↓` to move between **Enable** and **Value**. On the **Value** r
 
 ## Blur
 
-Each surface has its own **Blur** enable switch. Hyprland layer and window surfaces use one global compositor blur intensity. Use **Effects → Blur intensity**, adjust the staged value with `+` and `-` in 5% steps, then select **Apply**. The value is stored at `/effects/blur_global_value` and is shared by every enabled surface; it is not a per-surface slider.
+Blur is one global Hyprland setting, shared by every surface that opts in. Open **Control Center → Hyprland → Blur**. The page has an **Enable** switch and a **Values** list with the parameters of Hyprland's `decoration:blur`, under the names Hyprland uses:
 
-Blur uses the same keyboard flow: `↑/↓` moves between options, `+/-` adjusts the value and `Tab` opens **Actions** to apply it.
+| Row | Config key | Default | Range | `←/→` step |
+|---|---|---|---|---|
+| Size | `effects.blur_size` | `6` | 1–64 | 1 |
+| Passes | `effects.blur_passes` | `2` | 1–8 | 1 |
+| Brightness | `effects.blur_brightness` | `1` | 0–2 | 0.05 |
+| Noise | `effects.blur_noise` | `0.00` | 0–1 | 0.01 |
+| Contrast | `effects.blur_contrast` | `0.900000` | 0–2 | 0.05 |
+| Vibrancy | `effects.blur_vibrancy` | `0.100000` | 0–1 | 0.01 |
+| Vibrancy darkness | `effects.blur_vibrancy_darkness` | `0` | 0–1 | 0.01 |
 
-Hyprland exposes blur radius and pass count compositor-wide, rather than allowing an independent GPU radius in each layer rule. ARGVUS maps the global value directly to those compositor parameters; each surface only opts into or out of the global blur. Changing one surface's enable switch therefore does not change global intensity.
+Use `↑/↓` to move, `←/→` (or `+/-`) to change the selected value by its step, and `Enter` to type an exact value; values outside the range are refused. Nothing is written while you edit: the switch and the values stay in the draft until **[ Apply ]** at the bottom of the page is selected. Apply writes every changed value in one call, and reloads Hyprland after it. Leaving the page with an unapplied draft asks for confirmation.
+
+Values are passed to Hyprland as they are; ARGVUS does not derive them from a percentage. Changing one surface's switch does not change the values.
 
 ## Canonical state and compatibility files
 
-The logical preference is stored in `$XDG_CONFIG_HOME/argvus/config.json`. Global animation uses `effects.animations`, while blur intensity uses `effects.blur_global_value`; surface enable states and transparency values use keys such as `effects.blur_control-center_enabled` and `effects.transparency_control-center_value`. Terminal blur uses the same `effects.blur_global_value`; there is no global Blur toggle or separate terminal blur intensity. Values are clamped to `0–100` and enable states remain distinct from missing overrides.
+The logical preference is stored in `$XDG_CONFIG_HOME/argvus/config.json`. Global animation uses `effects.animations`. The global Blur switch is `effects.blur_global_enabled`, and the Blur values use the `effects.blur_*` keys listed above. Surface enable states and transparency values use keys such as `effects.blur_control-center_enabled` and `effects.transparency_control-center_value`. Transparency values are limited to `0–100`; each Blur value is limited to its own range, and `argvus-config` rejects writes outside it. Enable states remain distinct from missing overrides.
+
+The former `effects.blur_global_value` percentage is no longer read. A profile that still contains it keeps the key on disk without effect, and Blur uses the defaults above until its values are applied.
 
 ```text
 $XDG_CONFIG_HOME/argvus/config.json
