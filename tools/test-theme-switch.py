@@ -982,10 +982,14 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn('[ -s "$_theme_file" ] || _theme_file="$_argvus_home/.active-theme"',
                       loading)
 
-    def test_toggle_mode_reads_and_writes_data_markers(self):
+    def test_toggle_mode_delegates_to_theme_switch(self):
+        # SUPER+F5 must switch the official theme (Dark <-> Light) through the
+        # same transaction as theme-switch.sh, not only flip the GTK mode.
         toggle = (self.system / "appearance/sh/toggle-mode.sh").read_text()
-        self.assertIn('GTK_MODE_FILE="$ARGVUS_CONFIG_HOME/argvus/data/.gtk-mode"', toggle)
         self.assertIn('"$ARGVUS_CONFIG_HOME/argvus/data/.active-theme"', toggle)
+        self.assertIn('theme-switch.sh', toggle)
+        self.assertIn('TARGET="argvus-light"', toggle)
+        self.assertIn('TARGET="argvus-dark"', toggle)
 
     def test_theme_switch_resets_borders_to_mode_defaults(self):
         (self.user / ".borders").write_text("rounded=1\nrounding=10\n")
