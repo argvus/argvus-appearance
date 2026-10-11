@@ -62,7 +62,7 @@ argvus_theme_wallpaper() {
     slate-dark) _wallpaper_name="abstract/dark/slate-abstract-dark.jxl" ;;
     sunset) _wallpaper_name="abstract/dark/sunset-abstract-dark.jxl" ;;
     tokyo-night) _wallpaper_name="abstract/dark/tokyo-night-abstract-dark.jxl" ;;
-    hackerman) _wallpaper_name="abstract/dark/hackerman-abstract-dark.jxl" ;;
+    matrix) _wallpaper_name="abstract/dark/matrix-abstract-dark.jxl" ;;
     solitude) _wallpaper_name="abstract/dark/solitude-abstract-dark.jxl" ;;
     universe) _wallpaper_name="abstract/dark/universe-abstract-dark.jxl" ;;
     catppuccin-latte) _wallpaper_name="abstract/light/catppuccin-latte-abstract-light.jxl" ;;

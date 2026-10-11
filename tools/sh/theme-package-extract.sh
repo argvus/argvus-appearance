@@ -51,7 +51,7 @@ DE_ROOT="$WORKSPACE_ROOT/de"
 SKELETON_SOURCE="/seagate/gitea/repos/argvus/skeleton-pkg.git"
 
 # Theme metadata - Dark themes (14 total - 1 argvus-dark built-in = 13 packages)
-DARK_THEMES="one-dark dracula silver-dark slate-dark universe gruvbox-high-dark gruvbox-dark rose-pine tokyo-night solitude sunset hackerman monokai-dark"
+DARK_THEMES="one-dark dracula silver-dark slate-dark universe gruvbox-high-dark gruvbox-dark rose-pine tokyo-night solitude sunset matrix monokai-dark"
 
 # Theme metadata - Light themes (8 total - 1 argvus-light built-in = 7 packages)
 LIGHT_THEMES="github-light solarized-light one-light everforest-light frost catppuccin-latte gruvbox-light"
@@ -97,7 +97,7 @@ Dark themes (14 total):
   Built-in: argvus-dark
   Packages: one-dark dracula silver-dark slate-dark universe
             gruvbox-high-dark gruvbox-dark rose-pine tokyo-night
-            solitude sunset hackerman monokai-dark
+            solitude sunset matrix monokai-dark
 
 Light themes (8 total):
   Built-in: argvus-light
@@ -145,7 +145,7 @@ get_theme_name() {
         slate-dark) printf '%s\n' "Slate Dark" ;;
         sunset) printf '%s\n' "Sunset" ;;
         tokyo-night) printf '%s\n' "Tokyo-Night" ;;
-        hackerman) printf '%s\n' "Hackerman" ;;
+        matrix) printf '%s\n' "Matrix" ;;
         solitude) printf '%s\n' "Solitude" ;;
         universe) printf '%s\n' "Universe" ;;
         argvus-light) printf '%s\n' "ARGVUS Light" ;;

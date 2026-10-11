@@ -17,7 +17,7 @@ DEST_DIR="${1:-./de}"
 
 # All 20 themes that will become packages
 THEMES="
-  one-dark dracula silver-dark slate-dark universe gruvbox-high-dark gruvbox-dark rose-pine tokyo-night solitude sunset hackerman monokai-dark
+  one-dark dracula silver-dark slate-dark universe gruvbox-high-dark gruvbox-dark rose-pine tokyo-night solitude sunset matrix monokai-dark
   github-light solarized-light one-light everforest-light frost catppuccin-latte gruvbox-light
 "
 

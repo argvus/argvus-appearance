@@ -1,4 +1,4 @@
--- Theme: hackerman-float
+-- Theme: matrix
 -- Loaded by hyprland.lua via dofile()
 return {
   border_active = "rgba(82FB9Cff)",
@@ -7,9 +7,9 @@ return {
   groupbar_inactive = "rgba(29303Acc)",
   shadow_color = 0xcc000000,
   shadow_color_inactive = 0x660B0C16,
-  rounding = 4,
-  rounding_power = 2,
-  gaps_in = 8,
-  gaps_out = 8,
+  rounding = 0,
+  rounding_power = 1,
+  gaps_in = 1,
+  gaps_out = 1,
   border_size = 1,
 }

@@ -54,8 +54,8 @@ canonical_theme_id() {
     argvus-dark-solitude-float) printf '%s\n' "solitude-float" ;;
     argvus-dark-sunset) printf '%s\n' "sunset" ;;
     argvus-dark-sunset-float) printf '%s\n' "sunset-float" ;;
-    argvus-dark-hackerman) printf '%s\n' "hackerman" ;;
-    argvus-dark-hackerman-float) printf '%s\n' "hackerman-float" ;;
+    argvus-dark-matrix) printf '%s\n' "matrix" ;;
+    argvus-dark-matrix-float) printf '%s\n' "matrix-float" ;;
     argvus-dark-monokai) printf '%s\n' "monokai-dark" ;;
     argvus-dark-monokai-float) printf '%s\n' "monokai-dark-float" ;;
     argvus-catppuccin-latte) printf '%s\n' "catppuccin-latte" ;;
@@ -736,8 +736,8 @@ apply_argvus_storage_theme() {
       _theme_name="solitude.css" ;;
     sunset|sunset-float)
       _theme_name="sunset.css" ;;
-    hackerman|hackerman-float)
-      _theme_name="hackerman.css" ;;
+    matrix|matrix-float)
+      _theme_name="matrix.css" ;;
     monokai-dark|monokai-dark-float)
       _theme_name="monokai-dark.css" ;;
     *)
@@ -810,7 +810,7 @@ apply_argvus_calendar_theme() {
     gruvbox-high-dark|gruvbox-high-dark-float|gruvbox-dark|gruvbox-dark-float)
       _calendar_theme_name="${THEME}.css" ;;
     rose-pine|rose-pine-float|solitude|solitude-float|\
-    sunset|sunset-float|hackerman|hackerman-float|\
+    sunset|sunset-float|matrix|matrix-float|\
     monokai-dark|monokai-dark-float)
       _calendar_theme_name="${THEME}.css" ;;
     tokyo-night|tokyo-night-float)
@@ -873,7 +873,7 @@ publish_greeter_theme() {
   theme_manifest_exists "$THEME" || case "$THEME" in
     dracula|dracula-float|argvus-dark|argvus-dark-float|silver-dark|silver-dark-float|\
     slate-dark|slate-dark-float|universe|universe-float|\
-    argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|one-light|one-light-float|everforest-light|everforest-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float|gruvbox-high-dark|gruvbox-high-dark-float|gruvbox-dark|gruvbox-dark-float|rose-pine|rose-pine-float|tokyo-night|tokyo-night-float|solitude|solitude-float|sunset|sunset-float|hackerman|hackerman-float|monokai-dark|monokai-dark-float)
+    argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|one-light|one-light-float|everforest-light|everforest-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float|gruvbox-high-dark|gruvbox-high-dark-float|gruvbox-dark|gruvbox-dark-float|rose-pine|rose-pine-float|tokyo-night|tokyo-night-float|solitude|solitude-float|sunset|sunset-float|matrix|matrix-float|monokai-dark|monokai-dark-float)
       ;;
     *)
       return 0
@@ -985,7 +985,7 @@ for _waybar_style in "$(paths_config taskbar/config/argvus-taskbar.css)" \
 done
 
 case "$THEME" in
-  one-dark | dracula | argvus-dark | silver-dark | argvus-light | github-light | solarized-light | one-light | everforest-light | frost | catppuccin-latte | gruvbox-light | slate-dark | universe | gruvbox-high-dark | gruvbox-dark | rose-pine | tokyo-night | solitude | sunset | hackerman | monokai-dark)
+  one-dark | dracula | argvus-dark | silver-dark | argvus-light | github-light | solarized-light | one-light | everforest-light | frost | catppuccin-latte | gruvbox-light | slate-dark | universe | gruvbox-high-dark | gruvbox-dark | rose-pine | tokyo-night | solitude | sunset | matrix | monokai-dark)
     sed -i "s|\"margin-top\": [0-9]*|\"margin-top\": 0|" "$_waybar_cfg"
     sed -i "s|\"margin-left\": [0-9]*|\"margin-left\": 0|" "$_waybar_cfg"
     sed -i "s|\"margin-right\": [0-9]*|\"margin-right\": 0|" "$_waybar_cfg"
@@ -1113,7 +1113,7 @@ fi
 _yazi_theme="$THEME"
 case "$THEME" in
   sunset-float) _yazi_theme='sunset' ;;
-  hackerman-float) _yazi_theme='hackerman' ;;
+  matrix-float) _yazi_theme='matrix' ;;
 esac
 
 if [ -d "$YAZI_SYSTEM_ROOT/flavors/$_yazi_theme.yazi" ]; then

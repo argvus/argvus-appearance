@@ -274,7 +274,7 @@ class ThemeSwitchTests(unittest.TestCase):
             "tokyo-night": ("#7AA2F7", "#1A1B26", "#C0CAF5"),
             "solitude": ("#798186", "#101315", "#CACCCC"),
             "sunset": ("#E2BE8A", "#0F0F0F", "#EADCCC"),
-            "hackerman": ("#82FB9C", "#0B0C16", "#DDF7FF"),
+            "matrix": ("#82FB9C", "#0B0C16", "#DDF7FF"),
             "monokai-dark": ("#78DCE8", "#2D2A2E", "#FCFCFA"),
         }
 
@@ -624,13 +624,13 @@ class ThemeSwitchTests(unittest.TestCase):
             str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/dark/sunset-abstract-dark.jxl"),
         )
 
-    def test_dark_hackerman_uses_its_packaged_wallpaper(self):
-        self.apply("hackerman")
+    def test_dark_matrix_uses_its_packaged_wallpaper(self):
+        self.apply("matrix")
         self.assertEqual(
             os.path.expanduser(
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
-            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/dark/hackerman-abstract-dark.jxl"),
+            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/dark/matrix-abstract-dark.jxl"),
         )
 
     def test_dark_monokai_uses_its_packaged_wallpaper(self):

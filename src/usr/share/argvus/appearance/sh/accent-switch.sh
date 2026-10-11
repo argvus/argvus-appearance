@@ -74,7 +74,7 @@ theme_default_accent() {
     tokyo-night) printf '#7AA2F7\n' ;;
     solitude) printf '#798186\n' ;;
     sunset) printf '#E2BE8A\n' ;;
-    hackerman) printf '#82FB9C\n' ;;
+    matrix) printf '#82FB9C\n' ;;
     monokai-dark) printf '#78DCE8\n' ;;
     *) return 1 ;;
   esac
@@ -512,7 +512,7 @@ THEME="$(canonical_theme_id "$(read_state "$ACTIVE_FILE" "$DEFAULT_THEME")")"
 # legacy IDs without a manifest go through the built-in normalization below.
 if ! theme_manifest_exists "$THEME"; then
 case "$THEME" in
-  one-dark|one-dark-float|dracula|dracula-float|argvus-dark|argvus-dark-float|silver-dark|silver-dark-float|argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|one-light|one-light-float|everforest-light|everforest-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float|slate-dark|slate-dark-float|universe|universe-float|gruvbox-high-dark|gruvbox-high-dark-float|gruvbox-dark|gruvbox-dark-float|rose-pine|rose-pine-float|tokyo-night|tokyo-night-float|solitude|solitude-float|sunset|sunset-float|hackerman|hackerman-float|monokai-dark|monokai-dark-float) ;;
+  one-dark|one-dark-float|dracula|dracula-float|argvus-dark|argvus-dark-float|silver-dark|silver-dark-float|argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|one-light|one-light-float|everforest-light|everforest-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float|slate-dark|slate-dark-float|universe|universe-float|gruvbox-high-dark|gruvbox-high-dark-float|gruvbox-dark|gruvbox-dark-float|rose-pine|rose-pine-float|tokyo-night|tokyo-night-float|solitude|solitude-float|sunset|sunset-float|matrix|matrix-float|monokai-dark|monokai-dark-float) ;;
   *-dark-float) THEME="argvus-dark-float" ;;
   *-light-float) THEME="argvus-light-float" ;;
   *-light) THEME="argvus-light" ;;
