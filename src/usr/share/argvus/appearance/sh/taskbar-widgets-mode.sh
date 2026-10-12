@@ -15,8 +15,8 @@ ARGVUS_MUTABLE_CONFIG=1
 config_bool() {
   _pointer="$1"
   _default="$2"
-  if command -v argvus-config >/dev/null 2>&1; then
-    _value="$(argvus-config get "$_pointer" --effective --raw 2>/dev/null || true)"
+  if command -v argvus >/dev/null 2>&1; then
+    _value="$(argvus config get "$_pointer" --effective --raw 2>/dev/null || true)"
     case "$_value" in
       true|false) printf '%s\n' "$_value"; return 0 ;;
     esac
@@ -27,8 +27,8 @@ config_bool() {
 config_str() {
   _pointer="$1"
   _default="$2"
-  if command -v argvus-config >/dev/null 2>&1; then
-    _value="$(argvus-config get "$_pointer" --effective --raw 2>/dev/null || true)"
+  if command -v argvus >/dev/null 2>&1; then
+    _value="$(argvus config get "$_pointer" --effective --raw 2>/dev/null || true)"
     [ -n "$_value" ] && { printf '%s\n' "$_value"; return 0; }
   fi
   printf '%s\n' "$_default"
@@ -205,7 +205,7 @@ apply_mode() {
     "path": "/usr/share/argvus/svg/menu-default-dark.svg",
     "size": 20,
     "tooltip": false,
-    "on-click": "argvus-launcher"
+    "on-click": "argvus launcher"
   },' "$_target_config"
   fi
 
@@ -348,11 +348,11 @@ apply_mode() {
 }
 
 status() {
-  if ! command -v argvus-config >/dev/null 2>&1; then
-    printf '%s\n' "argvus-config unavailable" >&2
+  if ! command -v argvus >/dev/null 2>&1; then
+    printf '%s\n' "argvus config unavailable" >&2
     return 1
   fi
-  argvus-config get /taskbar --effective
+  argvus config get /taskbar --effective
 }
 
 case "${1:-status}" in

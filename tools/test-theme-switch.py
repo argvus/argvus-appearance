@@ -22,7 +22,7 @@ name = Path(sys.argv[0]).name
 with open(os.environ["TEST_COMMAND_LOG"], "a") as log:
     log.write(json.dumps([name, *sys.argv[1:]]) + "\\n")
 if name == "pgrep": sys.exit(1)
-if name == "argvus-sessionctl" and sys.argv[1:] == ["reload"]:
+if name == "argvus" and sys.argv[1:] == ["sessionctl", "reload"]:
     sys.exit(int(os.environ.get("TEST_RELOAD_FAIL", "0")))
 if name == "systemctl" and sys.argv[1:] == ["--user", "reload", "argvus-config.service"]:
     sys.exit(int(os.environ.get("TEST_CONFIG_RELOAD_FAIL", "0")))
@@ -30,7 +30,7 @@ if name == "hyprctl":
     if sys.argv[1:] == ["monitors"]: print("Monitor TEST-1 (ID 0):")
     if "dpms" in " ".join(sys.argv) and '"off"' in " ".join(sys.argv):
         sys.exit(int(os.environ.get("TEST_DPMS_FAIL", "0")))
-if name == "argvus-config" and sys.argv[1:3] == ["get", "/layout/variant"]:
+if name == "argvus" and sys.argv[1:4] == ["config", "get", "/layout/variant"]:
     # argvus-config owns /layout/variant and apply_theme keeps it in sync with
     # data/.active-theme. TEST_VARIANT lets a test diverge the two on purpose.
     override = os.environ.get("TEST_VARIANT")
@@ -76,9 +76,15 @@ class ThemeSwitchTests(unittest.TestCase):
         self.splash_args = self.base / "splash-args"
         mockbin = self.base / "bin"
         mockbin.mkdir()
-        for name in ("hyprctl", "systemctl", "argvus-sessionctl", "pgrep",
-                     "gsettings", "notify-send", "argvus-terminal", "argvus-system-monitor",
-                     "argvus-widget-telemetry-toggle", "argvus-config"):
+        # Private commands directory: the real argvus-i18n is linked in so the
+        # menu translations resolve the same way as on an installed system.
+        self.cmd_bin = self.base / "commands"
+        self.cmd_bin.mkdir()
+        real_i18n = shutil.which("argvus-i18n") or "/usr/bin/argvus-i18n"
+        if os.path.exists(real_i18n):
+            (self.cmd_bin / "argvus-i18n").symlink_to(real_i18n)
+        for name in ("hyprctl", "systemctl", "pgrep",
+                     "gsettings", "notify-send", "argvus"):
             script = mockbin / name
             script.write_text(MOCK)
             script.chmod(0o755)
@@ -112,6 +118,7 @@ class ThemeSwitchTests(unittest.TestCase):
             "TEST_COMMAND_LOG": str(self.log),
             "TEST_SPLASH_ARGS": str(self.splash_args),
             "ARGVUS_LOADING_THEME_BIN": str(splash),
+            "ARGVUS_COMMANDS_DIR": str(self.cmd_bin),
             "PATH": str(mockbin) + os.pathsep + os.environ["PATH"],
         }
 
@@ -407,7 +414,7 @@ class ThemeSwitchTests(unittest.TestCase):
                     commands.count(["systemctl", "--user", "reload", "argvus-config.service"]),
                     1,
                 )
-                self.assertNotIn(["argvus-sessionctl", "reload"], commands)
+                self.assertNotIn(["argvus", "sessionctl", "reload"], commands)
                 self.assertFalse(any(c[0] == "hyprctl" and "dpms" in " ".join(c)
                                      for c in commands))
 
@@ -509,7 +516,7 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertNotIn("applied.", result.stdout)
         commands = self.commands()
         self.assertIn(["systemctl", "--user", "reload", "argvus-config.service"], commands)
-        self.assertNotIn(["argvus-sessionctl", "reload"], commands)
+        self.assertNotIn(["argvus", "sessionctl", "reload"], commands)
         self.assertFalse(any(c[0] == "hyprctl" and "dpms" in " ".join(c)
                              for c in commands))
 
@@ -739,12 +746,12 @@ class ThemeSwitchTests(unittest.TestCase):
         taskbar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
         self.assertIn('    "drawer": {', taskbar)
         self.assertIn('      "custom/right-2-expander",', taskbar)
-        self.assertIn('"on-click": "argvus-removable-devices menu"', taskbar)
+        self.assertIn('"on-click": "argvus removable-devices menu"', taskbar)
         self.assertNotIn('"on-click": "/usr/share/argvus/removable-devices/sh/removable-devices-menu.sh --root {x} {y}"', taskbar)
         css = (self.user / "waybar/argvus-taskbar.css").read_text()
         self.assertIn("#custom-removable-devices", css)
         self.assertNotIn("#custom-storage", css)
-        self.assertIn(["argvus-widget-telemetry-toggle", "blocks", "apply"], self.commands())
+        self.assertIn(["argvus", "widget-telemetry-toggle", "blocks", "apply"], self.commands())
 
     def test_partial_theme_directory_is_repaired_without_losing_edits(self):
         theme = "argvus-dark"

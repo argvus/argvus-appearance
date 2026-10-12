@@ -115,9 +115,9 @@ read_accent_state() {
 # (`/appearance/accent_custom` is true). Prints nothing otherwise so the caller
 # keeps using the theme default or the existing marker.
 canonical_accent() {
-  command -v argvus-config >/dev/null 2>&1 || return 0
-  [ "$(argvus-config get /appearance/accent_custom --raw 2>/dev/null)" = "true" ] || return 0
-  argvus-config get /appearance/accent --raw 2>/dev/null | sed -n '1{s/\r$//;s/^[[:space:]]*//;s/[[:space:]]*$//;p;}'
+  command -v argvus >/dev/null 2>&1 || return 0
+  [ "$(argvus config get /appearance/accent_custom --raw 2>/dev/null)" = "true" ] || return 0
+  argvus config get /appearance/accent --raw 2>/dev/null | sed -n '1{s/\r$//;s/^[[:space:]]*//;s/[[:space:]]*$//;p;}'
 }
 
 select_accent() {
@@ -260,8 +260,8 @@ apply_theme_references() {
     "$_rofi_theme_file" 2>/dev/null || true
   sed -i "s|^@import \".*mode.rasi\"$|@import \"${_rofi_mode}\"|" \
     "$_rofi_theme_file" 2>/dev/null || true
-  command -v argvus-terminal >/dev/null 2>&1 && argvus-terminal --apply "$THEME" >/dev/null 2>&1 || true
-  command -v argvus-system-monitor >/dev/null 2>&1 && argvus-system-monitor --apply "$THEME" >/dev/null 2>&1 || true
+  command -v argvus >/dev/null 2>&1 && argvus terminal --apply "$THEME" >/dev/null 2>&1 || true
+  command -v argvus >/dev/null 2>&1 && argvus system-monitor --apply "$THEME" >/dev/null 2>&1 || true
   sync_snappy_switcher_theme
   replace_setting "$_superfile_config/config.toml" theme "\"${THEME}\""
   _qt6ct_conf="$(paths_config appearance/config/qt6ct/qt6ct.conf)"
@@ -438,7 +438,7 @@ apply_application_colors() {
     fi
   fi
 
-  command -v argvus-system-monitor >/dev/null 2>&1 && argvus-system-monitor --apply "$THEME" >/dev/null 2>&1 || true
+  command -v argvus >/dev/null 2>&1 && argvus system-monitor --apply "$THEME" >/dev/null 2>&1 || true
 
   for _key in file_panel_border_active file_panel_top_directory_icon footer_border_active sidebar_title sidebar_border_active modal_border_active modal_confirm_bg help_menu_hotkey correct hint; do
     replace_toml_color "$_superfile" "$_key"
@@ -470,9 +470,9 @@ publish_greeter_accent() {
 
 refresh_runtime() {
   command -v hyprctl >/dev/null 2>&1 && hyprctl reload >/dev/null 2>&1 || true
-  command -v argvus-terminal >/dev/null 2>&1 && argvus-terminal --apply "$THEME" >/dev/null 2>&1 || true
+  command -v argvus >/dev/null 2>&1 && argvus terminal --apply "$THEME" >/dev/null 2>&1 || true
   if [ "${ARGVUS_THEME_SWITCH:-0}" != 1 ]; then
-    argvus-sessionctl restart waybar dunst snappy-switcher shell >/dev/null 2>&1 || true
+    argvus sessionctl restart waybar dunst snappy-switcher shell >/dev/null 2>&1 || true
   fi
   # Signal running kitty instances to reload config (SIGUSR1)
   for _pid in $(pgrep -x kitty 2>/dev/null); do

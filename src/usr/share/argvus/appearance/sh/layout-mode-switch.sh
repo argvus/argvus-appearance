@@ -20,8 +20,8 @@ esac
 # mode's defaults, exactly like a theme switch already does. Selecting a
 # theme never touches this value (see theme-switch.sh), so this is the single
 # writer of the mode.
-if command -v argvus-config >/dev/null 2>&1; then
-  argvus-config apply-mode "$VARIANT"
+if command -v argvus >/dev/null 2>&1; then
+  argvus config apply-mode "$VARIANT"
 fi
 
 ACTIVE_FILE="${ARGVUS_CONFIG_HOME}/argvus/data/.active-theme"

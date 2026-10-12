@@ -12,8 +12,8 @@ ARGVUS_MUTABLE_CONFIG=1
 MODE_FILE="${ARGVUS_STATE_HOME}/taskbar-right-2-mode"
 
 mode() {
-  if command -v argvus-config >/dev/null 2>&1; then
-    _expanded="$(argvus-config get /taskbar/icons/utilities/expanded --effective --raw 2>/dev/null || true)"
+  if command -v argvus >/dev/null 2>&1; then
+    _expanded="$(argvus config get /taskbar/icons/utilities/expanded --effective --raw 2>/dev/null || true)"
     case "$_expanded" in
       true) printf '%s\n' always-expanded; return 0 ;;
       false) printf '%s\n' auto; return 0 ;;
@@ -45,7 +45,7 @@ apply_mode() {
       sed -i '/ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_BEGIN/,/ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_END/{
         /ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_BEGIN/b
         /ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_END/b
-        s|^\([[:space:]]*\)"on-click":.*$|\1"on-click": "argvus-removable-devices menu"|
+        s|^\([[:space:]]*\)"on-click":.*$|\1"on-click": "argvus removable-devices menu"|
       }' "$_taskbar_config"
       ;;
     always-expanded)
@@ -74,10 +74,10 @@ case "${1:-status}" in
   set)
     case "${2:-}" in
       auto|always-expanded)
-        if command -v argvus-config >/dev/null 2>&1; then
+        if command -v argvus >/dev/null 2>&1; then
           _expanded=false
           [ "$2" = always-expanded ] && _expanded=true
-          argvus-config patch "{\"/taskbar/icons/utilities/expanded\": ${_expanded}}" || true
+          argvus config patch "{\"/taskbar/icons/utilities/expanded\": ${_expanded}}" || true
         fi
         mkdir -p "${MODE_FILE%/*}"
         _temporary_mode_file="$(mktemp "${MODE_FILE}.tmp.XXXXXX")"

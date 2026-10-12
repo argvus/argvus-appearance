@@ -75,8 +75,8 @@ THEME="$(canonical_theme_id "${1:-}")"
 # of from the caller's choice, so switching themes never changes the mode.
 if [ -n "$THEME" ]; then
   THEME_FAMILY="${THEME%-float}"
-  if command -v argvus-config >/dev/null 2>&1; then
-    THEME_VARIANT="$(argvus-config get /layout/variant --raw 2>/dev/null || true)"
+  if command -v argvus >/dev/null 2>&1; then
+    THEME_VARIANT="$(argvus config get /layout/variant --raw 2>/dev/null || true)"
   else
     THEME_VARIANT=""
   fi
@@ -863,7 +863,7 @@ apply_argvus_calendar_theme() {
     rm -f "$_calendar_theme_tmp"
     return 0
   fi
-  command -v argvus-taskbar-calendar >/dev/null 2>&1 && argvus-taskbar-calendar reload >/dev/null 2>&1 || true
+  command -v argvus >/dev/null 2>&1 && argvus taskbar-calendar reload >/dev/null 2>&1 || true
 }
 
 # Publish only the validated theme identifier needed by the pre-authentication
@@ -922,7 +922,7 @@ fi
 # current Hyprland Lua and shell consumers. During argvus-config projection the
 # canonical mutation already happened, so calling it again would re-enter the
 # transaction.
-if [ "${ARGVUS_PROJECTING:-0}" != 1 ] && command -v argvus-config >/dev/null 2>&1; then
+if [ "${ARGVUS_PROJECTING:-0}" != 1 ] && command -v argvus >/dev/null 2>&1; then
   # Clear the canonical accent override in the same transaction as the theme
   # write, so the official theme default is what gets persisted.
   if [ "${ARGVUS_ACCENT_OFFICIAL:-0}" = 1 ]; then
@@ -934,10 +934,10 @@ if [ "${ARGVUS_PROJECTING:-0}" != 1 ] && command -v argvus-config >/dev/null 2>&
   # suffix: the variant is owned by /layout/variant (mode-switch.sh), not by
   # theme selection.
   if [ -n "$_theme_wallpaper" ]; then
-    argvus-config apply-theme "$THEME_FAMILY" $_theme_accent_flag \
+    argvus config apply-theme "$THEME_FAMILY" $_theme_accent_flag \
       --wallpaper "$_theme_wallpaper" --reset-wallpaper >/dev/null 2>&1 || true
   else
-    argvus-config apply-theme "$THEME_FAMILY" $_theme_accent_flag >/dev/null 2>&1 || true
+    argvus config apply-theme "$THEME_FAMILY" $_theme_accent_flag >/dev/null 2>&1 || true
   fi
   unset _theme_accent_flag
 fi
@@ -968,8 +968,8 @@ if [ -x "$_taskbar_widgets_mode_script" ]; then
 fi
 # The managed Waybar file is recreated above, so restore the user's sparse
 # telemetry block preferences before the session components are restarted.
-if command -v argvus-widget-telemetry-toggle >/dev/null 2>&1; then
-  argvus-widget-telemetry-toggle blocks apply || true
+if command -v argvus >/dev/null 2>&1; then
+  argvus widget-telemetry-toggle blocks apply || true
 fi
 _waybar_cfg="$(paths_config taskbar/config/argvus-taskbar.jsonc)"
 _waybar_cfg_widget_telemetry="$(paths_config widget-telemetry/config/argvus-widget-telemetry.jsonc)"
@@ -1074,8 +1074,8 @@ sed -i "s|^@import \".*themes/.*/theme.rasi\"$|@import \"${ROFI_THEMES}/${THEME}
 
 sed -i "s|^@import \".*mode.rasi\"$|@import \"${ROFI_MODE}\"|" "$ROFI_THEME"
 
-if command -v argvus-terminal >/dev/null 2>&1; then
-  if ! argvus-terminal --apply "$THEME" >/dev/null 2>&1; then
+if command -v argvus >/dev/null 2>&1; then
+  if ! argvus terminal --apply "$THEME" >/dev/null 2>&1; then
     argvus_tr appearance theme.terminal_apply_failed >&2
     THEME_APPLY_STATUS=1
   fi
@@ -1104,7 +1104,7 @@ if [ "$RUNTIME" -eq 1 ] && { [ -f "$HYPR_THEMES/$THEME/hyprtoolkit.conf" ] || [ 
   systemctl --user restart hyprpolkitagent 2>/dev/null || true
 fi
 
-command -v argvus-system-monitor >/dev/null 2>&1 && argvus-system-monitor --apply "$THEME" >/dev/null 2>&1 || true
+command -v argvus >/dev/null 2>&1 && argvus system-monitor --apply "$THEME" >/dev/null 2>&1 || true
 
 if [ -f "$SNAPPY_THEMES/$THEME/theme.ini" ]; then
   sync_snappy_switcher_theme
@@ -1167,8 +1167,8 @@ esac
 # session startup, configuration projection and custom profile applies, where
 # the new theme only owns backgrounds.
 if [ "${ARGVUS_ACCENT_OFFICIAL:-0}" != 1 ] \
-  && command -v argvus-config >/dev/null 2>&1 \
-  && [ "$(argvus-config get /appearance/accent_custom --raw 2>/dev/null)" = "true" ]; then
+  && command -v argvus >/dev/null 2>&1 \
+  && [ "$(argvus config get /appearance/accent_custom --raw 2>/dev/null)" = "true" ]; then
   _accent_mode="--apply-static"
 else
   _accent_mode="--theme-default"
