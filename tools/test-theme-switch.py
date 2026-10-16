@@ -303,6 +303,20 @@ class ThemeSwitchTests(unittest.TestCase):
             telemetry_css.read_text(),
         )
 
+    def test_default_icon_theme_follows_the_theme_mode(self):
+        # With no icon theme configured, the default is the dark or light
+        # ARGVUS icon theme of the applied theme's mode.
+        cases = (
+            ("argvus-light", "Argvus Light Icons"),
+            ("argvus-dark", "Argvus Dark Icons"),
+        )
+        for theme, icon_theme in cases:
+            with self.subTest(theme=theme):
+                self.apply(theme)
+                for version in ("gtk-3.0", "gtk-4.0"):
+                    settings = (self.user / version / "settings.ini").read_text()
+                    self.assertIn(f"gtk-icon-theme-name={icon_theme}", settings)
+
     def test_dunst_theme_follows_selected_theme(self):
         expected = {
             "dracula": ("#BD93F9", "#282A36", "#6272A4"),

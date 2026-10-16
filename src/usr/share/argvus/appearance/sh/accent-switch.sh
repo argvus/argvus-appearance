@@ -216,7 +216,8 @@ sync_native_qt6ct_config() {
   # A native icon_theme equal to the ARGVUS default or to the configured theme
   # marks the file as ARGVUS-generated; any other value is a user choice.
   _argvus_icon_theme="$(icon_theme_effective 2>/dev/null)"
-  if grep -Fxq "icon_theme=${ARGVUS_ICON_DEFAULT_THEME}" "$_native_qt6ct" \
+  if grep -Fxq "icon_theme=${ARGVUS_ICON_DEFAULT_DARK}" "$_native_qt6ct" \
+    || grep -Fxq "icon_theme=${ARGVUS_ICON_DEFAULT_LIGHT}" "$_native_qt6ct" \
     || grep -Fxq "icon_theme=${_argvus_icon_theme}" "$_native_qt6ct" \
     || grep -Eq '^color_scheme_path[[:space:]]*=.*(argvus|appearance/config/qt6ct)/colors/argvus-' "$_native_qt6ct"; then
     replace_setting "$_native_qt6ct" color_scheme_path \

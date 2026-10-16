@@ -19,7 +19,6 @@ ARGVUS_HYPR_HELPER="${ARGVUS_SYSTEM_CONFIG}/appearance/sh/hypr.sh"
 # icon theme is resolved once here and reused by every GNOME/GTK/Qt write.
 ARGVUS_ICON_HELPER="${ARGVUS_SYSTEM_CONFIG}/appearance/sh/icon-switch.sh"
 [ -r "$ARGVUS_ICON_HELPER" ] && . "$ARGVUS_ICON_HELPER"
-ARGVUS_ICON_THEME="$(icon_theme_effective)"
 
 ARGVUS_MUTABLE_CONFIG=1
 export ARGVUS_THEME_SWITCH=1
@@ -93,6 +92,8 @@ if [ -n "$THEME" ]; then
 fi
 
 ACTIVE_FILE="${ARGVUS_CONFIG_HOME}/argvus/data/.active-theme"
+# The default icon theme follows the mode of the final theme id.
+ARGVUS_ICON_THEME="$(icon_theme_effective "$THEME")"
 GREETER_THEME_STATE_DIR="${ARGVUS_GREETER_THEME_STATE_DIR:-/var/lib/argvus/greeter/themes}"
 RUNTIME=1
 mkdir -p "${ACTIVE_FILE%/*}"
@@ -507,21 +508,6 @@ refresh_managed_waybar_file() {
 
 # Built-in light families that predate manifest-driven themes. New themes are
 # classified by gtk_scheme in their manifest and never need an entry here.
-# Manifests are per family; the Float variant is read through its family id.
-gtk_mode_for_theme() {
-  if theme_manifest_exists "${1%-float}"; then
-    case "$(theme_manifest_table_value "${1%-float}" appearance gtk_scheme)" in
-      prefer-light) printf '%s\n' light ;;
-      *) printf '%s\n' dark ;;
-    esac
-    return 0
-  fi
-  case "$1" in
-    argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|one-light|one-light-float|everforest-light|everforest-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float) printf '%s\n' light ;;
-    *) printf '%s\n' dark ;;
-  esac
-}
-
 gtk_theme_name_for_theme() {
   if theme_manifest_exists "${1%-float}"; then
     case "$(theme_manifest_table_value "${1%-float}" appearance gtk_scheme)" in
