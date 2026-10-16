@@ -39,6 +39,9 @@ canonical_theme_id() {
 ARGVUS_MANIFEST_HELPER="${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/appearance/sh/theme-manifest.sh"
 [ -r "$ARGVUS_MANIFEST_HELPER" ] && . "$ARGVUS_MANIFEST_HELPER"
 
+ARGVUS_ICON_HELPER="${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/appearance/sh/icon-switch.sh"
+[ -r "$ARGVUS_ICON_HELPER" ] && . "$ARGVUS_ICON_HELPER"
+
 theme_default_accent() {
   _theme_id="${1%-float}"
 
@@ -210,11 +213,16 @@ sync_native_qt6ct_config() {
     return 0
   fi
 
-  if grep -q '^icon_theme[[:space:]]*=[[:space:]]*Argvus Icons$' "$_native_qt6ct" \
+  # A native icon_theme equal to the ARGVUS default or to the configured theme
+  # marks the file as ARGVUS-generated; any other value is a user choice.
+  _argvus_icon_theme="$(icon_theme_effective 2>/dev/null)"
+  if grep -Fxq "icon_theme=${ARGVUS_ICON_DEFAULT_THEME}" "$_native_qt6ct" \
+    || grep -Fxq "icon_theme=${_argvus_icon_theme}" "$_native_qt6ct" \
     || grep -Eq '^color_scheme_path[[:space:]]*=.*(argvus|appearance/config/qt6ct)/colors/argvus-' "$_native_qt6ct"; then
     replace_setting "$_native_qt6ct" color_scheme_path \
       "$(paths_config "appearance/config/qt6ct/colors/${THEME}.conf")"
     replace_setting "$_native_qt6ct" custom_palette true
+    icon_theme_write_qt6ct "$_argvus_icon_theme" "$_native_qt6ct"
   fi
 }
 
@@ -508,9 +516,10 @@ if ! normalize_accent "$REQUESTED"; then
 fi
 
 THEME="$(canonical_theme_id "$(read_state "$ACTIVE_FILE" "$DEFAULT_THEME")")"
-# An installed manifest is an explicit theme identity: keep it as-is. Only
+# An installed manifest is an explicit theme identity: keep it as-is. Manifests
+# are per family, so the Float variant is checked through its family id. Only
 # legacy IDs without a manifest go through the built-in normalization below.
-if ! theme_manifest_exists "$THEME"; then
+if ! theme_manifest_exists "${THEME%-float}"; then
 case "$THEME" in
   one-dark|one-dark-float|dracula|dracula-float|argvus-dark|argvus-dark-float|silver-dark|silver-dark-float|argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|one-light|one-light-float|everforest-light|everforest-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float|slate-dark|slate-dark-float|universe|universe-float|gruvbox-high-dark|gruvbox-high-dark-float|gruvbox-dark|gruvbox-dark-float|rose-pine|rose-pine-float|tokyo-night|tokyo-night-float|solitude|solitude-float|sunset|sunset-float|matrix|matrix-float|monokai-dark|monokai-dark-float) ;;
   *-dark-float) THEME="argvus-dark-float" ;;

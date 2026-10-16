@@ -15,6 +15,12 @@ ARGVUS_MANIFEST_HELPER="${ARGVUS_SYSTEM_CONFIG}/appearance/sh/theme-manifest.sh"
 ARGVUS_HYPR_HELPER="${ARGVUS_SYSTEM_CONFIG}/appearance/sh/hypr.sh"
 [ -r "$ARGVUS_HYPR_HELPER" ] && . "$ARGVUS_HYPR_HELPER"
 
+# Icon theme helpers: /appearance/icon_theme is the source of truth, so the
+# icon theme is resolved once here and reused by every GNOME/GTK/Qt write.
+ARGVUS_ICON_HELPER="${ARGVUS_SYSTEM_CONFIG}/appearance/sh/icon-switch.sh"
+[ -r "$ARGVUS_ICON_HELPER" ] && . "$ARGVUS_ICON_HELPER"
+ARGVUS_ICON_THEME="$(icon_theme_effective)"
+
 ARGVUS_MUTABLE_CONFIG=1
 export ARGVUS_THEME_SWITCH=1
 
@@ -501,9 +507,10 @@ refresh_managed_waybar_file() {
 
 # Built-in light families that predate manifest-driven themes. New themes are
 # classified by gtk_scheme in their manifest and never need an entry here.
+# Manifests are per family; the Float variant is read through its family id.
 gtk_mode_for_theme() {
-  if theme_manifest_exists "$1"; then
-    case "$(theme_manifest_table_value "$1" appearance gtk_scheme)" in
+  if theme_manifest_exists "${1%-float}"; then
+    case "$(theme_manifest_table_value "${1%-float}" appearance gtk_scheme)" in
       prefer-light) printf '%s\n' light ;;
       *) printf '%s\n' dark ;;
     esac
@@ -516,8 +523,8 @@ gtk_mode_for_theme() {
 }
 
 gtk_theme_name_for_theme() {
-  if theme_manifest_exists "$1"; then
-    case "$(theme_manifest_table_value "$1" appearance gtk_scheme)" in
+  if theme_manifest_exists "${1%-float}"; then
+    case "$(theme_manifest_table_value "${1%-float}" appearance gtk_scheme)" in
       prefer-light) printf '%s\n' "Adwaita" ;;
       *) printf '%s\n' "Adwaita-dark" ;;
     esac
@@ -548,7 +555,7 @@ apply_gtk_runtime_settings() {
     sleep 0.05
   fi
   gsettings set org.gnome.desktop.interface gtk-theme "$_theme_name" 2>/dev/null || true
-  gsettings set org.gnome.desktop.interface icon-theme "Argvus Icons" 2>/dev/null || true
+  gsettings set org.gnome.desktop.interface icon-theme "$ARGVUS_ICON_THEME" 2>/dev/null || true
 }
 
 apply_gtk_theme_files() {
@@ -574,7 +581,7 @@ apply_gtk_theme_files() {
     for _settings in "${_argvus_gtk_dir}/settings.ini" "${_native_gtk_dir}/settings.ini"; do
       replace_or_append_ini_setting "$_settings" gtk-theme-name "$_gtk_theme_name"
       replace_or_append_ini_setting "$_settings" gtk-application-prefer-dark-theme "$_prefer_dark"
-      replace_or_append_ini_setting "$_settings" gtk-icon-theme-name "Argvus Icons"
+      replace_or_append_ini_setting "$_settings" gtk-icon-theme-name "$ARGVUS_ICON_THEME"
       replace_or_append_ini_setting "$_settings" gtk-font-name "$ARGVUS_APPS_FONT"
       replace_or_append_ini_setting "$_settings" gtk-cursor-theme-name Adwaita
       replace_or_append_ini_setting "$_settings" gtk-cursor-theme-size 24
@@ -1097,6 +1104,7 @@ _qt6ct_conf="$(paths_config appearance/config/qt6ct/qt6ct.conf)"
 if [ -f "$_qt6ct_conf" ] && [ -f "$QT6CT_COLORS/$THEME.conf" ]; then
   sed -i "s|^color_scheme_path=.*|color_scheme_path=${QT6CT_COLORS}/${THEME}.conf|" "$_qt6ct_conf"
   sed -i "s|^custom_palette=.*|custom_palette=true|" "$_qt6ct_conf"
+  icon_theme_write_qt6ct "$ARGVUS_ICON_THEME" "$_qt6ct_conf"
 fi
 
 if [ "$RUNTIME" -eq 1 ] && { [ -f "$HYPR_THEMES/$THEME/hyprtoolkit.conf" ] || [ -f "$HYPR_THEMES/$THEME/application-style.conf" ]; }; then

@@ -15,6 +15,12 @@ import tomllib
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
+# The suite runs the real argvus-config. Build it first with
+# `cargo build --bin argvus-config` in de/argvus-config.
+ARGVUS_CONFIG_BIN = ROOT / "argvus-config/target/debug/argvus-config"
+# Translations resolve through the real argvus-i18n, as on an installed system.
+# Build it with `cargo build --bin argvus-i18n` in de/argvus-i18n.
+ARGVUS_I18N_BIN = ROOT / "argvus-i18n/target/debug/argvus-i18n"
 MOCK = '''#!/usr/bin/env python3
 import json, os, sys
 from pathlib import Path
@@ -22,6 +28,13 @@ name = Path(sys.argv[0]).name
 with open(os.environ["TEST_COMMAND_LOG"], "a") as log:
     log.write(json.dumps([name, *sys.argv[1:]]) + "\\n")
 if name == "pgrep": sys.exit(1)
+# Canonical configuration is owned by argvus-config: forward `argvus config`
+# to the real binary so projections (layout, taskbar, derived files) are
+# written exactly as on an installed system. TEST_VARIANT keeps the fake
+# answer for tests that diverge /layout/variant on purpose.
+if name == "argvus" and sys.argv[1:2] == ["config"] and os.environ.get("TEST_ARGVUS_CONFIG_BIN") and not os.environ.get("TEST_VARIANT"):
+    real = os.environ["TEST_ARGVUS_CONFIG_BIN"]
+    os.execv(real, [real, *sys.argv[2:]])
 if name == "argvus" and sys.argv[1:] == ["sessionctl", "reload"]:
     sys.exit(int(os.environ.get("TEST_RELOAD_FAIL", "0")))
 if name == "systemctl" and sys.argv[1:] == ["--user", "reload", "argvus-config.service"]:
@@ -42,6 +55,17 @@ if name == "argvus" and sys.argv[1:4] == ["config", "get", "/layout/variant"]:
 '''
 
 
+def link_tree(source, destination):
+    """Mirror `source` under `destination`, linking every file instead of copying it."""
+    for path in source.rglob("*"):
+        target = destination / path.relative_to(source)
+        if path.is_dir():
+            target.mkdir(parents=True, exist_ok=True)
+        elif not target.exists():
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.symlink_to(path)
+
+
 class ThemeSwitchTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix="argvus-theme-test-")
@@ -58,6 +82,14 @@ class ThemeSwitchTests(unittest.TestCase):
                         self.system / component.name,
                         dirs_exist_ok=True,
                     )
+        # Theme packages ship their own wallpapers under backgrounds/argvus, as
+        # the installed /usr/share/backgrounds does, so the test root merges
+        # every sibling's backgrounds instead of reading one repository.
+        self.backgrounds = self.base / "backgrounds"
+        for repo in ROOT.glob("argvus*"):
+            source = repo / "src/usr/share/backgrounds/argvus"
+            if source.is_dir():
+                link_tree(source, self.backgrounds / "argvus")
         calendar_themes = ROOT / "argvus-taskbar-calendar/resources/themes"
         shutil.copytree(
             calendar_themes,
@@ -80,9 +112,13 @@ class ThemeSwitchTests(unittest.TestCase):
         # menu translations resolve the same way as on an installed system.
         self.cmd_bin = self.base / "commands"
         self.cmd_bin.mkdir()
-        real_i18n = shutil.which("argvus-i18n") or "/usr/bin/argvus-i18n"
-        if os.path.exists(real_i18n):
-            (self.cmd_bin / "argvus-i18n").symlink_to(real_i18n)
+        if not ARGVUS_I18N_BIN.is_file():
+            raise RuntimeError(
+                f"missing {ARGVUS_I18N_BIN}; run `cargo build --bin argvus-i18n` in de/argvus-i18n")
+        (self.cmd_bin / "argvus-i18n").symlink_to(ARGVUS_I18N_BIN)
+        # Session scripts reach the canonical configuration through the same
+        # commands directory, so argvus-config is linked there as well.
+        (self.cmd_bin / "argvus-config").symlink_to(ARGVUS_CONFIG_BIN)
         for name in ("hyprctl", "systemctl", "pgrep",
                      "gsettings", "notify-send", "argvus"):
             script = mockbin / name
@@ -113,9 +149,10 @@ class ThemeSwitchTests(unittest.TestCase):
             "ARGVUS_NO_RUNTIME": "1",
             "ARGVUS_THEME_LOCKED": "0",
             "ARGVUS_I18N_DIR": str(ROOT / "argvus-i18n/locales"),
-            "ARGVUS_BACKGROUNDS_DIR": str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds"),
-            "WALLPAPER_ROOT": str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus"),
+            "ARGVUS_BACKGROUNDS_DIR": str(self.backgrounds),
+            "WALLPAPER_ROOT": str(self.backgrounds / "argvus"),
             "TEST_COMMAND_LOG": str(self.log),
+            "TEST_ARGVUS_CONFIG_BIN": str(ARGVUS_CONFIG_BIN),
             "TEST_SPLASH_ARGS": str(self.splash_args),
             "ARGVUS_LOADING_THEME_BIN": str(splash),
             "ARGVUS_COMMANDS_DIR": str(self.cmd_bin),
@@ -123,8 +160,17 @@ class ThemeSwitchTests(unittest.TestCase):
         }
 
     def apply(self, theme, runtime=False, fail_dpms=False, expected_status=0):
+        # Sticky/Float is /layout/variant, written only by layout-mode-switch.sh;
+        # a theme switch never changes it. A "-float" name therefore sets the
+        # Float mode first and then applies the bare theme family.
+        mode = "float" if theme.endswith("-float") else "sticky"
+        family = theme.removesuffix("-float")
+        subprocess.run(
+            ["sh", str(self.system / "appearance/sh/layout-mode-switch.sh"), mode],
+            env=self.env | {"ARGVUS_NO_RUNTIME": "1"},
+            capture_output=True, text=True, timeout=60, check=True)
         result = subprocess.run(
-            ["sh", str(self.system / "appearance/sh/theme-switch.sh"), theme],
+            ["sh", str(self.system / "appearance/sh/theme-switch.sh"), family],
             env=self.env | {"ARGVUS_NO_RUNTIME": "0" if runtime else "1",
                             "TEST_DPMS_FAIL": "1" if fail_dpms else "0"},
             capture_output=True, text=True, timeout=60)
@@ -142,7 +188,7 @@ class ThemeSwitchTests(unittest.TestCase):
                 with self.subTest(theme=theme):
                     self.apply(theme)
                     margin = 18 if theme.endswith("-float") else 0
-                    bottom_margin = 18 if theme.endswith("-float") else 2
+                    bottom_margin = 18 if theme.endswith("-float") else 0
                     bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
                     for edge in ("top", "left", "right"):
                         self.assertIn(f'"margin-{edge}": {margin}', bar)
@@ -160,14 +206,14 @@ class ThemeSwitchTests(unittest.TestCase):
                     if theme in ("one-dark", "one-dark-float"):
                         telemetry_theme = (self.user / f"waybar/themes/{theme}/widget-telemetry-theme.css").read_text()
                         self.assertIn(
-                            "@define-color th-window-bg     rgba(44, 49, 58, 0.35);",
+                            "@define-color th-window-bg-rgba rgba(44, 49, 58, 0.35);",
                             telemetry_theme,
                         )
                     rofi = (self.user / "rofi/theme.rasi").read_text()
                     self.assertIn(f"/{theme}/theme.rasi", rofi)
                     for version in ("gtk-3.0", "gtk-4.0"):
                         settings = (self.user / version / "settings.ini").read_text()
-                        prefer_dark = 0 if ("argvus-light" in theme or "github-light" in theme or "solarized-light" in theme or "one-light" in theme or "everforest-light" in theme or "frost" in theme or "gruvbox-light" in theme or "catppuccin-latte" in theme) else 1
+                        prefer_dark = 0 if self.is_light_theme(theme) else 1
                         self.assertIn(f"gtk-application-prefer-dark-theme={prefer_dark}", settings)
                     palette = (self.base / "cache/argvus-control-center/theme.css").read_text()
                     self.assertIn("@define-color argvus_accent #", palette)
@@ -210,7 +256,7 @@ class ThemeSwitchTests(unittest.TestCase):
                     if theme == "catppuccin-latte-float":
                         expected_telemetry_rgb = "235, 235, 235"
                     self.assertIn(
-                        f"@define-color th-window-bg     rgba({expected_telemetry_rgb}, 0.82);",
+                        f"@define-color th-window-bg-rgba rgba({expected_telemetry_rgb}, 0.82);",
                         telemetry_theme,
                     )
 
@@ -225,24 +271,22 @@ class ThemeSwitchTests(unittest.TestCase):
                         control_panel_theme,
                     )
 
-        state_dir = self.base / "state/argvus"
-        state_dir.mkdir(parents=True, exist_ok=True)
-        (state_dir / "transparency").write_text("enabled\n")
+        self.set_transparency("enabled")
         self.apply("one-light")
 
         effects = self.system / "session/sh/effects-toggle.sh"
         taskbar_css = self.user / "waybar/argvus-taskbar.css"
         telemetry_css = self.user / "waybar/argvus-widget-telemetry.css"
         self.assertIn(
-            "@define-color th-background-effective @th-background-rgba;",
+            "@define-color th-background-effective alpha(@th-background, 0.50);",
             taskbar_css.read_text(),
         )
         self.assertIn(
-            "@define-color th-window-bg-effective @th-window-bg;",
+            "@define-color th-window-bg-effective alpha(@th-window-bg, 0.50);",
             telemetry_css.read_text(),
         )
 
-        (state_dir / "transparency").write_text("disabled\n")
+        self.set_transparency("disabled")
         subprocess.run(
             ["sh", str(effects), "apply"],
             env=self.env,
@@ -255,7 +299,7 @@ class ThemeSwitchTests(unittest.TestCase):
             taskbar_css.read_text(),
         )
         self.assertIn(
-            "@define-color th-window-bg-effective @th-background;",
+            "@define-color th-window-bg-effective @th-window-bg;",
             telemetry_css.read_text(),
         )
 
@@ -556,7 +600,7 @@ class ThemeSwitchTests(unittest.TestCase):
             os.path.expanduser(
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
-            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/light/catppuccin-latte-abstract-light.jxl"),
+            str(self.backgrounds / "argvus/abstract/light/catppuccin-latte-abstract-light.jxl"),
         )
 
     def test_legacy_catppuccin_id_is_migrated(self):
@@ -572,7 +616,7 @@ class ThemeSwitchTests(unittest.TestCase):
             os.path.expanduser(
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
-            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/light/solarized-abstract-light.jxl"),
+            str(self.backgrounds / "argvus/abstract/light/solarized-abstract-light.jxl"),
         )
 
     def test_light_gruvbox_uses_its_packaged_wallpaper(self):
@@ -581,7 +625,7 @@ class ThemeSwitchTests(unittest.TestCase):
             os.path.expanduser(
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
-            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/light/gruvbox-abstract-light.jxl"),
+            str(self.backgrounds / "argvus/abstract/light/gruvbox-abstract-light.jxl"),
         )
 
     def test_one_light_uses_its_packaged_wallpaper(self):
@@ -590,7 +634,7 @@ class ThemeSwitchTests(unittest.TestCase):
             os.path.expanduser(
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
-            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/light/one-light-abstract-light.jxl"),
+            str(self.backgrounds / "argvus/abstract/light/one-light-abstract-light.jxl"),
         )
 
     def test_everforest_light_uses_its_packaged_wallpaper(self):
@@ -599,7 +643,7 @@ class ThemeSwitchTests(unittest.TestCase):
             os.path.expanduser(
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
-            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/light/everforest-abstract-light.jxl"),
+            str(self.backgrounds / "argvus/abstract/light/everforest-abstract-light.jxl"),
         )
 
     def test_official_superfile_themes_use_the_complete_schema(self):
@@ -619,7 +663,7 @@ class ThemeSwitchTests(unittest.TestCase):
             os.path.expanduser(
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
-            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/dark/solitude-abstract-dark.jxl"),
+            str(self.backgrounds / "argvus/abstract/dark/solitude-abstract-dark.jxl"),
         )
 
     def test_dark_sunset_uses_its_packaged_wallpaper(self):
@@ -628,7 +672,7 @@ class ThemeSwitchTests(unittest.TestCase):
             os.path.expanduser(
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
-            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/dark/sunset-abstract-dark.jxl"),
+            str(self.backgrounds / "argvus/abstract/dark/sunset-abstract-dark.jxl"),
         )
 
     def test_dark_matrix_uses_its_packaged_wallpaper(self):
@@ -637,7 +681,7 @@ class ThemeSwitchTests(unittest.TestCase):
             os.path.expanduser(
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
-            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/dark/matrix-abstract-dark.jxl"),
+            str(self.backgrounds / "argvus/abstract/dark/matrix-abstract-dark.jxl"),
         )
 
     def test_dark_monokai_uses_its_packaged_wallpaper(self):
@@ -646,7 +690,7 @@ class ThemeSwitchTests(unittest.TestCase):
             os.path.expanduser(
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
-            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/dark/monokai-abstract-dark.jxl"),
+            str(self.backgrounds / "argvus/abstract/dark/monokai-abstract-dark.jxl"),
         )
 
     def test_dark_rose_pine_uses_its_packaged_wallpaper(self):
@@ -655,13 +699,11 @@ class ThemeSwitchTests(unittest.TestCase):
             os.path.expanduser(
                 (self.user / "hypr/hyprpaper.conf").read_text().split("path =", 1)[1].splitlines()[0].strip()
             ),
-            str(ROOT / "argvus-wallpapers/src/usr/share/backgrounds/argvus/abstract/dark/rose-pine-abstract-dark.jxl"),
+            str(self.backgrounds / "argvus/abstract/dark/rose-pine-abstract-dark.jxl"),
         )
 
     def test_dark_monokai_float_applies_geometry_and_telemetry_transparency(self):
-        state_dir = self.base / "state/argvus"
-        state_dir.mkdir(parents=True, exist_ok=True)
-        (state_dir / "transparency").write_text("enabled\n")
+        self.set_transparency("enabled")
         self.apply("monokai-dark-float")
 
         spaces = subprocess.run(
@@ -688,7 +730,7 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn("rounding=4", borders)
 
         telemetry_theme = self.user / "waybar/themes/monokai-dark-float/widget-telemetry-theme.css"
-        self.assertIn("@define-color th-window-bg rgba(45, 42, 46, 0.35);", telemetry_theme.read_text())
+        self.assertIn("@define-color th-window-bg-rgba rgba(45, 42, 46, 0.35);", telemetry_theme.read_text())
 
         taskbar_theme = self.user / "waybar/themes/monokai-dark-float/theme.css"
         taskbar_contents = taskbar_theme.read_text()
@@ -698,22 +740,9 @@ class ThemeSwitchTests(unittest.TestCase):
 
         telemetry_css = self.user / "waybar/argvus-widget-telemetry.css"
         effects = self.system / "session/sh/effects-toggle.sh"
-        self.assertIn("@define-color th-window-bg-effective @th-window-bg;", telemetry_css.read_text())
+        self.assertIn("@define-color th-window-bg-effective alpha(@th-window-bg, 0.50);", telemetry_css.read_text())
 
-        (state_dir / "transparency").write_text("disabled\n")
-        subprocess.run(
-            ["sh", str(effects), "apply"],
-            env=self.env,
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        self.assertIn(
-            "@define-color th-window-bg-effective @th-background;",
-            telemetry_css.read_text(),
-        )
-
-        (state_dir / "transparency").write_text("enabled\n")
+        self.set_transparency("disabled")
         subprocess.run(
             ["sh", str(effects), "apply"],
             env=self.env,
@@ -726,10 +755,46 @@ class ThemeSwitchTests(unittest.TestCase):
             telemetry_css.read_text(),
         )
 
+        self.set_transparency("enabled")
+        subprocess.run(
+            ["sh", str(effects), "apply"],
+            env=self.env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        self.assertIn(
+            "@define-color th-window-bg-effective alpha(@th-window-bg, 0.50);",
+            telemetry_css.read_text(),
+        )
+
+    def is_light_theme(self, theme):
+        """Drop-in packages declare their category; built-ins are listed."""
+        manifest = self.system / "appearance/themes.d" / theme.removesuffix("-float") / "theme.toml"
+        if manifest.is_file():
+            with manifest.open("rb") as handle:
+                return tomllib.load(handle).get("category") == "light"
+        return any(name in theme for name in (
+            "argvus-light", "github-light", "solarized-light", "one-light",
+            "everforest-light", "frost", "gruvbox-light", "catppuccin-latte"))
+
+    def set_transparency(self, state):
+        """Switches transparency through the user-facing effects command."""
+        subprocess.run(
+            ["sh", str(self.system / "session/sh/effects-toggle.sh"), "transparency", "enable" if state == "enabled" else "disable"],
+            env=self.env | {"ARGVUS_NO_RUNTIME": "1"}, stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL, timeout=60, check=True,
+        )
+
+    def set_taskbar_mode(self, mode):
+        """Stores the utility-group mode in argvus-config, the only source of it."""
+        subprocess.run(
+            ["sh", str(self.system / "appearance/sh/taskbar-right-2-mode.sh"), "set", mode],
+            env=self.env, capture_output=True, text=True, check=True,
+        )
+
     def test_theme_switch_preserves_taskbar_utility_group_mode(self):
-        mode_file = self.base / "state/argvus/taskbar-right-2-mode"
-        mode_file.parent.mkdir(parents=True)
-        mode_file.write_text("always-expanded\n")
+        self.set_taskbar_mode("always-expanded")
 
         self.apply("argvus-dark")
 
@@ -740,7 +805,7 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn('//      "custom/right-2-expander",', taskbar)
         self.assertIn('"on-click": "/usr/share/argvus/removable-devices/sh/removable-devices-menu.sh --root {x} {y}"', taskbar)
 
-        mode_file.write_text("auto\n")
+        self.set_taskbar_mode("auto")
         self.apply("argvus-dark")
 
         taskbar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
@@ -780,7 +845,7 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn('"position": "top"', bar)
         for edge in ("top", "left", "right"):
             self.assertIn(f'"margin-{edge}": 0', bar)
-        self.assertIn('"margin-bottom": 2', bar)
+        self.assertIn('"margin-bottom": 0', bar)
         spaces_status = subprocess.run(
             ["sh", str(self.system / "hyprland/sh/spaces-switch.sh"), "--status"],
             env=self.env, capture_output=True, text=True, check=True,
@@ -813,14 +878,10 @@ class ThemeSwitchTests(unittest.TestCase):
         )
         bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
         self.assertIn('"margin-bottom": 7', bar)
-        # The generated effective geometry complements the taskbar reservation
-        # instead of adding the requested gaps_out value a second time.
-        self.assertIn(["hyprctl", "keyword", "general:gaps_out", "0 5 7 4"], self.commands())
-        effective = (self.user / "generated/spaces-effective.conf").read_text()
-        self.assertIn("effective_top=0", effective)
-        self.assertIn("effective_left=4", effective)
-        self.assertIn("effective_right=5", effective)
-        self.assertIn("effective_bottom=7", effective)
+        # The effective geometry complements the taskbar reservation instead of
+        # adding the requested gaps_out value a second time.
+        self.assertIn(
+            "top = 0, right = 5, bottom = 7, left = 4", self.last_gaps_eval())
         telemetry = (self.user / "waybar/argvus-widget-telemetry.jsonc").read_text()
         self.assertIn('"margin-top": 0', telemetry)
         self.assertIn('"margin-left": 4', telemetry)
@@ -836,12 +897,21 @@ class ThemeSwitchTests(unittest.TestCase):
             env=self.env | {"ARGVUS_NO_RUNTIME": "0"},
             capture_output=True, text=True, check=True,
         )
-        self.assertIn(["hyprctl", "keyword", "general:gaps_out", "2 5 0 4"], self.commands())
+        self.assertIn(
+            "top = 2, right = 5, bottom = 0, left = 4", self.last_gaps_eval())
+
+    def last_gaps_eval(self):
+        """The `hyprctl eval` that carried the most recent gaps to Hyprland."""
+        evals = [
+            command[2] for command in self.commands()
+            if command[:2] == ["hyprctl", "eval"] and len(command) > 2 and "gaps_out" in command[2]
+        ]
+        self.assertTrue(evals, "no gaps eval was sent to Hyprland")
+        return evals[-1]
 
     def test_effective_geometry_constraints_preserve_requested_state(self):
         script = self.system / "hyprland/sh/spaces-switch.sh"
         lua = (self.system / "hyprland/config/hyprland.lua").read_text()
-        self.assertIn("generated/spaces-effective.conf", lua)
         self.assertIn("math.max(0, _spaces_gaps_out_top - _spaces_waybar_bottom)", lua)
         self.assertIn("math.max(0, _spaces_gaps_out_bottom - _spaces_waybar_top)", lua)
         cases = (
@@ -886,13 +956,12 @@ class ThemeSwitchTests(unittest.TestCase):
                     ).stdout.strip(),
                     "15",
                 )
-                effective = (self.user / "generated/spaces-effective.conf").read_text()
                 expected_top = expected if position == "top" else requested
                 expected_bottom = expected if position == "bottom" else other
-                self.assertIn(f"effective_top={expected_top}", effective)
-                self.assertIn(f"effective_bottom={expected_bottom}", effective)
-                self.assertIn("effective_left=6", effective)
-                self.assertIn("effective_right=7", effective)
+                self.assertIn(
+                    f"top = {expected_top}, right = 7, bottom = {expected_bottom}, left = 6",
+                    self.last_gaps_eval(),
+                )
 
     def test_sticky_float_geometry_resolves_from_data_markers(self):
         # Guards the Sticky/Float contract end to end: the mode owns rounding,
@@ -908,7 +977,7 @@ class ThemeSwitchTests(unittest.TestCase):
         ):
             self.assertIn(f'_data_home .. "/{marker}', lua)
         self.assertIn(
-            'theme.gaps_in = _theme_name:match("%-float$") and 4 or 2',
+            'theme.gaps_in = _layout_variant == "float" and 10 or 2',
             lua,
         )
 
@@ -925,6 +994,7 @@ class ThemeSwitchTests(unittest.TestCase):
                 for pair in expected:
                     self.assertIn(pair, status)
                 # The compositor must resolve the same mode from data/.
+                # The derived marker keeps the variant suffix for consumers.
                 active = (self.user / ".active-theme").read_text().strip()
                 self.assertEqual(active, theme)
                 self.assertEqual(active.endswith("-float"),
