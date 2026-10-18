@@ -160,11 +160,11 @@ get_theme_name() {
     esac
 }
 
-# Extract the built-in default accent of a theme from argvus-config, which owns
-# the table since the accent switch moved to Rust.
+# Extract the built-in default accent of a theme from the argvus config model,
+# which owns the table since the accent switch moved to Rust.
 get_theme_accent() {
     local id="${1%-float}"
-    local accent_file="$DE_ROOT/argvus-config/src/accent.rs"
+    local accent_file="$DE_ROOT/argvus/crates/argvus-config/src/accent.rs"
 
     if [ ! -f "$accent_file" ]; then
         printf '#3590bd'
@@ -443,7 +443,7 @@ _copy_component_themes() {
     fi
 }
 
-# Copy app-profiles theme files (superfile, yazi, snappy-switcher)
+# Copy app-profiles theme files (superfile, yazi)
 _copy_app_profile_themes() {
     local pkg_path="$1"
     local theme_id="$2"
@@ -465,15 +465,6 @@ _copy_app_profile_themes() {
               "$pkg_path/src/usr/share/argvus/app-profiles/config/yazi/flavors/" 2>/dev/null || log_warn "Missing yazi flavor: $theme_id.yazi"
     else
         log_warn "Missing yazi flavor: $theme_id.yazi"
-    fi
-
-    # Snappy-switcher themes (if they exist)
-    mkdir -p "$pkg_path/src/usr/share/argvus/app-profiles/config/snappy-switcher/themes"
-    if [ -d "$source_base/snappy-switcher/themes/$theme_id" ]; then
-        cp -r "$source_base/snappy-switcher/themes/$theme_id" \
-              "$pkg_path/src/usr/share/argvus/app-profiles/config/snappy-switcher/themes/" 2>/dev/null || log_warn "Missing snappy-switcher theme: $theme_id (optional)"
-    else
-        log_warn "Missing snappy-switcher theme: $theme_id (optional)"
     fi
 }
 

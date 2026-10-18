@@ -70,7 +70,7 @@ case "${1:-status}" in
     case "${2:-}" in
       auto|always-expanded)
         if ! command -v argvus >/dev/null 2>&1; then
-          printf '%s\n' "argvus-config is required to store the taskbar mode" >&2
+          printf '%s\n' "argvus is required to store the taskbar mode" >&2
           exit 1
         fi
         _expanded=false

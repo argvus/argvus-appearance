@@ -222,7 +222,7 @@ apply_mode() {
   _time_seconds_enabled="$(config_bool /taskbar/time/seconds_enabled false)"
   _time_format="$(config_str /taskbar/time/format 24h)"
   _launcher_icon_path="$(config_str /taskbar/icons/launcher_custom_icon_path '')"
-  # `argvus-config get --raw` prints the literal text "null" for a JSON null
+  # `argvus config get --raw` prints the literal text "null" for a JSON null
   # value (it only special-cases Value::String; see main.rs's get_value),
   # unlike config_bool's "true"/"false" case match — so the unset default
   # must be caught here too, or it would be written verbatim as the path.

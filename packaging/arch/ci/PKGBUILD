@@ -9,12 +9,11 @@ license=('GPL-3.0-only')
 options=('!debug')
 depends=(
   'util-linux'
-  'argvus-i18n'
-  'argvus-config'
+  'argvus'
   'argvus-session'
   'argvus-fonts'
   'argvus-wallpapers'
-  'argvus-loading-theme'
+  'argvus-gtk'
   'brightnessctl'
   'fontconfig'
   'gtk3'

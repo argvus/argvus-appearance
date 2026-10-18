@@ -15,12 +15,10 @@ import tomllib
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
-# The suite runs the real argvus-config. Build it first with
-# `cargo build --bin argvus-config` in de/argvus-config.
-ARGVUS_CONFIG_BIN = ROOT / "argvus-config/target/debug/argvus-config"
-# Translations resolve through the real argvus-i18n, as on an installed system.
-# Build it with `cargo build --bin argvus-i18n` in de/argvus-i18n.
-ARGVUS_I18N_BIN = ROOT / "argvus-i18n/target/debug/argvus-i18n"
+# The suite runs the real argvus binary: `argvus config` and `argvus i18n` are
+# in-process subcommands of it. Build it first with `cargo build --bin argvus`
+# in de/argvus.
+ARGVUS_BIN = ROOT / "argvus/target/debug/argvus"
 MOCK = '''#!/usr/bin/env python3
 import json, os, sys
 from pathlib import Path
@@ -28,13 +26,16 @@ name = Path(sys.argv[0]).name
 with open(os.environ["TEST_COMMAND_LOG"], "a") as log:
     log.write(json.dumps([name, *sys.argv[1:]]) + "\\n")
 if name == "pgrep": sys.exit(1)
-# Canonical configuration is owned by argvus-config: forward `argvus config`
+# Canonical configuration is owned by argvus config: forward `argvus config`
 # to the real binary so projections (layout, taskbar, derived files) are
 # written exactly as on an installed system. TEST_VARIANT keeps the fake
 # answer for tests that diverge /layout/variant on purpose.
-if name == "argvus" and sys.argv[1:2] == ["config"] and os.environ.get("TEST_ARGVUS_CONFIG_BIN") and not os.environ.get("TEST_VARIANT"):
-    real = os.environ["TEST_ARGVUS_CONFIG_BIN"]
-    os.execv(real, [real, *sys.argv[2:]])
+# Translations always resolve through the real binary.
+if name == "argvus" and os.environ.get("TEST_ARGVUS_BIN") and (
+        sys.argv[1:2] == ["i18n"]
+        or (sys.argv[1:2] == ["config"] and not os.environ.get("TEST_VARIANT"))):
+    real = os.environ["TEST_ARGVUS_BIN"]
+    os.execv(real, [real, *sys.argv[1:]])
 if name == "argvus" and sys.argv[1:2] == ["theme-switch"] and os.environ.get("TEST_THEME_SWITCH_RECORD"):
     open(os.environ["TEST_THEME_SWITCH_RECORD"], "w").write(sys.argv[2] + "\\n")
 if name == "argvus" and sys.argv[1:] == ["sessionctl", "reload"]:
@@ -46,7 +47,7 @@ if name == "hyprctl":
     if "dpms" in " ".join(sys.argv) and '"off"' in " ".join(sys.argv):
         sys.exit(int(os.environ.get("TEST_DPMS_FAIL", "0")))
 if name == "argvus" and sys.argv[1:4] == ["config", "get", "/layout/variant"]:
-    # argvus-config owns /layout/variant and apply_theme keeps it in sync with
+    # argvus config owns /layout/variant and apply_theme keeps it in sync with
     # data/.active-theme. TEST_VARIANT lets a test diverge the two on purpose.
     override = os.environ.get("TEST_VARIANT")
     if not override:
@@ -92,7 +93,7 @@ class ThemeSwitchTests(unittest.TestCase):
             source = repo / "src/usr/share/backgrounds/argvus"
             if source.is_dir():
                 link_tree(source, self.backgrounds / "argvus")
-        calendar_themes = ROOT / "argvus-taskbar-calendar/resources/themes"
+        calendar_themes = ROOT / "argvus/src/etc/argvus/taskbar/calendar/themes"
         shutil.copytree(
             calendar_themes,
             self.system / "argvus-taskbar-calendar/themes",
@@ -110,17 +111,14 @@ class ThemeSwitchTests(unittest.TestCase):
         self.splash_args = self.base / "splash-args"
         mockbin = self.base / "bin"
         mockbin.mkdir()
-        # Private commands directory: the real argvus-i18n is linked in so the
-        # menu translations resolve the same way as on an installed system.
+        # The real argvus binary is linked in as `argvus`, so the direct calls
+        # below reach the same entry point the session scripts use on PATH.
         self.cmd_bin = self.base / "commands"
         self.cmd_bin.mkdir()
-        if not ARGVUS_I18N_BIN.is_file():
+        if not ARGVUS_BIN.is_file():
             raise RuntimeError(
-                f"missing {ARGVUS_I18N_BIN}; run `cargo build --bin argvus-i18n` in de/argvus-i18n")
-        (self.cmd_bin / "argvus-i18n").symlink_to(ARGVUS_I18N_BIN)
-        # Session scripts reach the canonical configuration through the same
-        # commands directory, so argvus-config is linked there as well.
-        (self.cmd_bin / "argvus-config").symlink_to(ARGVUS_CONFIG_BIN)
+                f"missing {ARGVUS_BIN}; run `cargo build --bin argvus` in de/argvus")
+        (self.cmd_bin / "argvus").symlink_to(ARGVUS_BIN)
         for name in ("hyprctl", "systemctl", "pgrep",
                      "gsettings", "notify-send", "argvus"):
             script = mockbin / name
@@ -150,11 +148,11 @@ class ThemeSwitchTests(unittest.TestCase):
             "XDG_STATE_HOME": str(self.base / "state"),
             "ARGVUS_NO_RUNTIME": "1",
             "ARGVUS_THEME_LOCKED": "0",
-            "ARGVUS_I18N_DIR": str(ROOT / "argvus-i18n/locales"),
+            "ARGVUS_I18N_DIR": str(ROOT / "argvus/locales"),
             "ARGVUS_BACKGROUNDS_DIR": str(self.backgrounds),
             "WALLPAPER_ROOT": str(self.backgrounds / "argvus"),
             "TEST_COMMAND_LOG": str(self.log),
-            "TEST_ARGVUS_CONFIG_BIN": str(ARGVUS_CONFIG_BIN),
+            "TEST_ARGVUS_BIN": str(ARGVUS_BIN),
             "TEST_SPLASH_ARGS": str(self.splash_args),
             "ARGVUS_LOADING_THEME_BIN": str(splash),
             "ARGVUS_COMMANDS_DIR": str(self.cmd_bin),
@@ -172,7 +170,7 @@ class ThemeSwitchTests(unittest.TestCase):
             env=self.env | {"ARGVUS_NO_RUNTIME": "1"},
             capture_output=True, text=True, timeout=60, check=True)
         result = subprocess.run(
-            [str(self.cmd_bin / "argvus-config"), "theme-apply", family],
+            [str(self.cmd_bin / "argvus"), "config", "theme-apply", family],
             env=self.env | {"ARGVUS_NO_RUNTIME": "0" if runtime else "1",
                             "TEST_DPMS_FAIL": "1" if fail_dpms else "0"},
             capture_output=True, text=True, timeout=60)
@@ -276,7 +274,7 @@ class ThemeSwitchTests(unittest.TestCase):
         self.set_transparency("enabled")
         self.apply("one-light")
 
-        effects = self.cmd_bin / "argvus-config"
+        effects = self.cmd_bin / "argvus"
         taskbar_css = self.user / "waybar/argvus-taskbar.css"
         telemetry_css = self.user / "waybar/argvus-widget-telemetry.css"
         self.assertIn(
@@ -290,7 +288,7 @@ class ThemeSwitchTests(unittest.TestCase):
 
         self.set_transparency("disabled")
         subprocess.run(
-            [str(effects), "effects", "apply"],
+            [str(effects), "config", "effects", "apply"],
             env=self.env,
             capture_output=True,
             text=True,
@@ -510,7 +508,7 @@ class ThemeSwitchTests(unittest.TestCase):
         )
         systemctl.chmod(0o755)
         result = subprocess.run(
-            [str(self.cmd_bin / "argvus-config"), "theme-apply", "sunset"],
+            [str(self.cmd_bin / "argvus"), "config", "theme-apply", "sunset"],
             env=self.env | {
                 "ARGVUS_NO_RUNTIME": "0",
                 "ARGVUS_LOADING_THEME_BIN": str(splash),
@@ -585,7 +583,7 @@ class ThemeSwitchTests(unittest.TestCase):
 
     def test_theme_menu_releases_rofi_arrow_bindings(self):
         # The empty theme argument opens theme-menu.sh from the Rust transaction.
-        apply_source = (ROOT / "argvus-config/src/theme_apply.rs").read_text()
+        apply_source = (ROOT / "argvus/crates/argvus-config/src/theme_apply.rs").read_text()
         self.assertIn("theme-menu.sh", apply_source)
         self.assertNotIn("-kb-custom-1 Right", apply_source)
 
@@ -744,12 +742,12 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertNotIn("@import", taskbar_contents)
 
         telemetry_css = self.user / "waybar/argvus-widget-telemetry.css"
-        effects = self.cmd_bin / "argvus-config"
+        effects = self.cmd_bin / "argvus"
         self.assertIn("@define-color th-window-bg-effective alpha(@th-window-bg, 0.50);", telemetry_css.read_text())
 
         self.set_transparency("disabled")
         subprocess.run(
-            [str(effects), "effects", "apply"],
+            [str(effects), "config", "effects", "apply"],
             env=self.env,
             capture_output=True,
             text=True,
@@ -762,7 +760,7 @@ class ThemeSwitchTests(unittest.TestCase):
 
         self.set_transparency("enabled")
         subprocess.run(
-            [str(effects), "effects", "apply"],
+            [str(effects), "config", "effects", "apply"],
             env=self.env,
             capture_output=True,
             text=True,
@@ -786,13 +784,13 @@ class ThemeSwitchTests(unittest.TestCase):
     def set_transparency(self, state):
         """Switches transparency through the user-facing effects command."""
         subprocess.run(
-            [str(self.cmd_bin / "argvus-config"), "effects", "transparency", "enable" if state == "enabled" else "disable"],
+            [str(self.cmd_bin / "argvus"), "config", "effects", "transparency", "enable" if state == "enabled" else "disable"],
             env=self.env | {"ARGVUS_NO_RUNTIME": "1"}, stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL, timeout=60, check=True,
         )
 
     def set_taskbar_mode(self, mode):
-        """Stores the utility-group mode in argvus-config, the only source of it."""
+        """Stores the utility-group mode in argvus config, the only source of it."""
         subprocess.run(
             ["sh", str(self.system / "appearance/sh/taskbar-right-2-mode.sh"), "set", mode],
             env=self.env, capture_output=True, text=True, check=True,
@@ -1048,7 +1046,7 @@ class ThemeSwitchTests(unittest.TestCase):
 
     def test_hypr_helper_persists_custom_wallpaper_under_data(self):
         # persist_custom_wallpaper must write data/. The reader and the legacy
-        # root marker moved out of the shell: argvus-config migrates the marker.
+        # root marker moved out of the shell: argvus config migrates the marker.
         helper = self.system / "appearance/sh/hypr.sh"
         self.assertIn('CUSTOM_WALLPAPER_STATE="${CUSTOM_WALLPAPER_DIR}/.wallpaper-custom"',
                       helper.read_text())
@@ -1058,8 +1056,8 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertNotIn("read_custom_wallpaper", helper.read_text())
 
     def test_session_loading_prefers_data_markers(self):
-        # The spinner is argvus-config session-loading now; its marker rules live there.
-        loading = (ROOT / "argvus-config/src/session_loading.rs").read_text()
+        # The spinner is argvus config session-loading now; its marker rules live there.
+        loading = (ROOT / "argvus/crates/argvus-config/src/session_loading.rs").read_text()
         self.assertIn('paths.config_home.join("argvus/data").join(name)', loading)
         self.assertIn('paths.config_home.join("argvus").join(name)', loading)
         self.assertIn('".active-theme"', loading)
