@@ -97,7 +97,7 @@ The former `effects.blur_global_value` percentage is no longer read. A profile t
 $XDG_CONFIG_HOME/argvus/config.json
 ```
 
-`data/generated/effects/<active-theme>.conf` is the single projection for effects, written only by `argvus config`; `effects-toggle.sh` is a thin delegate to `argvus config effects` with no output of its own, and it is not a competing source of truth. Theme-specific defaults are used only when the canonical field is absent, and an explicit `false` is never treated as missing. Switching themes preserves canonical overrides and regenerates the affected projections.
+`data/generated/effects/<active-theme>.conf` is the single projection for effects, written only by `argvus config`; `argvus effects-toggle` is a thin delegate to `argvus config effects` with no output of its own, and it is not a competing source of truth. Theme-specific defaults are used only when the canonical field is absent, and an explicit `false` is never treated as missing. Switching themes preserves canonical overrides and regenerates the affected projections.
 
 Disabling a surface's Transparency or Blur switch affects only that surface; saved numeric values are retained for later re-enabling.
 
