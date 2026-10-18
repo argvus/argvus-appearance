@@ -35,6 +35,8 @@ if name == "pgrep": sys.exit(1)
 if name == "argvus" and sys.argv[1:2] == ["config"] and os.environ.get("TEST_ARGVUS_CONFIG_BIN") and not os.environ.get("TEST_VARIANT"):
     real = os.environ["TEST_ARGVUS_CONFIG_BIN"]
     os.execv(real, [real, *sys.argv[2:]])
+if name == "argvus" and sys.argv[1:2] == ["theme-switch"] and os.environ.get("TEST_THEME_SWITCH_RECORD"):
+    open(os.environ["TEST_THEME_SWITCH_RECORD"], "w").write(sys.argv[2] + "\\n")
 if name == "argvus" and sys.argv[1:] == ["sessionctl", "reload"]:
     sys.exit(int(os.environ.get("TEST_RELOAD_FAIL", "0")))
 if name == "systemctl" and sys.argv[1:] == ["--user", "reload", "argvus-config.service"]:
@@ -170,7 +172,7 @@ class ThemeSwitchTests(unittest.TestCase):
             env=self.env | {"ARGVUS_NO_RUNTIME": "1"},
             capture_output=True, text=True, timeout=60, check=True)
         result = subprocess.run(
-            ["sh", str(self.system / "appearance/sh/theme-switch.sh"), family],
+            [str(self.cmd_bin / "argvus-config"), "theme-apply", family],
             env=self.env | {"ARGVUS_NO_RUNTIME": "0" if runtime else "1",
                             "TEST_DPMS_FAIL": "1" if fail_dpms else "0"},
             capture_output=True, text=True, timeout=60)
@@ -274,7 +276,7 @@ class ThemeSwitchTests(unittest.TestCase):
         self.set_transparency("enabled")
         self.apply("one-light")
 
-        effects = self.system / "session/sh/effects-toggle.sh"
+        effects = self.cmd_bin / "argvus-config"
         taskbar_css = self.user / "waybar/argvus-taskbar.css"
         telemetry_css = self.user / "waybar/argvus-widget-telemetry.css"
         self.assertIn(
@@ -288,7 +290,7 @@ class ThemeSwitchTests(unittest.TestCase):
 
         self.set_transparency("disabled")
         subprocess.run(
-            ["sh", str(effects), "apply"],
+            [str(effects), "effects", "apply"],
             env=self.env,
             capture_output=True,
             text=True,
@@ -323,7 +325,7 @@ class ThemeSwitchTests(unittest.TestCase):
             "argvus-dark": ("#3590bd", "#111316", "#B0BFCB"),
             "silver-dark": ("#595959", "#111316", "#B0BFCB"),
             "slate-dark": ("#7391a5", "#2F3541", "#A6B8C4"),
-            # HEX colors are case-insensitive; accent-switch writes the Dunst
+            # HEX colors are case-insensitive; `argvus config accent` writes the Dunst
             # palette using its canonical uppercase representation.
             "universe": ("#eeeeee", "#000000", "#AAAAAA"),
             "argvus-light": ("#181818", "#f7f7f7", "#454545"),
@@ -371,16 +373,10 @@ class ThemeSwitchTests(unittest.TestCase):
             "printf '%s\\n' $((step + 1)) >\"$step_file\"\n"
         )
         rofi.chmod(0o755)
-        theme_switch = self.system / "appearance/sh/theme-switch.sh"
-        theme_switch.write_text(
-            "#!/bin/sh\n"
-            f"printf '%s\\n' \"$1\" > {shlex.quote(str(selected_theme))}\n"
-        )
-        theme_switch.chmod(0o755)
 
         result = subprocess.run(
             ["sh", str(self.system / "appearance/sh/theme-menu.sh")],
-            env=self.env | {"ARGVUS_NO_RUNTIME": "1"},
+            env=self.env | {"ARGVUS_NO_RUNTIME": "1", "TEST_THEME_SWITCH_RECORD": str(selected_theme)},
             capture_output=True,
             text=True,
             timeout=10,
@@ -410,16 +406,10 @@ class ThemeSwitchTests(unittest.TestCase):
             "printf '%s\\n' $((step + 1)) >\"$step_file\"\n"
         )
         rofi.chmod(0o755)
-        theme_switch = self.system / "appearance/sh/theme-switch.sh"
-        theme_switch.write_text(
-            "#!/bin/sh\n"
-            f"printf '%s\\n' \"$1\" > {shlex.quote(str(selected_theme))}\n"
-        )
-        theme_switch.chmod(0o755)
 
         result = subprocess.run(
             ["sh", str(self.system / "appearance/sh/theme-menu.sh")],
-            env=self.env | {"ARGVUS_NO_RUNTIME": "1"},
+            env=self.env | {"ARGVUS_NO_RUNTIME": "1", "TEST_THEME_SWITCH_RECORD": str(selected_theme)},
             capture_output=True,
             text=True,
             timeout=10,
@@ -520,7 +510,7 @@ class ThemeSwitchTests(unittest.TestCase):
         )
         systemctl.chmod(0o755)
         result = subprocess.run(
-            ["sh", str(self.system / "appearance/sh/theme-switch.sh"), "sunset"],
+            [str(self.cmd_bin / "argvus-config"), "theme-apply", "sunset"],
             env=self.env | {
                 "ARGVUS_NO_RUNTIME": "0",
                 "ARGVUS_LOADING_THEME_BIN": str(splash),
@@ -591,12 +581,13 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertNotIn("theme.model.sticky", source)
         self.assertIn("-kb-accept-entry 'Return,KP_Enter,Right'", source)
         self.assertIn("-kb-cancel 'Escape,Left'", source)
-        self.assertIn("exec env ARGVUS_ACCENT_OFFICIAL=1 sh", source)
+        self.assertIn("exec env ARGVUS_ACCENT_OFFICIAL=1 argvus theme-switch", source)
 
     def test_theme_menu_releases_rofi_arrow_bindings(self):
-        switcher = (self.system / "appearance/sh/theme-switch.sh").read_text()
-        self.assertIn("theme-menu.sh", switcher)
-        self.assertNotIn("-kb-custom-1 Right", switcher)
+        # The empty theme argument opens theme-menu.sh from the Rust transaction.
+        apply_source = (ROOT / "argvus-config/src/theme_apply.rs").read_text()
+        self.assertIn("theme-menu.sh", apply_source)
+        self.assertNotIn("-kb-custom-1 Right", apply_source)
 
     def test_theme_switch_is_silent_on_success(self):
         result = self.apply("argvus-dark")
@@ -753,12 +744,12 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertNotIn("@import", taskbar_contents)
 
         telemetry_css = self.user / "waybar/argvus-widget-telemetry.css"
-        effects = self.system / "session/sh/effects-toggle.sh"
+        effects = self.cmd_bin / "argvus-config"
         self.assertIn("@define-color th-window-bg-effective alpha(@th-window-bg, 0.50);", telemetry_css.read_text())
 
         self.set_transparency("disabled")
         subprocess.run(
-            ["sh", str(effects), "apply"],
+            [str(effects), "effects", "apply"],
             env=self.env,
             capture_output=True,
             text=True,
@@ -771,7 +762,7 @@ class ThemeSwitchTests(unittest.TestCase):
 
         self.set_transparency("enabled")
         subprocess.run(
-            ["sh", str(effects), "apply"],
+            [str(effects), "effects", "apply"],
             env=self.env,
             capture_output=True,
             text=True,
@@ -795,7 +786,7 @@ class ThemeSwitchTests(unittest.TestCase):
     def set_transparency(self, state):
         """Switches transparency through the user-facing effects command."""
         subprocess.run(
-            ["sh", str(self.system / "session/sh/effects-toggle.sh"), "transparency", "enable" if state == "enabled" else "disable"],
+            [str(self.cmd_bin / "argvus-config"), "effects", "transparency", "enable" if state == "enabled" else "disable"],
             env=self.env | {"ARGVUS_NO_RUNTIME": "1"}, stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL, timeout=60, check=True,
         )
@@ -1056,29 +1047,30 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn("monokai-abstract-dark", hyprpaper)
 
     def test_hypr_helper_persists_custom_wallpaper_under_data(self):
-        # persist_custom_wallpaper must write data/; read_custom_wallpaper
-        # prefers it and still honours a pre-migration root marker.
+        # persist_custom_wallpaper must write data/. The reader and the legacy
+        # root marker moved out of the shell: argvus-config migrates the marker.
         helper = self.system / "appearance/sh/hypr.sh"
         self.assertIn('CUSTOM_WALLPAPER_STATE="${CUSTOM_WALLPAPER_DIR}/.wallpaper-custom"',
                       helper.read_text())
         self.assertIn('CUSTOM_WALLPAPER_DIR="${ARGVUS_CONFIG_HOME}/argvus/data"',
                       helper.read_text())
-        self.assertIn('CUSTOM_WALLPAPER_LEGACY="${ARGVUS_CONFIG_HOME}/argvus/.wallpaper-custom"',
-                      helper.read_text())
+        self.assertNotIn("CUSTOM_WALLPAPER_LEGACY", helper.read_text())
+        self.assertNotIn("read_custom_wallpaper", helper.read_text())
 
     def test_session_loading_prefers_data_markers(self):
-        loading = (ROOT / "argvus-session/src/usr/bin/argvus-session-loading").read_text()
-        self.assertIn('_theme_file="$_argvus_home/data/.active-theme"', loading)
-        self.assertIn('_accent_file="$_argvus_home/data/.accent-color"', loading)
-        self.assertIn('[ -s "$_theme_file" ] || _theme_file="$_argvus_home/.active-theme"',
-                      loading)
+        # The spinner is argvus-config session-loading now; its marker rules live there.
+        loading = (ROOT / "argvus-config/src/session_loading.rs").read_text()
+        self.assertIn('paths.config_home.join("argvus/data").join(name)', loading)
+        self.assertIn('paths.config_home.join("argvus").join(name)', loading)
+        self.assertIn('".active-theme"', loading)
+        self.assertIn('".accent-color"', loading)
 
     def test_toggle_mode_delegates_to_theme_switch(self):
         # SUPER+F5 must switch the official theme (Dark <-> Light) through the
-        # same transaction as theme-switch.sh, not only flip the GTK mode.
+        # same transaction as `argvus theme-switch`, not only flip the GTK mode.
         toggle = (self.system / "appearance/sh/toggle-mode.sh").read_text()
         self.assertIn('"$ARGVUS_CONFIG_HOME/argvus/data/.active-theme"', toggle)
-        self.assertIn('theme-switch.sh', toggle)
+        self.assertIn('argvus theme-switch', toggle)
         self.assertIn('TARGET="argvus-light"', toggle)
         self.assertIn('TARGET="argvus-dark"', toggle)
 

@@ -28,15 +28,5 @@ theme_manifest_table_value() {
 
 # Manifests are per family; the Float variant is read through its family id.
 gtk_mode_for_theme() {
-  if theme_manifest_exists "${1%-float}"; then
-    case "$(theme_manifest_table_value "${1%-float}" appearance gtk_scheme)" in
-      prefer-light) printf '%s\n' light ;;
-      *) printf '%s\n' dark ;;
-    esac
-    return 0
-  fi
-  case "$1" in
-    argvus-light|argvus-light-float|github-light|github-light-float|solarized-light|solarized-light-float|one-light|one-light-float|everforest-light|everforest-light-float|frost|frost-float|catppuccin-latte|catppuccin-latte-float|gruvbox-light|gruvbox-light-float) printf '%s\n' light ;;
-    *) printf '%s\n' dark ;;
-  esac
+  argvus config theme-gtk-mode "$1"
 }

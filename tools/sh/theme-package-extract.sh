@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 ###############################################################################
 # Script: theme-package-extract.sh
 # Purpose: Extract official themes to standalone Arch packages
@@ -160,19 +160,20 @@ get_theme_name() {
     esac
 }
 
-# Extract accent color from accent-switch.sh
+# Extract the built-in default accent of a theme from argvus-config, which owns
+# the table since the accent switch moved to Rust.
 get_theme_accent() {
-    local id="$1"
-    local accent_file="$DE_ROOT/argvus-appearance/src/usr/share/argvus/appearance/sh/accent-switch.sh"
+    local id="${1%-float}"
+    local accent_file="$DE_ROOT/argvus-config/src/accent.rs"
 
     if [ ! -f "$accent_file" ]; then
         printf '#3590bd'
         return 0
     fi
 
-    # Look for the pattern: "    $id|$id-float) printf '...\n' ;;"
+    # Look for the table line: "        "$id" => "#RRGGBB","
     local result
-    result=$(grep "^    $id|$id-float)" "$accent_file" 2>/dev/null | sed "s/.*printf '//" | sed "s/\\\\n.*//" || printf '')
+    result=$(grep "^        \"$id\" => \"#" "$accent_file" 2>/dev/null | sed -n 's/.*=> "\(#[^"]*\)".*/\1/p' | head -n 1)
 
     if [ -n "$result" ]; then
         printf '%s\n' "$result"
@@ -360,18 +361,27 @@ main() {
     fi
 
     # Copy appearance tui themes
-    [ -f "$DE_ROOT/argvus-appearance/src/usr/share/argvus/appearance/config/tui/themes/$theme_id.css" ] && \
+    if [ -f "$DE_ROOT/argvus-appearance/src/usr/share/argvus/appearance/config/tui/themes/$theme_id.css" ]; then
         cp "$DE_ROOT/argvus-appearance/src/usr/share/argvus/appearance/config/tui/themes/$theme_id.css" \
            "$pkg_path/src/usr/share/argvus/appearance/config/tui/themes/" 2>/dev/null || log_warn "Missing tui theme: $theme_id.css"
+    else
+        log_warn "Missing tui theme: $theme_id.css"
+    fi
 
-    [ -f "$DE_ROOT/argvus-appearance/src/usr/share/argvus/appearance/config/tui/themes/${theme_id}-float.css" ] && \
+    if [ -f "$DE_ROOT/argvus-appearance/src/usr/share/argvus/appearance/config/tui/themes/${theme_id}-float.css" ]; then
         cp "$DE_ROOT/argvus-appearance/src/usr/share/argvus/appearance/config/tui/themes/${theme_id}-float.css" \
            "$pkg_path/src/usr/share/argvus/appearance/config/tui/themes/" 2>/dev/null || log_warn "Missing tui theme: ${theme_id}-float.css"
+    else
+        log_warn "Missing tui theme: ${theme_id}-float.css"
+    fi
 
     # Copy appearance qt6ct colors
-    [ -f "$DE_ROOT/argvus-appearance/src/usr/share/argvus/appearance/config/qt6ct/colors/$theme_id.conf" ] && \
+    if [ -f "$DE_ROOT/argvus-appearance/src/usr/share/argvus/appearance/config/qt6ct/colors/$theme_id.conf" ]; then
         cp "$DE_ROOT/argvus-appearance/src/usr/share/argvus/appearance/config/qt6ct/colors/$theme_id.conf" \
            "$pkg_path/src/usr/share/argvus/appearance/config/qt6ct/colors/" 2>/dev/null || log_warn "Missing qt6ct color: $theme_id.conf"
+    else
+        log_warn "Missing qt6ct color: $theme_id.conf"
+    fi
 
     # Copy component-specific theme files (taskbar, launcher, etc.)
     _copy_component_themes "$pkg_path" "$theme_id" "argvus-taskbar" "taskbar/config/themes" || true
@@ -441,21 +451,30 @@ _copy_app_profile_themes() {
 
     # Superfile themes
     mkdir -p "$pkg_path/src/usr/share/argvus/app-profiles/config/superfile"
-    [ -f "$source_base/superfile/theme/$theme_id.toml" ] && \
+    if [ -f "$source_base/superfile/theme/$theme_id.toml" ]; then
         cp "$source_base/superfile/theme/$theme_id.toml" \
            "$pkg_path/src/usr/share/argvus/app-profiles/config/superfile/" 2>/dev/null || log_warn "Missing superfile theme: $theme_id.toml"
+    else
+        log_warn "Missing superfile theme: $theme_id.toml"
+    fi
 
     # Yazi themes
     mkdir -p "$pkg_path/src/usr/share/argvus/app-profiles/config/yazi/flavors"
-    [ -d "$source_base/yazi/flavors/$theme_id.yazi" ] && \
+    if [ -d "$source_base/yazi/flavors/$theme_id.yazi" ]; then
         cp -r "$source_base/yazi/flavors/$theme_id.yazi" \
               "$pkg_path/src/usr/share/argvus/app-profiles/config/yazi/flavors/" 2>/dev/null || log_warn "Missing yazi flavor: $theme_id.yazi"
+    else
+        log_warn "Missing yazi flavor: $theme_id.yazi"
+    fi
 
     # Snappy-switcher themes (if they exist)
     mkdir -p "$pkg_path/src/usr/share/argvus/app-profiles/config/snappy-switcher/themes"
-    [ -d "$source_base/snappy-switcher/themes/$theme_id" ] && \
+    if [ -d "$source_base/snappy-switcher/themes/$theme_id" ]; then
         cp -r "$source_base/snappy-switcher/themes/$theme_id" \
               "$pkg_path/src/usr/share/argvus/app-profiles/config/snappy-switcher/themes/" 2>/dev/null || log_warn "Missing snappy-switcher theme: $theme_id (optional)"
+    else
+        log_warn "Missing snappy-switcher theme: $theme_id (optional)"
+    fi
 }
 
 # Copy taskbar-calendar theme
@@ -465,9 +484,12 @@ _copy_calendar_theme() {
     local source_base="$DE_ROOT/argvus-taskbar-calendar"
 
     mkdir -p "$pkg_path/etc/argvus/taskbar/calendar/themes"
-    [ -f "$source_base/resources/themes/$theme_id.css" ] && \
+    if [ -f "$source_base/resources/themes/$theme_id.css" ]; then
         cp "$source_base/resources/themes/$theme_id.css" \
            "$pkg_path/etc/argvus/taskbar/calendar/themes/" 2>/dev/null || log_warn "Missing calendar theme: $theme_id.css"
+    else
+        log_warn "Missing calendar theme: $theme_id.css"
+    fi
 }
 
 # Copy wallpapers (abstract and landscape)

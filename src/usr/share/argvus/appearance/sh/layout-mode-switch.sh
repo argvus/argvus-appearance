@@ -18,7 +18,7 @@ esac
 # /layout/variant is the only place Sticky/Float is persisted; this also
 # resets the canonical /layout/window and /layout/taskbar geometry to the new
 # mode's defaults, exactly like a theme switch already does. Selecting a
-# theme never touches this value (see theme-switch.sh), so this is the single
+# theme never touches this value (see the theme transaction), so this is the single
 # writer of the mode.
 if command -v argvus >/dev/null 2>&1; then
   argvus config apply-mode "$VARIANT"
@@ -39,7 +39,7 @@ case "$VARIANT" in
 esac
 
 # `.active-theme` is the legacy resolved-theme marker (with the `-float`
-# suffix) that theme-switch.sh also writes. Consumers that have not migrated
+# suffix) that the theme transaction also writes. Consumers that have not migrated
 # to reading `/layout/variant` directly, including the Control Center's
 # in-memory theme state, still key off this suffix to tell Sticky and Float
 # apart, so it must track the new mode even though the theme did not change.
@@ -96,7 +96,7 @@ _borders_script="$(paths_config hyprland/sh/borders-switch.sh)"
 
 # Refresh every other mode-dependent consumer (generated Hyprland config,
 # Control Panel, etc.) through the established reload mechanism, the same one
-# theme-switch.sh relies on for its own final consistency pass.
+# the theme transaction relies on for its own final consistency pass.
 if [ "${ARGVUS_NO_RUNTIME:-0}" != 1 ] && command -v systemctl >/dev/null 2>&1; then
   systemctl --user reload argvus-config.service >/dev/null 2>&1 || true
 fi

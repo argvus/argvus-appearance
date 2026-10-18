@@ -27,88 +27,16 @@ HYPRLOCK_PATH="$GET_HYPRLOCK_PATH"
 ARGVUS_MANIFEST_HELPER="${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/appearance/sh/theme-manifest.sh"
 [ -r "$ARGVUS_MANIFEST_HELPER" ] && . "$ARGVUS_MANIFEST_HELPER"
 
-# Query theme wallpaper via CLI, with fallback to hardcoded map (for backwards compat)
-argvus_theme_wallpaper() {
-  _theme="${1%-float}"
-  _wallpaper_root="${WALLPAPER_ROOT:-${ARGVUS_BACKGROUNDS_DIR:-/usr/share/backgrounds}/argvus}"
-
-  # Try CLI first (argvus-appearance themes get <id> wallpaper)
-  if command -v argvus-appearance >/dev/null 2>&1; then
-    _wallpaper_name="$(argvus-appearance themes get "$_theme" wallpaper 2>/dev/null || true)"
-    if [ -n "$_wallpaper_name" ]; then
-      _wallpaper_path="${_wallpaper_root}/${_wallpaper_name}"
-      [ -f "$_wallpaper_path" ] && printf '%s\n' "$_wallpaper_path" && return 0
-    fi
-  fi
-
-  # The manifest wallpaper is relative to the wallpaper root, like the CLI value.
-  _wallpaper_name="$(theme_manifest_value "$_theme" wallpaper 2>/dev/null || true)"
-  if [ -n "$_wallpaper_name" ]; then
-    _wallpaper_path="${_wallpaper_root}/${_wallpaper_name}"
-    [ -f "$_wallpaper_path" ] && printf '%s\n' "$_wallpaper_path" && return 0
-  fi
-
-  # Fallback: hardcoded map for built-ins (no CLI available)
-  case "$_theme" in
-    argvus-dark) _wallpaper_name="argvus-dark.jxl" ;;
-    argvus-light) _wallpaper_name="argvus-light.jxl" ;;
-    dracula) _wallpaper_name="abstract/dark/dracula-abstract-dark.jxl" ;;
-    gruvbox-dark) _wallpaper_name="abstract/dark/gruvbox-abstract-dark.jxl" ;;
-    gruvbox-high-dark) _wallpaper_name="abstract/dark/gruvbox-high-abstract-dark.jxl" ;;
-    monokai-dark) _wallpaper_name="abstract/dark/monokai-abstract-dark.jxl" ;;
-    one-dark) _wallpaper_name="abstract/dark/one-dark-abstract-dark.jxl" ;;
-    rose-pine) _wallpaper_name="abstract/dark/rose-pine-abstract-dark.jxl" ;;
-    silver-dark) _wallpaper_name="abstract/dark/silver-abstract-dark.jxl" ;;
-    slate-dark) _wallpaper_name="abstract/dark/slate-abstract-dark.jxl" ;;
-    sunset) _wallpaper_name="abstract/dark/sunset-abstract-dark.jxl" ;;
-    tokyo-night) _wallpaper_name="abstract/dark/tokyo-night-abstract-dark.jxl" ;;
-    matrix) _wallpaper_name="abstract/dark/matrix-abstract-dark.jxl" ;;
-    solitude) _wallpaper_name="abstract/dark/solitude-abstract-dark.jxl" ;;
-    universe) _wallpaper_name="abstract/dark/universe-abstract-dark.jxl" ;;
-    catppuccin-latte) _wallpaper_name="abstract/light/catppuccin-latte-abstract-light.jxl" ;;
-    frost) _wallpaper_name="abstract/light/frost-abstract-light.jxl" ;;
-    github-light) _wallpaper_name="abstract/light/github-light-abstract-light.jxl" ;;
-    gruvbox-light) _wallpaper_name="abstract/light/gruvbox-abstract-light.jxl" ;;
-    solarized-light) _wallpaper_name="abstract/light/solarized-abstract-light.jxl" ;;
-    one-light) _wallpaper_name="abstract/light/one-light-abstract-light.jxl" ;;
-    everforest-light) _wallpaper_name="abstract/light/everforest-abstract-light.jxl" ;;
-    *) return 1 ;;
-  esac
-  _wallpaper_path="${_wallpaper_root}/${_wallpaper_name}"
-  [ -f "$_wallpaper_path" ] || return 1
-  printf '%s\n' "$_wallpaper_path"
-}
-
 # A custom wallpaper is independent from the active visual theme. Keep its
 # selected path in the user-owned ARGVUS state so the session service can
 # restore it without relying on a transient systemd manager environment.
 CUSTOM_WALLPAPER_DIR="${ARGVUS_CONFIG_HOME}/argvus/data"
 CUSTOM_WALLPAPER_STATE="${CUSTOM_WALLPAPER_DIR}/.wallpaper-custom"
-CUSTOM_WALLPAPER_LEGACY="${ARGVUS_CONFIG_HOME}/argvus/.wallpaper-custom"
 
 persist_custom_wallpaper() {
   _wallpaper_path="$1"
   mkdir -p "$CUSTOM_WALLPAPER_DIR"
   printf '%s\n' "$_wallpaper_path" > "$CUSTOM_WALLPAPER_STATE"
-}
-
-# Read the canonical marker first. The legacy root copy is read-only: it can
-# still hold a selection made before the data/ migration.
-read_custom_wallpaper() {
-  if [ -f "$CUSTOM_WALLPAPER_STATE" ]; then
-    sed -n '1p' "$CUSTOM_WALLPAPER_STATE"
-    return 0
-  fi
-  [ -f "$CUSTOM_WALLPAPER_LEGACY" ] || return 1
-  sed -n '1p' "$CUSTOM_WALLPAPER_LEGACY"
-}
-
-# Drop the custom selection so a theme change stays authoritative. Remove the
-# legacy root copy too: leaving it behind lets a pre-migration selection
-# resurrect the old wallpaper on the next session reload.
-clear_custom_wallpaper() {
-  rm -f "$CUSTOM_WALLPAPER_STATE" "$CUSTOM_WALLPAPER_LEGACY"
-  return 0
 }
 
 hypr_monitors() {

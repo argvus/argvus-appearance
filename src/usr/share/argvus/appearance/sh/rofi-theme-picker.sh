@@ -7,7 +7,6 @@ set -eu
 ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/session/sh/bootstrap.sh}"
 . "$ARGVUS_BOOTSTRAP"
 
-THEME_SWITCH="$(paths_config appearance/sh/theme-switch.sh)"
 ROFI_CONFIG="$(paths_config launcher/config/config.rasi)"
 
 run_menu() {
@@ -75,4 +74,4 @@ _theme_id="$(printf '%s\n' "$_themes" | awk -F'\t' -v name="$_selected" '$2 == n
 }
 
 # Apply
-exec env ARGVUS_ACCENT_OFFICIAL=1 sh "$THEME_SWITCH" "$_theme_id" >/dev/null 2>&1
+exec env ARGVUS_ACCENT_OFFICIAL=1 argvus theme-switch "$_theme_id" >/dev/null 2>&1

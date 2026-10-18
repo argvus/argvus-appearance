@@ -55,6 +55,8 @@ fi
 printf '\nNext steps:\n' >&2
 printf '  1. Review extracted packages in: %s\n' "$DEST_DIR" >&2
 printf '  2. Adjust PKGBUILD templates in each package\n' >&2
+# The backticks are literal text printed to the user, not command substitution.
+# shellcheck disable=SC2016
 printf '  3. Run `make validate` in each package\n' >&2
 printf '  4. Commit and tag releases\n' >&2
 

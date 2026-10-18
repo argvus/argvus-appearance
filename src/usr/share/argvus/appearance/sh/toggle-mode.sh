@@ -6,7 +6,7 @@ ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}
 
 # SUPER+F5 alternates between the official ARGVUS Dark and ARGVUS Light themes.
 # The switch itself is the same transaction used by SUPER+SHIFT+T
-# (theme-switch.sh), so wallpaper, GTK, Waybar and Rofi follow the new theme.
+# (the theme-switch route), so wallpaper, GTK, Waybar and Rofi follow the new theme.
 ACTIVE_FILE="$ARGVUS_CONFIG_HOME/argvus/data/.active-theme"
 [ -s "$ACTIVE_FILE" ] || ACTIVE_FILE="$ARGVUS_CONFIG_HOME/argvus/.active-theme"
 THEME="$(sed -n '1p' "$ACTIVE_FILE" 2>/dev/null || true)"
@@ -18,4 +18,4 @@ case "$THEME" in
   *) TARGET="argvus-light" ;;
 esac
 
-ARGVUS_ACCENT_OFFICIAL=1 exec sh "$(paths_config appearance/sh/theme-switch.sh)" "$TARGET"
+ARGVUS_ACCENT_OFFICIAL=1 exec argvus theme-switch "$TARGET"

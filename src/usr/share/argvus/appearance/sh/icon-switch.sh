@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # icon-switch - apply the configured icon theme to GNOME/GTK and Qt
-# Usage: icon-switch.sh [apply]        (also sourced by theme-switch.sh)
+# Usage: icon-switch.sh [apply]        (also sourced by the theme transaction)
 #
 # Source of truth: /appearance/icon_theme in argvus-config. An empty value
 # means the ARGVUS default of the theme mode: Argvus Dark Icons for dark
