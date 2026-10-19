@@ -1,26 +1,40 @@
-name: Arch package
+name: Arch Linux Package
 
 on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing version tag to rebuild and publish (for example v0.1.0)
+        required: true
+        type: string
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
   package:
-    name: Build and publish Arch package
+    name: Build and publish Arch Linux Package
     runs-on: ubuntu-latest
-    container: archlinux:latest
+    container: archlinux:base-devel
+    permissions:
+      contents: write
 
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-
       - name: Install packaging tools
         run: |
           pacman -Syu --noconfirm --needed git gnupg namcap pacman-contrib sudo
+
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
 
       - name: Prepare build user
         run: |
@@ -31,21 +45,21 @@ jobs:
       - name: Prepare PKGBUILD version
         id: version
         shell: bash
+        env:
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
         run: |
           set -euo pipefail
 
-          version="${GITHUB_REF_NAME#v}"
-          if [[ ! "$version" =~ ^[0-9]+(\.[0-9]+)*([._+-][A-Za-z0-9]+)*$ ]]; then
-            echo "Unsupported version tag: ${GITHUB_REF_NAME}" >&2
+          tag="$RELEASE_TAG"
+          if [[ ! "$tag" =~ ^v[0-9]+(\.[0-9]+)*([._+-][A-Za-z0-9]+)*$ ]]; then
+            echo "Unsupported version tag: ${tag}" >&2
             exit 1
           fi
+          version="${tag#v}"
 
-          if [[ -f Cargo.toml ]]; then
-            cargo_version="$(awk -F '"' '/^version = / { print $2; exit }' Cargo.toml)"
-            if [[ -n "$cargo_version" && "$cargo_version" != "$version" ]]; then
-              echo "Cargo.toml version (${cargo_version}) does not match tag (${version})." >&2
-              exit 1
-            fi
+          if grep -qE '^url=""|^url=$' "packaging/arch/ci/PKGBUILD"; then
+            echo "::error::url is not set in packaging/arch/ci/PKGBUILD (required to fetch the tag source archive)."
+            exit 1
           fi
 
           sed -i "s/^pkgver=.*/pkgver=${version}/" "packaging/arch/ci/PKGBUILD"
@@ -55,11 +69,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if make -n validate >/dev/null 2>&1; then
-            make validate
-          else
-            echo "No make validate target; skipping repository validation."
-          fi
+          make validate
 
       - name: Build package
         shell: bash
@@ -70,7 +80,7 @@ jobs:
 
           sudo -u builder env GITHUB_WORKSPACE="$GITHUB_WORKSPACE" bash -lc 'cd "$GITHUB_WORKSPACE/packaging/arch/ci" && makepkg --nodeps --noconfirm --needed --cleanbuild --clean --check'
 
-          pkg_file="$(find "packaging/arch/ci" -maxdepth 1 -type f -name 'argvus-appearance-*.pkg.tar.zst' -print -quit)"
+          pkg_file="$(find "packaging/arch/ci" -maxdepth 1 -type f -name '*.pkg.tar.zst' -print -quit)"
           if [[ -z "$pkg_file" ]]; then
             echo "Package file was not created." >&2
             exit 1
@@ -81,6 +91,12 @@ jobs:
             echo "pkg_name=$(basename "$pkg_file")"
             echo "pkg_sig_file=${pkg_file}.sig"
           } >> "$GITHUB_ENV"
+
+      - name: Lint package with namcap
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo -u builder namcap "${pkg_file}"
 
       - name: Sign package
         shell: bash
@@ -114,8 +130,6 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
           set -euo pipefail
-
-          [ -n "${GPG_PRIVATE_KEY:-}" ] || { echo "::error::GPG_PRIVATE_KEY secret is not set"; exit 1; }
 
           export GNUPGHOME
           GNUPGHOME="$(mktemp -d)"
@@ -192,5 +206,25 @@ jobs:
             exit 0
           fi
 
-          git commit -m "Publish argvus-appearance ${{ steps.version.outputs.version }}"
-          git push
+          git commit -m "Publish package ${{ steps.version.outputs.version }}"
+          for attempt in 1 2 3 4 5; do
+            if git pull --rebase --quiet && git push --quiet; then
+              break
+            fi
+            if [ "$attempt" = 5 ]; then
+              echo "::error::could not publish after 5 attempts"; exit 1
+            fi
+            sleep $((attempt * 5))
+          done
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+          name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+          generate_release_notes: true
+          files: |
+            ${{ env.pkg_file }}
+            ${{ env.pkg_sig_file }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
