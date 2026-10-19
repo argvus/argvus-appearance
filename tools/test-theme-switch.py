@@ -330,7 +330,6 @@ class ThemeSwitchTests(unittest.TestCase):
             "github-light": ("#0969DA", "#FFFFFF", "#57606A"),
             "solarized-light": ("#268BD2", "#FDF6E3", "#839496"),
             "everforest-light": ("#3A94C5", "#FDF6E3", "#829181"),
-            "frost": ("#0969DA", "#F6F8FA", "#6E7781"),
             "catppuccin-latte": ("#1E66F5", "#EFF1F5", "#5C5F77"),
             "gruvbox-light": ("#458588", "#FBF1C7", "#3C3836"),
             "gruvbox-high-dark": ("#D79921", "#282828", "#A89984"),
@@ -539,7 +538,6 @@ class ThemeSwitchTests(unittest.TestCase):
             "solarized-light": "#FDF6E3",
             "everforest-light": "#FDF6E3",
             "catppuccin-latte": "#EFF1F5",
-            "frost": "#F6F8FA",
             "gruvbox-light": "#FBF1C7",
         }
 
@@ -779,7 +777,7 @@ class ThemeSwitchTests(unittest.TestCase):
                 return tomllib.load(handle).get("category") == "light"
         return any(name in theme for name in (
             "argvus-light", "github-light", "solarized-light", "one-light",
-            "everforest-light", "frost", "gruvbox-light", "catppuccin-latte"))
+            "everforest-light", "gruvbox-light", "catppuccin-latte"))
 
     def set_transparency(self, state):
         """Switches transparency through the user-facing effects command."""

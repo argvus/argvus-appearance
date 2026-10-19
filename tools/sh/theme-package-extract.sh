@@ -54,7 +54,7 @@ SKELETON_SOURCE="/seagate/gitea/repos/argvus/skeleton-pkg.git"
 DARK_THEMES="one-dark dracula silver-dark slate-dark universe gruvbox-high-dark gruvbox-dark rose-pine tokyo-night solitude sunset matrix monokai-dark"
 
 # Theme metadata - Light themes (8 total - 1 argvus-light built-in = 7 packages)
-LIGHT_THEMES="github-light solarized-light one-light everforest-light frost catppuccin-latte gruvbox-light"
+LIGHT_THEMES="github-light solarized-light one-light everforest-light catppuccin-latte gruvbox-light"
 
 # ============================================================================
 # Helper Functions
@@ -102,7 +102,7 @@ Dark themes (14 total):
 Light themes (8 total):
   Built-in: argvus-light
   Packages: github-light solarized-light one-light everforest-light
-            frost catppuccin-latte gruvbox-light
+            catppuccin-latte gruvbox-light
 LIST
     exit 0
 }
@@ -150,7 +150,6 @@ get_theme_name() {
         universe) printf '%s\n' "Universe" ;;
         argvus-light) printf '%s\n' "ARGVUS Light" ;;
         catppuccin-latte) printf '%s\n' "Catppuccin Latte" ;;
-        frost) printf '%s\n' "Frost" ;;
         github-light) printf '%s\n' "GitHub Light" ;;
         gruvbox-light) printf '%s\n' "Gruvbox Light" ;;
         solarized-light) printf '%s\n' "Solarized Light" ;;

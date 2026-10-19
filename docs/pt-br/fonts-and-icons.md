@@ -1,7 +1,6 @@
 ---
 title: Fontes e ícones
 description: Configure fontes e temas de ícones.
-slug: pt/0.4.0/docs/user-guide/appearance/fonts-and-icons
 ---
 
 `argvus-fonts` instala fontes em `/usr/share/fonts/` e `argvus-icons` instala os temas de ícones ARGVUS. Use os controles de fonte no Control Center; as preferências são materializadas nos arquivos gerados.

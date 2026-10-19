@@ -1,7 +1,6 @@
 ---
 title: Wallpapers
 description: Use wallpapers integrados e personalizados.
-slug: pt/0.4.0/docs/user-guide/appearance/wallpapers
 ---
 
 `argvus-wallpapers` instala wallpapers JPEG XL em `/usr/share/backgrounds/argvus/`. Em **Control Center → Aparência → Wallpapers**, eles são organizados por `Abstrato` ou `Paisagem` e depois por `Escuro` ou `Claro`. Os arquivos `argvus-dark.jxl` e `argvus-light.jxl` da raiz aparecem nos grupos de fallback abstratos. A troca de tema usa apenas os arquivos abstratos em `abstract/dark` e `abstract/light`; os arquivos de paisagem são opções manuais extras. Pressione `SUPER + Y` para abrir diretamente essa tela do Control Center. A primeira entrada também permite escolher uma imagem personalizada da HOME, que passa a ser o estado de wallpaper personalizado do usuário.

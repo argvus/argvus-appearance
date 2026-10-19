@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# shellcheck disable=SC1091
+# shellcheck disable=SC1090,SC1091
 ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/session/sh/bootstrap.sh}"
 . "$ARGVUS_BOOTSTRAP"
 
@@ -13,8 +13,12 @@ THEME="$(sed -n '1p' "$ACTIVE_FILE" 2>/dev/null || true)"
 [ -n "$THEME" ] || THEME="argvus-dark"
 THEME="${THEME%-float}"
 
-case "$THEME" in
-  argvus-light) TARGET="argvus-dark" ;;
+# A light theme (any of them, for example github-light) switches to ARGVUS Dark and a dark
+# theme to ARGVUS Light. The mode comes from the theme's manifest, not its id, so
+# pressing the key always changes the mode.
+MODE="$(argvus config theme-gtk-mode "$THEME" 2>/dev/null || true)"
+case "$MODE" in
+  light) TARGET="argvus-dark" ;;
   *) TARGET="argvus-light" ;;
 esac
 

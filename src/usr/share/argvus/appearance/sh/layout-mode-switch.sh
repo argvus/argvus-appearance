@@ -15,6 +15,17 @@ case "$VARIANT" in
   *) argvus_tr appearance layout_mode.usage >&2; exit 1 ;;
 esac
 
+# The theme transaction (argvus-config theme-apply) holds this same lock file. Taking
+# it here keeps a mode switch from interleaving its file writes with a theme switch.
+if [ -n "${ARGVUS_CACHE_HOME:-}" ]; then
+  LOCK_DIR="$ARGVUS_CACHE_HOME"
+else
+  LOCK_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/argvus"
+fi
+mkdir -p "$LOCK_DIR"
+exec 9>>"$LOCK_DIR/theme-switch.lock"
+flock -x 9
+
 # /layout/variant is the only place Sticky/Float is persisted; this also
 # resets the canonical /layout/window and /layout/taskbar geometry to the new
 # mode's defaults, exactly like a theme switch already does. Selecting a
@@ -56,13 +67,20 @@ font_state_value() {
   printf '%s\n' "$_fallback"
 }
 
+# A value goes into a sed replacement: escape the characters that are special there,
+# so a font family such as "Foo|Bar" or "A & B" cannot corrupt the file.
+sed_replacement() {
+  printf '%s' "$1" | sed -e 's/[\\&|]/\\&/g'
+}
+
 replace_or_append_setting() {
   _file="$1"
   _key="$2"
   _value="$3"
   [ -f "$_file" ] || return 0
   if grep -q "^[[:space:]]*${_key}[[:space:]]*=" "$_file"; then
-    sed -i "s|^[[:space:]]*${_key}[[:space:]]*=.*|${_key} = ${_value}|" "$_file"
+    _escaped="$(sed_replacement "$_value")"
+    sed -i "s|^[[:space:]]*${_key}[[:space:]]*=.*|${_key} = ${_escaped}|" "$_file"
   else
     printf '\n%s = %s\n' "$_key" "$_value" >> "$_file"
   fi
@@ -97,6 +115,17 @@ _borders_script="$(paths_config hyprland/sh/borders-switch.sh)"
 # Refresh every other mode-dependent consumer (generated Hyprland config,
 # Control Panel, etc.) through the established reload mechanism, the same one
 # the theme transaction relies on for its own final consistency pass.
+# Sticky and Float differ in more than hyprtoolkit: the taskbar, launcher, notifications,
+# lock, terminal, telemetry, control panel, TUI and btop files of a theme are written
+# per variant. Regenerate them for the current family through the theme transaction.
+# Release this script's lock first (the transaction takes the same lock). The canonical
+# commit is skipped: /layout/variant is already set, and a commit would reset the custom
+# wallpaper. The services are still stopped and restarted by the transaction.
+exec 9>&-
+if command -v argvus >/dev/null 2>&1; then
+  ARGVUS_SKIP_CANONICAL=1 argvus theme-switch "$THEME_FAMILY" || true
+fi
+
 if [ "${ARGVUS_NO_RUNTIME:-0}" != 1 ] && command -v systemctl >/dev/null 2>&1; then
   systemctl --user reload argvus-config.service >/dev/null 2>&1 || true
 fi

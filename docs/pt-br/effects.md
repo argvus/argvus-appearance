@@ -1,7 +1,6 @@
 ---
 title: Efeitos
 description: Configure animações, o blur global do Hyprland e a transparência por superfície.
-slug: pt/0.4.0/docs/user-guide/appearance/effects
 ---
 
 **Control Center → Hyprland** contém **Animações** e **Blur**. Os controles de ativação de Transparência ficam nas páginas de cada superfície.
