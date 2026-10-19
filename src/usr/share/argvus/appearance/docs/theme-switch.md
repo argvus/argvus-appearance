@@ -2,13 +2,13 @@
 
 `argvus theme-switch <theme>` applies the selected theme. The route runs
 `argvus config theme-apply`, which holds the switch transaction in Rust and
-serializes concurrent switches with `flock`. Runtime transitions use the Hyprland Lua DPMS API
+serializes concurrent switches with `flock`, waiting at most 60 seconds for the lock. Runtime transitions use the Hyprland Lua DPMS API
 and reload `argvus-config.service` through systemd after updating configuration,
 then restart the services that were running before the switch. This centralizes
 the Hyprland, Waybar, Quickshell, wallpaper, notification, idle and polkit
 lifecycle. Waybar must
 restart even if blanking the display fails: a CSS reload does not update its
-layer-shell margins. Signal cleanup restores the services and display.
+layer-shell margins. The switch does not handle signals: if it is killed, it does not restart the services it stopped.
 
 Sticky/Float is the layout mode (`/layout/variant` in `argvus config`,
 `sticky` or `float`) and is independent of the active theme: selecting a
