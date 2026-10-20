@@ -34,7 +34,7 @@ Use `DESTDIR` for packaging:
 make DESTDIR="$pkgdir" PREFIX=/usr install
 ```
 
-Arch packaging is owned by this repository through the CI and local recipes in
+Arch packaging is owned by this repository through the remote and local recipes in
 `packaging/arch/{ci,local}/PKGBUILD`, with shared helpers in
 `packaging/arch/common/`.
 

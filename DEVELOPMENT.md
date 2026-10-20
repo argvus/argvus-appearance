@@ -7,7 +7,7 @@ Argvus Appearance contains shared themes and appearance integration for Argvus.
 This repository is config-only. Local validation requires `make`, a POSIX
 shell and standard POSIX install tools.
 
-On Arch Linux, the package recipes live at `packaging/arch/ci/PKGBUILD` and
+On Arch Linux, the package recipes live at `packaging/arch/remote/PKGBUILD` and
 `packaging/arch/local/PKGBUILD`.
 
 ## Commands

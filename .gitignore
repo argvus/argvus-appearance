@@ -9,8 +9,8 @@ TODO.txt
 .release/
 __pycache__/
 packages-repo/
-packaging/arch/ci/src/
-packaging/arch/ci/pkg/
+packaging/arch/remote/src/
+packaging/arch/remote/pkg/
 packaging/arch/local/src/
 packaging/arch/local/pkg/
 packaging/arch/*/.PKGBUILD.local.*
