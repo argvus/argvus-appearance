@@ -4,11 +4,11 @@
 # Purpose: Extract official themes to standalone Arch packages
 # Usage: ./theme-package-extract.sh <theme-id> [destination]
 # Author: ARGVUS Theme Migration
-# Dependencies: git, sed, grep, find, mkdir, cp
+# Dependencies: sed, grep, find, mkdir, cp
 #
 # This script:
 # 1. Validates theme ID against known families
-# 2. Clones skeleton-pkg template
+# 2. Creates the package tree (no external template is cloned)
 # 3. Copies theme files from all component repos
 # 4. Generates theme.toml metadata
 # 5. Validates shell scripts in the result
@@ -48,7 +48,6 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "$_script_path")" && pwd)" || exit 1
 # Go up 4 levels: sh -> tools -> argvus-appearance -> de -> workspace root
 WORKSPACE_ROOT="$(cd -- "$SCRIPT_DIR/../../../.." && pwd)" || exit 1
 DE_ROOT="$WORKSPACE_ROOT/de"
-SKELETON_SOURCE="/seagate/gitea/repos/argvus/skeleton-pkg.git"
 
 # Theme metadata - Dark themes (14 total - 1 argvus-dark built-in = 13 packages)
 DARK_THEMES="one-dark dracula silver-dark slate-dark universe gruvbox-high-dark gruvbox-dark rose-pine tokyo-night solitude sunset matrix monokai-dark"
@@ -278,12 +277,6 @@ main() {
         exit 1
     fi
 
-    # Verify skeleton source exists
-    if [ ! -d "$SKELETON_SOURCE" ]; then
-        log_error "Skeleton template not found: $SKELETON_SOURCE"
-        exit 1
-    fi
-
     # Create parent directory if needed
     if [ ! -d "$dest_dir" ]; then
         mkdir -p "$dest_dir" || {
@@ -292,21 +285,13 @@ main() {
         }
     fi
 
-    # Clone skeleton template
-    log_info "Cloning skeleton template..."
-    if ! git clone "$SKELETON_SOURCE" "$pkg_path" 2>&1 | grep -v "Cloning into" >&2; then
-        log_error "Failed to clone skeleton template"
-        rm -rf "$pkg_path"
-        exit 1
-    fi
-
-    # Remove git metadata
-    rm -rf "$pkg_path/.git" || {
-        log_error "Failed to clean git metadata"
+    # The package tree is built from the theme sources below. No external template is
+    # cloned: packaging files (PKGBUILD, install hooks) belong to each repository.
+    mkdir -p "$pkg_path" || {
+        log_error "Failed to create package directory: $pkg_path"
         exit 1
     }
-
-    log_info "Cloned skeleton to: $pkg_path"
+    log_info "Created package tree: $pkg_path"
 
     # Get theme metadata
     local category
