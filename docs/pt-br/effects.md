@@ -9,6 +9,19 @@ Os controles das superfícies são independentes. A página de Configuração da
 
 A Central de Controle é iniciada pelo Foot com um perfil dedicado gerado em `$XDG_CONFIG_HOME/argvus/data/control-center/foot.ini`. No Foot 1.28, a transparência é projetada para `[colors-dark] alpha` e o controle de Blur para `[colors-dark] blur`; a configuração normal do Foot e o terminal ARGVUS permanecem independentes.
 
+## Chaves de Animações e Efeitos
+
+Existem duas chaves mestras independentes, ambas aplicadas ao `hyprland.lua` pelas configurações canônicas de `/effects`:
+
+- **Animações** (`/effects/animations`) controla tudo que se move: animações de workspace, janela, fade, borda e layers.
+- **Efeitos** é um atalho para o blur (`/effects/blur_global_enabled`) e a transparência de Terminal, Launcher, Widget Telemetry, Control Panel e Taskbar (`/effects/transparency_<superfície>_enabled`, que também comandam as sombras das janelas). Ligar ou desligar grava todas elas (e também a transparência do Control Center). Cada superfície mantém a sua própria página de transparência, então Efeitos aparece como **ativo quando pelo menos uma delas está ativa** e só como inativo quando todas estão desligadas.
+
+Use `argvus effects-toggle animations status|enable|disable|toggle` e `argvus effects-toggle effects status|enable|disable|toggle`. O card de Aparência do Control Panel mostra um interruptor para cada. Desligar uma chave mestra preserva todos os ajustes finos das páginas **Animações** e **Blur** (velocidades, curvas, chaves por item, tamanho e passes do blur), então ligar de novo restaura o mesmo visual. `effects status` imprime `enabled` quando o blur ou pelo menos uma dessas superfícies de transparência está ativa. Desligar a transparência de uma superfície deixa toda a superfície do Waybar opaca: além do fundo, as bordas translúcidas da taskbar e do Widget Telemetry viram a cor sólida que apareceria sobre o fundo do tema. Todos os efeitos vêm ativados por padrão em uma instalação nova, inclusive em máquinas virtuais e sessões de baixo consumo; apenas uma configuração explícita desliga algum.
+
+## Todos os efeitos de uma vez
+
+`argvus effects-toggle` sem componente atua em animações, blur e transparência juntos: `status` imprime `enabled` somente quando os três estão ativos, `enable` e `disable` alternam os três, e `toggle` desliga tudo quando `status` é `enabled` e liga tudo caso contrário. **SUPER + F6** executa esse toggle. Para atuar em um único grupo, informe o nome: `argvus effects-toggle animations|effects|blur|transparency status|enable|disable|toggle`. A página **Animações** do Control Center usa a forma por componente, então o seu interruptor **Ativar** continua alterando apenas as animações.
+
 ## Transparência
 
 Cada superfície possui um submenu **Transparência**, com seu próprio controle de ativação e valor.

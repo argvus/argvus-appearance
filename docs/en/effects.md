@@ -9,6 +9,19 @@ Surface switches are independent. The Control Center Configuration page has its 
 
 The Control Center is launched through Foot with a dedicated generated profile at `$XDG_CONFIG_HOME/argvus/data/control-center/foot.ini`. With Foot 1.28, transparency is projected to `[colors-dark] alpha` and the surface Blur switch to `[colors-dark] blur`; the normal Foot configuration and ARGVUS terminal remain independent.
 
+## Animations and Effects switches
+
+There are two independent master switches, both applied to `hyprland.lua` through the canonical `/effects` settings:
+
+- **Animations** (`/effects/animations`) controls everything that moves: workspace, window, fade, border and layer animations.
+- **Effects** is a shortcut for blur (`/effects/blur_global_enabled`) and the transparency of Terminal, Launcher, Widget Telemetry, Control Panel and Taskbar (`/effects/transparency_<surface>_enabled`, which also drives the window shadows). Turning it on or off writes all of them (and the Control Center transparency too). Each surface keeps its own transparency page, so Effects reads as **on when at least one of them is on** and as off only when every one is off.
+
+Use `argvus effects-toggle animations status|enable|disable|toggle` and `argvus effects-toggle effects status|enable|disable|toggle`. The Control Panel Appearance card shows one switch for each. Turning a master switch off keeps every fine setting of the **Animations** and **Blur** pages (speeds, curves, per-leaf switches, blur size and passes), so turning it on again restores the same look. `effects status` prints `enabled` when blur or at least one of those transparency surfaces is enabled. Turning a surface's transparency off makes the whole Waybar surface opaque: besides the background, the translucent borders of the taskbar and the Widget Telemetry become the solid color they show over the theme background. Every effect is enabled by default on a fresh install, including on virtual machines and low-power sessions; only an explicit setting turns one off.
+
+## All effects at once
+
+`argvus effects-toggle` without a component acts on animations, blur and transparency together: `status` prints `enabled` only when all three are enabled, `enable` and `disable` switch all three, and `toggle` switches everything off when `status` is `enabled` and on otherwise. **SUPER + F6** runs this toggle. To act on a single group, name it: `argvus effects-toggle animations|effects|blur|transparency status|enable|disable|toggle`. The **Animations** page of the Control Center uses the per-component form, so its **Enable** switch still changes animations only.
+
 ## Transparency
 
 Each surface has its own **Transparency** submenu with an enable switch and value.
