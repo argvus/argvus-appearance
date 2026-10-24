@@ -1,5 +1,18 @@
 # Argvus Appearance
 
+<div align="center">
+
+[![CI](https://github.com/argvus/argvus-appearance/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/argvus/argvus-appearance/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/argvus/argvus-appearance)](./LICENSE)
+[![Language: Lua](https://img.shields.io/badge/Lua-2C2D72?logo=lua&logoColor=white)](https://www.lua.org/)
+[![Platform: Arch Linux | Wayland](https://img.shields.io/badge/platform-Arch%20Linux%20%7C%20Wayland-1793D1?logo=archlinux&logoColor=white)](https://archlinux.org/)
+[![Pull requests](https://img.shields.io/github/issues-pr/argvus/argvus-appearance)](https://github.com/argvus/argvus-appearance/pulls)
+[![Issues](https://img.shields.io/github/issues/argvus/argvus-appearance)](https://github.com/argvus/argvus-appearance/issues)
+[![Last commit](https://img.shields.io/github/last-commit/argvus/argvus-appearance)](https://github.com/argvus/argvus-appearance/commits/main)
+[![Docs](https://img.shields.io/badge/docs-project-blue)](./docs/)
+
+</div>
+
 Argvus Appearance contains shared appearance configuration for the Argvus
 Desktop Environment.
 
