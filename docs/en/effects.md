@@ -26,7 +26,7 @@ Use `argvus effects-toggle animations status|enable|disable|toggle` and `argvus 
 
 Each surface has its own **Transparency** submenu with an enable switch and value.
 
-The **Appearance → Launchers** page controls the official Rofi-based launcher and picker flows: the main launcher, emoji picker, calculator, clipboard picker, cheatsheets and Rofi removable-device menus. Its Transparency value is the final background alpha, so `50` means an effective background opacity of approximately `0.50`; text, icons and selected rows remain opaque. Its Blur switch opts the `rofi` layer into the global Blur settings.
+The **Appearance → Launchers** page controls the official Rofi-based launcher and picker flows: the main launcher, emoji picker, calculator, clipboard picker, cheatsheets and Rofi removable-device menus. Its Transparency value is the final background alpha, so `50` means an effective background opacity of approximately `0.50`; text, icons and selected rows remain opaque. With Transparency turned off, the launcher uses the active theme's own background color, fully opaque. Its Blur switch opts the `rofi` layer into the global Blur settings.
 
 Each value ranges from `0%` (opaque) to `100%` (fully transparent). Use `+` and `-` in 5% steps, then select **Apply** on the surface page. Leaving the page discards an un-applied draft.
 
