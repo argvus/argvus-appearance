@@ -43,6 +43,13 @@ arch_package_appearance_payload() {
 	cp -R --no-preserve=ownership \
 		"${source_root}/src/usr/share/argvus/appearance/." \
 		"${pkgdir}/usr/share/argvus/appearance/"
+	local shared
+	for shared in theme themes; do
+		install -dm755 "${pkgdir}/usr/share/argvus/${shared}"
+		cp -R --no-preserve=ownership \
+			"${source_root}/src/usr/share/argvus/${shared}/." \
+			"${pkgdir}/usr/share/argvus/${shared}/"
+	done
 	find "${pkgdir}/usr/share/argvus/appearance/sh" -type f -name '*.sh' \
 		-exec chmod 755 {} \;
 	install -Dm644 "${source_root}/LICENSE" \

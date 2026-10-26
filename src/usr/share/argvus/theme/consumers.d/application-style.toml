@@ -1,0 +1,4 @@
+# Theme consumer: rendered into every theme build as hypr/application-style.conf.
+id = "application-style"
+template = "appearance/theme-template/application-style.conf"
+output = "hypr/application-style.conf"

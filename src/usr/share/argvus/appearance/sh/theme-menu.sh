@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-# Hierarchical Rofi theme selector. Themes come from `argvus-appearance themes
-# list`; ARGVUS Dark/Light are built in and always offered.
+# Hierarchical Rofi theme selector. Themes come from `argvus theme list`;
+# ARGVUS Dark/Light are listed first in their category.
 
 set -eu
 
@@ -18,36 +18,19 @@ run_menu() {
     -kb-cancel 'Escape,Left'
 }
 
-# Prints the top-level `key = "value"` of a theme.toml (stops at the first table).
-manifest_field() {
-  sed -n -e '/^\[/q' -e "s/^$2[[:space:]]*=[[:space:]]*\"\\(.*\\)\"[[:space:]]*\$/\\1/p" "$1" |
-    head -n 1
-}
-
-# Prints "id<TAB>name<TAB>category" lines for one category: the built-in theme
-# first, then every drop-in manifest under appearance/themes.d, sorted by name.
-# Reads the same manifests as the Control Center and `argvus-appearance`, so
-# the menu does not depend on that binary being installed.
+# Prints "id<TAB>name<TAB>category" lines for one category: the ARGVUS theme
+# first, then every installed theme (official and the user's own, as
+# `argvus theme list` discovers them), sorted by name.
 themes_for_category() {
   _builtin_id="argvus-$1"
-  case "$1" in
-    dark) _builtin_name="ARGVUS Dark" ;;
-    *) _builtin_name="ARGVUS Light" ;;
-  esac
-  printf '%s\t%s\t%s\n' "$_builtin_id" "$_builtin_name" "$1"
-
-  _themes_dir="$(paths_system_config appearance/themes.d)"
-  for _manifest in "$_themes_dir"/*/theme.toml; do
-    [ -f "$_manifest" ] || continue
-    _id="$(manifest_field "$_manifest" id)"
-    _name="$(manifest_field "$_manifest" name)"
-    _cat="$(manifest_field "$_manifest" category)"
-    [ "$_cat" = "$1" ] && [ -n "$_name" ] || continue
-    case "$_id" in
-      '' | argvus-dark | argvus-light | -* | *- | *-float | *[!a-z0-9-]*) continue ;;
-    esac
-    printf '%s\t%s\t%s\n' "$_id" "$_name" "$_cat"
-  done | sort -t "$(printf '\t')" -k2,2
+  argvus theme list 2>/dev/null |
+    awk -F'\t' -v category="$1" -v builtin="$_builtin_id" '
+      $2 == category && $1 == builtin { printf "%s\t%s\t%s\n", $1, $4, $2 }
+    '
+  argvus theme list 2>/dev/null |
+    awk -F'\t' -v category="$1" -v builtin="$_builtin_id" '
+      $2 == category && $1 != builtin { printf "%s\t%s\t%s\n", $1, $4, $2 }
+    ' | sort -t "$(printf '\t')" -k2,2
 }
 
 _dark_category="$(argvus_tr appearance theme.category.dark)"

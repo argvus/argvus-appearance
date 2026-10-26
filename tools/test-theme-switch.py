@@ -25,14 +25,17 @@ from pathlib import Path
 name = Path(sys.argv[0]).name
 with open(os.environ["TEST_COMMAND_LOG"], "a") as log:
     log.write(json.dumps([name, *sys.argv[1:]]) + "\\n")
+if name == "pgrep" and "hyprpaper" in sys.argv and os.environ.get("TEST_HYPRPAPER_RUNNING"): sys.exit(0)
 if name == "pgrep": sys.exit(1)
 # Canonical configuration is owned by argvus config: forward `argvus config`
 # to the real binary so projections (layout, taskbar, derived files) are
 # written exactly as on an installed system. TEST_VARIANT keeps the fake
 # answer for tests that diverge /layout/variant on purpose.
 # Translations always resolve through the real binary.
+if name == "argvus" and sys.argv[1:3] == ["config", "project"] and os.environ.get("TEST_PROJECT_FAIL"):
+    sys.exit(1)
 if name == "argvus" and os.environ.get("TEST_ARGVUS_BIN") and (
-        sys.argv[1:2] == ["i18n"]
+        sys.argv[1:2] in (["i18n"], ["theme"])
         or (sys.argv[1:2] == ["config"] and not os.environ.get("TEST_VARIANT"))):
     real = os.environ["TEST_ARGVUS_BIN"]
     os.execv(real, [real, *sys.argv[1:]])
@@ -44,6 +47,7 @@ if name == "systemctl" and sys.argv[1:] == ["--user", "reload", "argvus-config.s
     sys.exit(int(os.environ.get("TEST_CONFIG_RELOAD_FAIL", "0")))
 if name == "hyprctl":
     if sys.argv[1:] == ["monitors"]: print("Monitor TEST-1 (ID 0):")
+    if sys.argv[1:] == ["-j", "monitors"]: print(json.dumps([{"name": "TEST-1"}]))
     if "dpms" in " ".join(sys.argv) and '"off"' in " ".join(sys.argv):
         sys.exit(int(os.environ.get("TEST_DPMS_FAIL", "0")))
 if name == "argvus" and sys.argv[1:4] == ["config", "get", "/layout/variant"]:
@@ -56,6 +60,16 @@ if name == "argvus" and sys.argv[1:4] == ["config", "get", "/layout/variant"]:
         override = "float" if theme.endswith("-float") else "sticky"
     print(override)
 '''
+
+
+def source_roots():
+    """Every sibling filesystem root: `<repo>/src`, plus the `argvus` workspace,
+    whose packaged files live under packaging/archlinux/src."""
+    roots = [repo / "src" for repo in ROOT.glob("argvus*") if (repo / "src").is_dir()]
+    workspace_root = ROOT / "argvus/packaging/archlinux/src"
+    if workspace_root.is_dir():
+        roots.append(workspace_root)
+    return roots
 
 
 def link_tree(source, destination):
@@ -76,8 +90,8 @@ class ThemeSwitchTests(unittest.TestCase):
         self.base = Path(self.temp.name)
         self.system = self.base / "system"
         self.system.mkdir()
-        for repo in ROOT.glob("argvus*"):
-            share = repo / "src/usr/share/argvus"
+        for root in source_roots():
+            share = root / "usr/share/argvus"
             if share.is_dir():
                 for component in share.iterdir():
                     shutil.copytree(
@@ -89,15 +103,19 @@ class ThemeSwitchTests(unittest.TestCase):
         # the installed /usr/share/backgrounds does, so the test root merges
         # every sibling's backgrounds instead of reading one repository.
         self.backgrounds = self.base / "backgrounds"
-        for repo in ROOT.glob("argvus*"):
-            source = repo / "src/usr/share/backgrounds/argvus"
+        for root in source_roots():
+            source = root / "usr/share/backgrounds/argvus"
             if source.is_dir():
                 link_tree(source, self.backgrounds / "argvus")
-        calendar_themes = ROOT / "argvus/src/etc/argvus/taskbar/calendar/themes"
-        shutil.copytree(
-            calendar_themes,
-            self.system / "argvus-taskbar-calendar/themes",
-        )
+        # Each theme package ships its own calendar stylesheet in /etc.
+        for root in source_roots():
+            calendar_themes = root / "etc/argvus/taskbar/calendar/themes"
+            if calendar_themes.is_dir():
+                shutil.copytree(
+                    calendar_themes,
+                    self.system / "argvus-taskbar-calendar/themes",
+                    dirs_exist_ok=True,
+                )
         self.config = self.base / "config"
         # The ARGVUS configuration root holds exactly `config/` and `data/`;
         # every managed runtime tree, generated file and state marker lives
@@ -119,7 +137,9 @@ class ThemeSwitchTests(unittest.TestCase):
             raise RuntimeError(
                 f"missing {ARGVUS_BIN}; run `cargo build --bin argvus` in de/argvus")
         (self.cmd_bin / "argvus").symlink_to(ARGVUS_BIN)
-        for name in ("hyprctl", "systemctl", "pgrep",
+        # Every program a theme switch talks to on the desktop is recorded
+        # instead: the switch must never reach the session running the tests.
+        for name in ("hyprctl", "systemctl", "pgrep", "pkill", "dunstctl", "qs",
                      "gsettings", "notify-send", "argvus"):
             script = mockbin / name
             script.write_text(MOCK)
@@ -148,7 +168,7 @@ class ThemeSwitchTests(unittest.TestCase):
             "XDG_STATE_HOME": str(self.base / "state"),
             "ARGVUS_NO_RUNTIME": "1",
             "ARGVUS_THEME_LOCKED": "0",
-            "ARGVUS_I18N_DIR": str(ROOT / "argvus/locales"),
+            "ARGVUS_I18N_DIR": str(ROOT / "argvus/resources/locales"),
             "ARGVUS_BACKGROUNDS_DIR": str(self.backgrounds),
             "WALLPAPER_ROOT": str(self.backgrounds / "argvus"),
             "TEST_COMMAND_LOG": str(self.log),
@@ -158,6 +178,9 @@ class ThemeSwitchTests(unittest.TestCase):
             "ARGVUS_COMMANDS_DIR": str(self.cmd_bin),
             "PATH": str(mockbin) + os.pathsep + os.environ["PATH"],
         }
+        # Hyprland is reached through its socket, not only through hyprctl.
+        for variable in ("HYPRLAND_INSTANCE_SIGNATURE", "WAYLAND_DISPLAY"):
+            self.env.pop(variable, None)
 
     def apply(self, theme, runtime=False, fail_dpms=False, expected_status=0):
         # Sticky/Float is /layout/variant, written only by layout-mode-switch.sh;
@@ -182,8 +205,8 @@ class ThemeSwitchTests(unittest.TestCase):
         return [json.loads(line) for line in self.log.read_text().splitlines()]
 
     def test_all_pairs_float_to_sticky_and_imports(self):
-        themes = self.system / "appearance/config/hypr/themes"
-        for sticky in sorted(p.name for p in themes.iterdir() if not p.name.endswith("-float")):
+        themes = self.system / "themes"
+        for sticky in sorted(p.name for p in themes.iterdir() if (p / "theme.toml").is_file()):
             for theme in (sticky + "-float", sticky):
                 with self.subTest(theme=theme):
                     self.apply(theme)
@@ -202,28 +225,28 @@ class ThemeSwitchTests(unittest.TestCase):
                     for css in (self.user / "waybar").glob("*.css"):
                         for ref in re.findall(r'@import url\("([^"]+)"\)', css.read_text()):
                             self.assertTrue((css.parent / ref).is_file(), (theme, css, ref))
-                    self.assertTrue((self.user / f"waybar/themes/{theme}/widget-telemetry-theme.css").is_file())
+                    telemetry_file = self.current_build() / "widget-telemetry/theme.css"
+                    self.assertTrue(telemetry_file.is_file())
                     if theme in ("one-dark", "one-dark-float"):
-                        telemetry_theme = (self.user / f"waybar/themes/{theme}/widget-telemetry-theme.css").read_text()
+                        telemetry_theme = telemetry_file.read_text()
                         self.assertIn(
                             "@define-color th-window-bg-rgba rgba(44, 49, 58, 0.35);",
                             telemetry_theme,
                         )
+                    # The launcher and Qt read the theme build of this theme.
+                    current = self.current_build()
+                    build = (current / "build.toml").read_text()
+                    self.assertIn(f'theme = "{theme.removesuffix("-float")}"', build)
                     rofi = (self.user / "rofi/theme.rasi").read_text()
-                    self.assertIn(f"/{theme}/theme.rasi", rofi)
+                    self.assertIn(f'@import "{current}/launcher/theme.rasi"', rofi)
                     for version in ("gtk-3.0", "gtk-4.0"):
                         settings = (self.user / version / "settings.ini").read_text()
                         prefer_dark = 0 if self.is_light_theme(theme) else 1
                         self.assertIn(f"gtk-application-prefer-dark-theme={prefer_dark}", settings)
-                    palette = (self.base / "cache/argvus-control-center/theme.css").read_text()
+                    palette = (current / "tui/theme.css").read_text()
                     self.assertIn("@define-color argvus_accent #", palette)
-                    self.assertNotIn("argvus_bg", palette)
-                    self.assertNotIn("@import", palette)
                     qt6ct = (self.base / "native/qt6ct/qt6ct.conf").read_text()
-                    self.assertIn(
-                        f"color_scheme_path = {self.user / 'qt6ct/colors' / (theme + '.conf')}",
-                        qt6ct,
-                    )
+                    self.assertIn(f"color_scheme_path = {current / 'qt6ct/colors.conf'}", qt6ct)
         self.assertFalse(any(c[0] == "gsettings" for c in self.commands()))
 
     def test_light_theme_surfaces_keep_transparency_for_sticky_and_float(self):
@@ -239,7 +262,7 @@ class ThemeSwitchTests(unittest.TestCase):
                 with self.subTest(theme=theme):
                     self.apply(theme)
 
-                    taskbar_theme = (self.user / f"waybar/themes/{theme}/theme.css").read_text()
+                    taskbar_theme = (self.current_build() / "taskbar/theme.css").read_text()
                     self.assertRegex(
                         taskbar_theme,
                         r"@define-color th-background-rgba .*0\.85\);",
@@ -250,21 +273,16 @@ class ThemeSwitchTests(unittest.TestCase):
                     )
 
                     telemetry_theme = (
-                        self.user / f"waybar/themes/{theme}/widget-telemetry-theme.css"
+                        self.current_build() / "widget-telemetry/theme.css"
                     ).read_text()
-                    expected_telemetry_rgb = telemetry_rgb
-                    if theme == "catppuccin-latte-float":
-                        expected_telemetry_rgb = "235, 235, 235"
+                    # Sticky and Float share the theme's palette.
                     self.assertIn(
-                        f"@define-color th-window-bg-rgba rgba({expected_telemetry_rgb}, 0.82);",
+                        f"@define-color th-window-bg-rgba rgba({telemetry_rgb}, 0.82);",
                         telemetry_theme,
                     )
 
                     control_panel_theme = (
-                        self.system
-                        / "control-panel/config/quickshell/argvus-control-panel/themes"
-                        / theme
-                        / "Theme.qml"
+                        self.current_build() / "control-panel/Theme.qml"
                     ).read_text()
                     self.assertIn(
                         f'readonly property color bgPanel:         "#D9{panel_rgb}"',
@@ -415,8 +433,8 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(selected_theme.read_text(), "argvus-light\n")
 
-    def test_theme_menu_lists_builtin_theme_without_cli(self):
-        """The built-in theme must reach Rofi even when the CLI is missing."""
+    def test_theme_menu_lists_the_argvus_theme_first(self):
+        """ARGVUS Dark leads the Dark category, then the installed themes."""
         rofi_input = self.base / "rofi-input"
         rofi_step = self.base / "rofi-step"
         rofi = self.base / "bin" / "rofi"
@@ -444,24 +462,195 @@ class ThemeSwitchTests(unittest.TestCase):
 
         items = rofi_input.read_text().splitlines()
         self.assertEqual(items[0], "ARGVUS Dark")
-        # Drop-in packages are listed from their manifests, without the CLI.
+        # Theme packages are listed from their manifests by `argvus theme list`.
         self.assertIn("One Dark", items)
         self.assertNotIn("One Light", items)
         self.assertFalse(any(item.endswith(">") for item in items))
 
-    def test_restart_does_not_depend_on_dpms(self):
-        for fail in (False, True):
-            with self.subTest(fail_dpms=fail):
-                self.log.write_text("")
-                self.apply("argvus-dark", runtime=True, fail_dpms=fail)
-                commands = self.commands()
-                self.assertEqual(
-                    commands.count(["systemctl", "--user", "reload", "argvus-config.service"]),
-                    1,
-                )
-                self.assertNotIn(["argvus", "sessionctl", "reload"], commands)
-                self.assertFalse(any(c[0] == "hyprctl" and "dpms" in " ".join(c)
-                                     for c in commands))
+    def test_runtime_switch_covers_nothing_and_stops_nothing(self):
+        self.apply("sunset")
+        self.log.write_text("")
+        self.env["TEST_HYPRPAPER_RUNNING"] = "1"
+        self.apply("dracula", runtime=True)
+        commands = self.commands()
+        self.assertFalse(self.splash_args.exists(), "no overlay is shown")
+        for command in commands:
+            # The polkit agent shows nothing while idle; it reads its colours at start.
+            if command[:2] == ["systemctl", "--user"] and command[-1] != "hyprpolkitagent":
+                self.assertNotIn(command[2], ("stop", "start", "restart", "reload", "try-restart"), command)
+        wallpapers = [c for c in commands if c[:3] == ["hyprctl", "hyprpaper", "wallpaper"]]
+        self.assertEqual(len(wallpapers), 1, wallpapers)
+        self.assertRegex(wallpapers[0][3], r"^TEST-1,.*dracula.*\.jxl,cover$")
+        self.assertNotIn(["argvus", "sessionctl", "reload"], commands)
+        self.assertFalse(any(c[0] == "hyprctl" and "dpms" in " ".join(c) for c in commands))
+        self.assertIn(["argvus", "config", "project"], commands)
+        # Every registered consumer reloads in place.
+        self.assertIn(["argvus", "config", "theme-runtime", "hyprland"], commands)
+        self.assertIn(["dunstctl", "reload", str(self.user / "dunst/dunstrc")], commands)
+        self.assertIn(["qs", "-c", "argvus-control-panel", "ipc", "call", "theme", "reload"], commands)
+        self.assertTrue(any(c[0] == "pkill" and "kitty" in c and "SIGUSR1" in c for c in commands))
+        self.assertTrue(any(c[0] == "pkill" and "btop" in c and "SIGUSR2" in c for c in commands))
+        build = os.readlink(self.current_build())
+        for css in ("waybar/argvus-taskbar.css", "waybar/argvus-widget-telemetry.css"):
+            first_line = (self.user / css).read_text().splitlines()[0]
+            self.assertEqual(first_line, f"/* argvus theme build: {Path(build).name} */")
+
+    def test_layout_change_restarts_only_the_bars(self):
+        self.apply("sunset")
+        self.log.write_text("")
+        self.env["TEST_HYPRPAPER_RUNNING"] = "1"
+        self.apply("sunset-float", runtime=True)
+        restarts = [c for c in self.commands() if c[:3] == ["systemctl", "--user", "try-restart"]]
+        self.assertEqual(restarts, [["systemctl", "--user", "try-restart",
+                                     "argvus-taskbar.service", "argvus-widget-telemetry.service"]])
+
+    def test_partly_registered_components_restart_only_their_surfaces(self):
+        # A component package older than the registry registers nothing, even
+        # when the others do: its surface restarts, the rest reload in place.
+        (self.system / "theme/consumers.d/taskbar.toml").unlink()
+        (self.system / "theme/consumers.d/hyprland.toml").unlink()
+        self.apply("sunset")
+        self.log.write_text("")
+        self.env["TEST_HYPRPAPER_RUNNING"] = "1"
+        self.apply("dracula", runtime=True)
+        commands = self.commands()
+        restarts = [c for c in commands if c[:3] == ["systemctl", "--user", "try-restart"]]
+        self.assertEqual(restarts, [["systemctl", "--user", "try-restart", "argvus-taskbar.service"]])
+        self.assertIn(["qs", "-c", "argvus-control-panel", "ipc", "call", "theme", "reload"], commands)
+        self.assertNotIn(["argvus", "config", "theme-runtime", "hyprland"], commands)
+
+    def test_layout_mode_switch_applies_in_place(self):
+        # Sticky/Float goes through the theme transaction only: no splash, no
+        # configuration-service reload and no early Waybar restart.
+        self.apply("sunset")
+        self.log.write_text("")
+        result = subprocess.run(
+            ["sh", str(self.system / "appearance/sh/layout-mode-switch.sh"), "float"],
+            env=self.env, capture_output=True, text=True, timeout=60)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        commands = self.commands()
+        self.assertIn(["argvus", "theme-switch", "sunset"], commands)
+        self.assertNotIn(["systemctl", "--user", "reload", "argvus-config.service"], commands)
+        self.assertNotIn(["argvus", "sessionctl", "restart", "waybar"], commands)
+        self.assertFalse(self.splash_args.exists(), "no overlay is shown")
+        # The transaction compares the marker with the new mode to see the layout change.
+        self.assertEqual((self.user / ".active-theme").read_text().strip(), "sunset")
+
+    def test_theme_apply_is_the_theme_switch(self):
+        result = subprocess.run(
+            [str(self.cmd_bin / "argvus"), "theme", "apply", "dracula"],
+            env=self.env, capture_output=True, text=True, timeout=60)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual((self.user / ".active-theme").read_text().strip(), "dracula")
+        self.assertIn('theme = "dracula"', (self.current_build() / "build.toml").read_text())
+
+    def test_failed_projection_reports_failure(self):
+        self.env["TEST_PROJECT_FAIL"] = "1"
+        result = self.apply("argvus-dark", runtime=True, expected_status=1)
+        self.assertNotIn("applied.", result.stdout)
+
+    def test_runtime_switch_leaves_waybar_restart_to_the_transaction(self):
+        # The switch stops the bars and restarts the recorded units itself; the
+        # geometry helpers must not start Waybar early in the middle of it.
+        self.log.write_text("")
+        self.apply("argvus-dark", runtime=True)
+        commands = self.commands()
+        self.assertNotIn(["argvus", "sessionctl", "restart", "waybar"], commands)
+        self.assertTrue(any(c[:2] == ["hyprctl", "eval"] and "gaps_out" in c[2]
+                            for c in commands if len(c) > 2))
+
+    def test_theme_switch_keeps_the_taskbar_shape(self):
+        # Height and border are Control Center settings: refreshing the managed
+        # Waybar files from the packaged copies must not reset them.
+        self.apply("argvus-dark")
+        for arguments in (["taskbar-height", "36"], ["taskbar-border", "3"]):
+            subprocess.run(
+                [str(self.cmd_bin / "argvus"), "config", *arguments],
+                env=self.env, capture_output=True, text=True, check=True,
+            )
+        for theme in ("sunset", "slate-dark", "argvus-light-float"):
+            with self.subTest(theme=theme):
+                self.apply(theme)
+                shape = subprocess.run(
+                    [str(self.cmd_bin / "argvus"), "config", "taskbar-shape"],
+                    env=self.env, capture_output=True, text=True, check=True,
+                ).stdout
+                self.assertIn("height=36", shape)
+                self.assertIn("border=3", shape)
+
+    def test_theme_switch_border_follows_the_theme_until_set(self):
+        self.apply("slate-dark")
+        css = (self.user / "waybar/argvus-taskbar.css").read_text()
+        window_block = css[css.index("window#waybar {"):]
+        self.assertIn("border: none", window_block[:window_block.index("}")])
+
+    def current_build(self):
+        return self.user / "generated/theme/current"
+
+    def test_switch_points_the_consumers_at_the_theme_build(self):
+        self.apply("sunset-float")
+        current = self.current_build()
+        build = (current / "build.toml").read_text()
+        self.assertIn('theme = "sunset"', build)
+        self.assertIn('variant = "float"', build)
+
+        css = (self.user / "waybar/argvus-taskbar.css").read_text()
+        self.assertIn(f'@import url("{current}/taskbar/theme.css");', css)
+        telemetry = (self.user / "waybar/argvus-widget-telemetry.css").read_text()
+        self.assertIn(f'@import url("{current}/widget-telemetry/theme.css");', telemetry)
+        rofi = (self.user / "rofi/theme.rasi").read_text()
+        self.assertIn(f'@import "{current}/launcher/theme.rasi"', rofi)
+        qt6ct = (self.user / "qt6ct/qt6ct.conf").read_text()
+        self.assertRegex(qt6ct, rf"color_scheme_path ?= ?{re.escape(str(current))}/qt6ct/colors\.conf")
+
+        def without_font(text):
+            return [line for line in text.splitlines() if not line.startswith("font_")]
+        self.assertEqual(
+            without_font((self.user / "hypr/hyprtoolkit.conf").read_text()),
+            without_font((current / "hypr/hyprtoolkit.conf").read_text()))
+        calendar = (self.base / "cache/argvus-taskbar-calendar/theme.css").read_text()
+        self.assertEqual(calendar.split("\n", 1)[1], (current / "taskbar-calendar/theme.css").read_text())
+        self.assertEqual((self.user / "removable-devices/theme.css").read_text(),
+                         (current / "removable-devices/theme.css").read_text())
+
+    def test_a_theme_that_is_not_installed_changes_nothing(self):
+        self.apply("sunset")
+        build = os.readlink(self.current_build())
+        result = subprocess.run(
+            [str(self.cmd_bin / "argvus"), "config", "theme-apply", "not-installed"],
+            env=self.env, capture_output=True, text=True, timeout=60)
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertEqual(os.readlink(self.current_build()), build)
+        self.assertEqual((self.user / ".active-theme").read_text().strip(), "sunset")
+
+    def test_per_theme_copies_of_older_switches_move_to_a_backup_once(self):
+        old = self.user / "waybar/themes/sunset/theme.css"
+        old.parent.mkdir(parents=True)
+        old.write_text("/* edited */\n")
+        self.apply("sunset")
+        self.assertFalse(old.exists())
+        backups = list((self.user / "backups").glob("theme-copies-*/waybar/themes/sunset/theme.css"))
+        self.assertEqual([path.read_text() for path in backups], ["/* edited */\n"])
+        old.parent.mkdir(parents=True)
+        old.write_text("again\n")
+        self.apply("dracula")
+        self.assertTrue(old.exists(), "the move runs once")
+
+    def test_a_custom_profile_keeps_the_theme_build(self):
+        (self.user / "state").mkdir(parents=True, exist_ok=True)
+        (self.user / "state/custom-theme").write_text("mine\n")
+        self.apply("dracula")
+        self.assertIn('theme = "dracula"', (self.current_build() / "build.toml").read_text())
+
+    def test_a_chosen_accent_renders_a_new_build(self):
+        self.apply("sunset")
+        before = os.readlink(self.current_build())
+        subprocess.run(
+            [str(self.cmd_bin / "argvus"), "config", "accent", "#00AA55"],
+            env=self.env, capture_output=True, text=True, check=True)
+        self.assertNotEqual(before, os.readlink(self.current_build()))
+        theme_css = (self.current_build() / "taskbar/theme.css").read_text()
+        self.assertIn("@define-color th-decorate        #00AA55;", theme_css)
 
     def test_non_runtime_materialization_does_not_reload_session_services(self):
         self.log.write_text("")
@@ -470,66 +659,6 @@ class ThemeSwitchTests(unittest.TestCase):
             ["systemctl", "--user", "reload", "argvus-config.service"],
             self.commands(),
         )
-
-    def test_runtime_splash_receives_selected_theme_and_generated_colors(self):
-        self.apply("sunset", runtime=True)
-        args = self.splash_args.read_text().splitlines()
-        self.assertEqual(args[args.index("--theme") + 1], "sunset")
-        self.assertEqual(args[args.index("--background") + 1], "#0F0F0F")
-        self.assertEqual(args[args.index("--foreground") + 1], "#EADCCC")
-        self.assertEqual(args[args.index("--accent") + 1], "#E2BE8A")
-        self.assertIn("--ready-file", args)
-
-    def test_runtime_splash_stays_until_config_reload_finishes(self):
-        events = self.base / "splash-events"
-        splash = self.base / "loading-theme"
-        splash.write_text(
-            "#!/usr/bin/env sh\n"
-            "printf 'START\\n' >> \"$TEST_SPLASH_EVENTS\"\n"
-            "ready=''\n"
-            "for arg in \"$@\"; do\n"
-            "  if [ \"${previous:-}\" = --ready-file ]; then ready=\"$arg\"; fi\n"
-            "  previous=\"$arg\"\n"
-            "done\n"
-            "[ -z \"$ready\" ] || printf 'READY\\n' > \"$ready\"\n"
-            "trap \"printf 'STOP\\\\n' >> \\\"$TEST_SPLASH_EVENTS\\\"; exit 0\" TERM INT\n"
-            "while :; do sleep 0.02; done\n"
-        )
-        splash.chmod(0o755)
-        systemctl = self.base / "bin/systemctl"
-        systemctl.write_text(
-            "#!/usr/bin/env sh\n"
-            "if [ \"$1\" = --user ] && [ \"$2\" = reload ]; then\n"
-            "  printf 'RELOAD_START\\n' >> \"$TEST_SPLASH_EVENTS\"\n"
-            "  sleep 0.2\n"
-            "  printf 'RELOAD_END\\n' >> \"$TEST_SPLASH_EVENTS\"\n"
-            "fi\n"
-        )
-        systemctl.chmod(0o755)
-        result = subprocess.run(
-            [str(self.cmd_bin / "argvus"), "config", "theme-apply", "sunset"],
-            env=self.env | {
-                "ARGVUS_NO_RUNTIME": "0",
-                "ARGVUS_LOADING_THEME_BIN": str(splash),
-                "TEST_SPLASH_EVENTS": str(events),
-            },
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertLess(
-            (events.read_text().splitlines()).index("RELOAD_END"),
-            (events.read_text().splitlines()).index("STOP"),
-        )
-
-    def test_runtime_splash_receives_one_light_colors(self):
-        self.apply("one-light", runtime=True)
-        args = self.splash_args.read_text().splitlines()
-        self.assertEqual(args[args.index("--theme") + 1], "one-light")
-        self.assertEqual(args[args.index("--background") + 1], "#FAFAFA")
-        self.assertEqual(args[args.index("--foreground") + 1], "#383A42")
-        self.assertEqual(args[args.index("--accent") + 1], "#4078F2")
 
     def test_calendar_cache_materializes_selected_themes(self):
         expected = {
@@ -554,25 +683,13 @@ class ThemeSwitchTests(unittest.TestCase):
                     if selected.endswith("-float"):
                         self.assertIn("border-radius: 4px", contents)
 
-    def test_failed_global_reload_restores_display_and_reports_failure(self):
-        self.env["TEST_CONFIG_RELOAD_FAIL"] = "1"
-        result = self.apply("argvus-dark", runtime=True, expected_status=1)
-        self.assertNotIn("applied.", result.stdout)
-        commands = self.commands()
-        self.assertIn(["systemctl", "--user", "reload", "argvus-config.service"], commands)
-        self.assertNotIn(["argvus", "sessionctl", "reload"], commands)
-        self.assertFalse(any(c[0] == "hyprctl" and "dpms" in " ".join(c)
-                             for c in commands))
-
     def test_theme_menu_exposes_category_family_then_model_protocol(self):
         menu = self.system / "appearance/sh/theme-menu.sh"
         source = menu.read_text()
         self.assertIn("theme.category.dark", source)
         self.assertIn("theme.category.light", source)
-        self.assertIn("appearance/themes.d", source)
+        self.assertIn("argvus theme list", source)
         self.assertNotIn("argvus-appearance themes list", source)
-        self.assertIn('"ARGVUS Dark"', source)
-        self.assertIn('"ARGVUS Light"', source)
         self.assertNotIn("theme.family.dracula", source)
         self.assertNotIn("theme.model.sticky", source)
         self.assertIn("-kb-accept-entry 'Return,KP_Enter,Right'", source)
@@ -647,15 +764,38 @@ class ThemeSwitchTests(unittest.TestCase):
             str(self.backgrounds / "argvus/abstract/light/everforest-abstract-light.jxl"),
         )
 
-    def test_official_superfile_themes_use_the_complete_schema(self):
-        theme_dir = self.system / "app-profiles/config/superfile/theme"
-        expected = set(tomllib.loads(
-            (theme_dir / "github-light.toml").read_text()
-        ))
+    def test_every_official_theme_renders_in_both_layouts(self):
+        manifests = sorted((self.system / "themes").glob("*/theme.toml"))
+        self.assertGreaterEqual(len(manifests), 22)
+        for manifest in manifests:
+            with self.subTest(theme=manifest.parent.name):
+                result = subprocess.run(
+                    [str(self.cmd_bin / "argvus"), "theme", "check", str(manifest.parent)],
+                    env=self.env, capture_output=True, text=True, timeout=60)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-        for theme_file in sorted(theme_dir.glob("*.toml")):
-            with self.subTest(theme=theme_file.name):
-                actual = set(tomllib.loads(theme_file.read_text()))
+    def test_a_theme_with_only_the_required_colours_renders(self):
+        theme = self.base / "minimal/minimal"
+        theme.mkdir(parents=True)
+        (theme / "theme.toml").write_text(
+            'schema = 2\nid = "minimal"\nname = "Minimal"\ncategory = "dark"\n'
+            '[palette]\nbg = "#101418"\nfg = "#D8DEE9"\naccent = "#88C0D0"\n')
+        result = subprocess.run(
+            [str(self.cmd_bin / "argvus"), "theme", "check", str(theme)],
+            env=self.env, capture_output=True, text=True, timeout=60)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_official_superfile_themes_use_the_complete_schema(self):
+        expected = None
+        for manifest in sorted((self.system / "themes").glob("*/theme.toml")):
+            theme = manifest.parent.name
+            with self.subTest(theme=theme):
+                output = self.base / "render" / theme
+                subprocess.run(
+                    [str(self.cmd_bin / "argvus"), "theme", "render", theme, "--output", str(output)],
+                    env=self.env, capture_output=True, text=True, timeout=60, check=True)
+                actual = set(tomllib.loads((output / "superfile/theme.toml").read_text()))
+                expected = expected or actual
                 self.assertEqual(actual, expected)
 
     def test_solitude_uses_its_packaged_wallpaper(self):
@@ -730,13 +870,13 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn("rounded=1", borders)
         self.assertIn("rounding=4", borders)
 
-        telemetry_theme = self.user / "waybar/themes/monokai-dark-float/widget-telemetry-theme.css"
+        telemetry_theme = self.current_build() / "widget-telemetry/theme.css"
         self.assertIn("@define-color th-window-bg-rgba rgba(45, 42, 46, 0.35);", telemetry_theme.read_text())
 
-        taskbar_theme = self.user / "waybar/themes/monokai-dark-float/theme.css"
+        taskbar_theme = self.current_build() / "taskbar/theme.css"
         taskbar_contents = taskbar_theme.read_text()
-        self.assertIn("@define-color th-background #2D2A2E;", taskbar_contents)
-        self.assertIn("@define-color th-background-rgba rgba(34, 31, 34, 0.92);", taskbar_contents)
+        self.assertRegex(taskbar_contents, r"@define-color th-background +#2D2A2E;")
+        self.assertRegex(taskbar_contents, r"@define-color th-background-rgba +rgba\(34, 31, 34, 0\.92\);")
         self.assertNotIn("@import", taskbar_contents)
 
         telemetry_css = self.user / "waybar/argvus-widget-telemetry.css"
@@ -771,7 +911,7 @@ class ThemeSwitchTests(unittest.TestCase):
 
     def is_light_theme(self, theme):
         """Drop-in packages declare their category; built-ins are listed."""
-        manifest = self.system / "appearance/themes.d" / theme.removesuffix("-float") / "theme.toml"
+        manifest = self.system / "themes" / theme.removesuffix("-float") / "theme.toml"
         if manifest.is_file():
             with manifest.open("rb") as handle:
                 return tomllib.load(handle).get("category") == "light"
@@ -818,22 +958,6 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn("#custom-removable-devices", css)
         self.assertNotIn("#custom-storage", css)
         self.assertIn(["argvus", "widget-telemetry-toggle", "blocks", "apply"], self.commands())
-
-    def test_partial_theme_directory_is_repaired_without_losing_edits(self):
-        theme = "argvus-dark"
-        css = self.user / f"waybar/themes/{theme}/theme.css"
-        css.parent.mkdir(parents=True)
-        css.write_text("/* preserved custom palette */\n")
-        self.apply(theme)
-        self.assertIn("preserved custom palette", css.read_text())
-        self.assertTrue((css.parent / "widget-telemetry-theme.css").is_file())
-
-    def test_optional_gtk_theme_uses_component_path(self):
-        custom = self.user / "gtk-4.0/themes/argvus-light/gtk.css"
-        custom.parent.mkdir(parents=True)
-        custom.write_text("/* custom GTK override */\n")
-        self.apply("argvus-light")
-        self.assertEqual((self.user / "gtk-4.0/gtk.css").read_text(), custom.read_text())
 
     def test_theme_switch_resets_spacing_to_mode_defaults(self):
         (self.user / ".spaces").write_text(
@@ -1116,7 +1240,14 @@ class ThemeSwitchTests(unittest.TestCase):
             env=self.env | {"ARGVUS_NO_RUNTIME": "0"},
             capture_output=True, text=True, check=True,
         )
-        self.assertIn(["hyprctl", "keyword", "general:border_size", "7"], self.commands())
+        border_evals = [
+            command[2] for command in self.commands()
+            if command[:2] == ["hyprctl", "eval"] and len(command) > 2
+            and "border_size" in command[2]
+        ]
+        self.assertTrue(border_evals, "borders-switch.sh sent no hyprctl eval")
+        self.assertIn("border_size = 7", border_evals[-1])
+        self.assertFalse(any(command[:2] == ["hyprctl", "keyword"] for command in self.commands()))
         self.assertEqual(before, (self.user / "waybar/argvus-taskbar.css").read_text())
         self.assertEqual(telemetry_before, (self.user / "waybar/argvus-widget-telemetry.css").read_text())
 

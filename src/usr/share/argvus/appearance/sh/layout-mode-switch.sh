@@ -44,88 +44,22 @@ THEME_FAMILY="$(sed -n '1p' "$ACTIVE_FILE" 2>/dev/null || true)"
 THEME_FAMILY="${THEME_FAMILY%-float}"
 [ -n "$THEME_FAMILY" ] || THEME_FAMILY="$DEFAULT_THEME"
 
-case "$VARIANT" in
-  float) THEME="${THEME_FAMILY}-float" ;;
-  *) THEME="$THEME_FAMILY" ;;
-esac
-
-# `.active-theme` is the legacy resolved-theme marker (with the `-float`
-# suffix) that the theme transaction also writes. Consumers that have not migrated
-# to reading `/layout/variant` directly, including the Control Center's
-# in-memory theme state, still key off this suffix to tell Sticky and Float
-# apart, so it must track the new mode even though the theme did not change.
-printf '%s' "$THEME" > "$ACTIVE_FILE"
-
-font_state_value() {
-  _key="$1"
-  _fallback="$2"
-  _fonts_file="${ARGVUS_CONFIG_HOME}/argvus/data/generated/fonts.conf"
-  if [ -f "$_fonts_file" ]; then
-    _value="$(sed -n "s|^${_key}=||p" "$_fonts_file" | head -n1)"
-    [ -n "$_value" ] && { printf '%s\n' "$_value"; return 0; }
-  fi
-  printf '%s\n' "$_fallback"
-}
-
-# A value goes into a sed replacement: escape the characters that are special there,
-# so a font family such as "Foo|Bar" or "A & B" cannot corrupt the file.
-sed_replacement() {
-  printf '%s' "$1" | sed -e 's/[\\&|]/\\&/g'
-}
-
-replace_or_append_setting() {
-  _file="$1"
-  _key="$2"
-  _value="$3"
-  [ -f "$_file" ] || return 0
-  if grep -q "^[[:space:]]*${_key}[[:space:]]*=" "$_file"; then
-    _escaped="$(sed_replacement "$_value")"
-    sed -i "s|^[[:space:]]*${_key}[[:space:]]*=.*|${_key} = ${_escaped}|" "$_file"
-  else
-    printf '\n%s = %s\n' "$_key" "$_value" >> "$_file"
-  fi
-}
-
-ARGVUS_SYSTEM_FAMILY="$(font_state_value system_family "$(font_state_value default_family "IBM Plex Mono")")"
-ARGVUS_SYSTEM_SIZE="$(font_state_value system_size "$(font_state_value default_size 13)")"
-
-# hyprtoolkit.conf/application-style.conf are the only theme-owned files that
-# differ between a theme's Sticky and Float directories: rounding only, never
-# color (see appearance/config/hypr/themes/<theme>/hyprtoolkit.conf). Reapply
-# them so HyprToolkit apps/Quickshell pick up the new mode's rounding without
-# touching anything color-related.
-HYPR_THEMES="$(paths_config appearance/config/hypr/themes)"
-if [ -f "${HYPR_THEMES}/${THEME}/hyprtoolkit.conf" ]; then
-  cp "${HYPR_THEMES}/${THEME}/hyprtoolkit.conf" "$(paths_config appearance/config/hypr/hyprtoolkit.conf)"
-  replace_or_append_setting "$(paths_config appearance/config/hypr/hyprtoolkit.conf)" font_family "\"$ARGVUS_SYSTEM_FAMILY\""
-  replace_or_append_setting "$(paths_config appearance/config/hypr/hyprtoolkit.conf)" font_size "$ARGVUS_SYSTEM_SIZE"
-fi
-if [ -f "${HYPR_THEMES}/${THEME}/application-style.conf" ]; then
-  cp "${HYPR_THEMES}/${THEME}/application-style.conf" "$(paths_config appearance/config/hypr/application-style.conf)"
-fi
-
-# Reset window/taskbar geometry and border rounding to the new mode's
-# defaults. Both scripts already derive their defaults from /layout/variant,
-# independent of the theme name (see spaces-switch.sh/borders-switch.sh).
-_spaces_script="$(paths_config hyprland/sh/spaces-switch.sh)"
-[ -f "$_spaces_script" ] && sh "$_spaces_script" --reset
-_borders_script="$(paths_config hyprland/sh/borders-switch.sh)"
-[ -f "$_borders_script" ] && sh "$_borders_script" --reset
-
-# Refresh every other mode-dependent consumer (generated Hyprland config,
-# Control Panel, etc.) through the established reload mechanism, the same one
-# the theme transaction relies on for its own final consistency pass.
-# Sticky and Float differ in more than hyprtoolkit: the taskbar, launcher, notifications,
-# lock, terminal, telemetry, control panel, TUI and btop files of a theme are written
-# per variant. Regenerate them for the current family through the theme transaction.
+# Sticky and Float differ in the geometry of every themed file, the Hyprland gaps,
+# borders and rounding, and the bar margins. The theme transaction renders the family
+# again for the new mode and applies it in place: it rewrites the per-mode files,
+# resets gaps and borders, reloads Hyprland and restarts only the two bars, whose
+# margins are layer-shell settings. No splash and no configuration-service reload.
 # Release this script's lock first (the transaction takes the same lock). The canonical
 # commit is skipped: /layout/variant is already set, and a commit would reset the custom
-# wallpaper. The services are still stopped and restarted by the transaction.
+# wallpaper. `.active-theme` is left to the transaction, which compares it with the
+# mode it applies to tell that the layout changed.
 exec 9>&-
-if command -v argvus >/dev/null 2>&1; then
-  ARGVUS_SKIP_CANONICAL=1 argvus theme-switch "$THEME_FAMILY" || true
+if command -v argvus >/dev/null 2>&1 && ARGVUS_SKIP_CANONICAL=1 argvus theme-switch "$THEME_FAMILY"; then
+  exit 0
 fi
 
-if [ "${ARGVUS_NO_RUNTIME:-0}" != 1 ] && command -v systemctl >/dev/null 2>&1; then
-  systemctl --user reload argvus-config.service >/dev/null 2>&1 || true
-fi
+# Without the transaction, keep the legacy resolved-theme marker on the new mode.
+case "$VARIANT" in
+  float) printf '%s' "${THEME_FAMILY}-float" > "$ACTIVE_FILE" ;;
+  *) printf '%s' "$THEME_FAMILY" > "$ACTIVE_FILE" ;;
+esac

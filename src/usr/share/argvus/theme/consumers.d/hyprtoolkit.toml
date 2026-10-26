@@ -1,0 +1,12 @@
+# Theme consumer: rendered into every theme build as hypr/hyprtoolkit.conf.
+id = "hyprtoolkit"
+template = "appearance/theme-template/hyprtoolkit.conf"
+output = "hypr/hyprtoolkit.conf"
+
+# Defaults for the tokens the template reads; a theme that defines one wins.
+[palette]
+danger = "#E06C75"
+toolkit_accent_secondary = "@accent | mix(@danger, 0.2)"
+toolkit_alternate_base = "@bg | mix(@fg, 0.1)"
+toolkit_background = "@bg"
+toolkit_base = "@bg | mix(@fg, 0.1)"

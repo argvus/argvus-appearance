@@ -229,20 +229,17 @@ apply_mode() {
   case "$_launcher_icon_path" in
     null) _launcher_icon_path='' ;;
   esac
-  # No custom icon: fall back to the active theme's own menu icon
-  # (/usr/share/argvus/svg/menu-<id>.svg, shipped by each argvus-theme-*
-  # package), or to argvus-branding's menu-default-dark.svg/menu-default-light.svg
-  # for the built-in ARGVUS Dark/ARGVUS Light themes (which have no manifest
-  # and thus no dedicated icon).
+  # No custom icon: the menu icon of the theme build, in the theme's accent, or
+  # argvus-branding's menu-default-dark.svg/menu-default-light.svg for the
+  # ARGVUS Dark/ARGVUS Light themes.
   if [ -z "$_launcher_icon_path" ]; then
     _active_theme="$(cat "${ARGVUS_CONFIG_HOME}/argvus/data/.active-theme" 2>/dev/null || true)"
     [ -n "$_active_theme" ] || _active_theme='argvus-dark'
-    _active_theme_family="${_active_theme%-float}"
-    case "$_active_theme_family" in
+    case "${_active_theme%-float}" in
       argvus-dark)  _launcher_icon_path='/usr/share/argvus/svg/menu-default-dark.svg' ;;
       argvus-light) _launcher_icon_path='/usr/share/argvus/svg/menu-default-light.svg' ;;
       *)
-        _launcher_icon_path="/usr/share/argvus/svg/menu-${_active_theme_family}.svg"
+        _launcher_icon_path="${ARGVUS_CONFIG_HOME}/argvus/data/generated/theme/current/taskbar/menu.svg"
         [ -f "$_launcher_icon_path" ] || _launcher_icon_path='/usr/share/argvus/svg/menu-default-dark.svg'
         ;;
     esac

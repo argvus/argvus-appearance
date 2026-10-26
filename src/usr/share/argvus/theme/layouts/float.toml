@@ -1,0 +1,20 @@
+# Float layout geometry, read by theme templates as layout.<name>.
+# rounded: 1 keeps the Float-only rules of the calendar and TUI stylesheets.
+appstyle_roundness = 2
+calendar_radius = 4
+hypr_gaps_in = 8
+hypr_gaps_out = 8
+hypr_rounding = 4
+hypr_rounding_power = 2
+lock_rounding_1 = 6
+lock_rounding_2 = 12
+panel_margin_bottom = 15
+panel_margin_right = 15
+panel_margin_top = 15
+panel_radius = 8
+panel_radius_pill = 18
+panel_radius_small = 4
+rounded = 1
+toolkit_rounding_large = 8
+toolkit_rounding_small = 4
+tui_radius = 4

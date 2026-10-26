@@ -1,0 +1,19 @@
+# Theme consumer: rendered into every theme build as hypr/theme.lua.
+id = "hyprland"
+template = "appearance/theme-template/theme.lua"
+output = "hypr/theme.lua"
+# It reads the build directly, so it reloads as soon as the build is active.
+reload_stage = "build"
+
+# Hyprland evaluates the colours of the active theme in place.
+[reload]
+kind = "command"
+argv = ["argvus", "config", "theme-runtime", "hyprland"]
+
+# Defaults for the tokens the template reads; a theme that defines one wins.
+[palette]
+hypr_border_active = "@accent"
+hypr_border_inactive = "@bg | mix(@fg, 0.2)"
+hypr_groupbar_inactive = "@bg | mix(@fg, 0.2)"
+hypr_shadow_color = "@fg | contrast | alpha(0.8)"
+hypr_shadow_color_inactive = "@bg | alpha(0.4)"

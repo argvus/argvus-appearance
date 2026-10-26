@@ -1,0 +1,25 @@
+# Theme consumer: rendered into every theme build as qt6ct/colors.conf.
+id = "qt6ct"
+template = "appearance/theme-template/qt6ct-colors.conf"
+output = "qt6ct/colors.conf"
+
+# Defaults for the tokens the template reads; a theme that defines one wins.
+[palette]
+danger = "#E06C75"
+qt_active_colors_1 = "@fg"
+qt_active_colors_11 = "@bg"
+qt_active_colors_12 = "@fg | contrast"
+qt_active_colors_15 = "@accent | mix(@fg, 0.2)"
+qt_active_colors_17 = "@bg | mix(@fg, 0.1)"
+qt_active_colors_18 = "@fg"
+qt_active_colors_19 = "@bg | mix(@fg, 0.1)"
+qt_active_colors_2 = "@bg | mix(@fg, 0.1)"
+qt_active_colors_21 = "@fg"
+qt_active_colors_4 = "@bg | mix(@fg, 0.2)"
+qt_active_colors_5 = "@bg | mix(@fg, 0.1)"
+qt_active_colors_6 = "@bg | mix(@fg, 0.1)"
+qt_disabled_colors_1 = "@accent | mix(@danger, 0.3)"
+qt_disabled_colors_15 = "@accent | mix(@fg, 0.2)"
+qt_disabled_colors_18 = "@accent | mix(@danger, 0.3)"
+qt_disabled_colors_20 = "@fg | mix(@bg, 0.2)"
+qt_disabled_colors_21 = "@fg | mix(@bg, 0.2) | alpha(0.5)"

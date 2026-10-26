@@ -1,0 +1,21 @@
+# Theme consumer: rendered into every theme build as tui/theme.css.
+id = "tui"
+template = "appearance/theme-template/tui.css"
+output = "tui/theme.css"
+
+# Defaults for the tokens the template reads; a theme that defines one wins.
+[palette]
+danger = "#E06C75"
+tui_accent = "@accent"
+tui_accent_alpha = "@accent | alpha(0.45)"
+tui_background = "@accent | alpha(0.16)"
+tui_bg = "@bg"
+tui_bg_alpha = "@bg"
+tui_border = "@accent | alpha(0.28)"
+tui_color = "@danger"
+tui_dim = "@fg | mix(@bg, 0.3) | alpha(0.34)"
+tui_fg = "@fg"
+tui_focus = "@accent | alpha(0.75)"
+tui_muted = "@fg | mix(@bg, 0.2)"
+tui_surface = "@bg | mix(@accent, 0.1)"
+tui_surface_alt = "@bg | mix(@fg, 0.1)"
