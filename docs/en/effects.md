@@ -3,7 +3,7 @@ title: Effects
 description: Configure animations, the global Hyprland blur and per-surface transparency.
 ---
 
-**Control Center → Hyprland** contains **Animations** and **Blur**. Transparency enable switches are per-surface settings in their respective Appearance pages.
+**Control Center → Hyprland** contains **Animations**, **Blur** and **Borders**, whose **Shadow** page controls the window shadow. Transparency enable switches are per-surface settings in their respective Appearance pages.
 
 Surface switches are independent. The Control Center Configuration page has its own Transparency value and Blur enable switch; its blur uses the global Blur values.
 
@@ -14,7 +14,7 @@ The Control Center is launched through Foot with a dedicated generated profile a
 There are two independent master switches, both applied to `hyprland.lua` through the canonical `/effects` settings:
 
 - **Animations** (`/effects/animations`) controls everything that moves: workspace, window, fade, border and layer animations.
-- **Effects** is a shortcut for blur (`/effects/blur_global_enabled`) and the transparency of Terminal, Launcher, Widget Telemetry, Control Panel and Taskbar (`/effects/transparency_<surface>_enabled`, which also drives the window shadows). Turning it on or off writes all of them (and the Control Center transparency too). Each surface keeps its own transparency page, so Effects reads as **on when at least one of them is on** and as off only when every one is off.
+- **Effects** is a shortcut for blur (`/effects/blur_global_enabled`) and the transparency of Terminal, Launcher, Widget Telemetry, Control Panel and Taskbar (`/effects/transparency_<surface>_enabled`). Turning it on or off writes all of them (and the Control Center transparency too). Each surface keeps its own transparency page, so Effects reads as **on when at least one of them is on** and as off only when every one is off.
 
 Use `argvus effects-toggle animations status|enable|disable|toggle` and `argvus effects-toggle effects status|enable|disable|toggle`. The Control Panel Appearance card shows one switch for each. Turning a master switch off keeps every fine setting of the **Animations** and **Blur** pages (speeds, curves, per-leaf switches, blur size and passes), so turning it on again restores the same look. `effects status` prints `enabled` when blur or at least one of those transparency surfaces is enabled. Turning a surface's transparency off makes the whole Waybar surface opaque: besides the background, the translucent borders of the taskbar and the Widget Telemetry become the solid color they show over the theme background. Every effect is enabled by default on a fresh install, including on virtual machines and low-power sessions; only an explicit setting turns one off.
 
@@ -99,6 +99,25 @@ Blur is one global Hyprland setting, shared by every surface that opts in. Open 
 Use `↑/↓` to move, `←/→` (or `+/-`) to change the selected value by its step, and `Enter` to type an exact value; values outside the range are refused. Nothing is written while you edit: the switch and the values stay in the draft until **[ Apply ]** at the bottom of the page is selected. Apply writes every changed value in one call, and reloads Hyprland after it. Leaving the page with an unapplied draft asks for confirmation.
 
 Values are passed to Hyprland as they are; ARGVUS does not derive them from a percentage. Changing one surface's switch does not change the values.
+
+## Shadow
+
+The window shadow is a global Hyprland setting, under **Control Center → Hyprland → Borders → Shadow**. It is independent of transparency and blur: it is off by default, and turning a surface's transparency on or off does not change it.
+
+| Row | Config key | Default | Range | `←/→` step |
+|---|---|---|---|---|
+| Enable | `effects.shadow_enabled` | `false` | — | — |
+| Sharp | `effects.shadow_sharp` | `false` | — | — |
+| Color | `effects.shadow_color` | empty (follows the accent) | empty or `RRGGBBAA` | — |
+| Range | `effects.shadow_range` | `6` | 0–100 | 1 |
+| Render power | `effects.shadow_render_power` | `6` | 1–10 | 1 |
+| Offset X | `effects.shadow_offset_x` | `0` | −100 to 100 | 1 |
+| Offset Y | `effects.shadow_offset_y` | `0` | −100 to 100 | 1 |
+| Scale | `effects.shadow_scale` | `1.00` | 0–1 | 0.05 |
+
+An empty color follows the accent of the active theme with alpha `99`, so the default blue accent gives `3590bd99`. Type eight hex digits (`RRGGBBAA`) to fix the color, or leave the prompt empty to follow the accent again. The color is read when the Hyprland configuration loads, so after a theme or accent change it takes the new accent on the next configuration reload.
+
+Like Blur, the page edits a draft: nothing is written until **[ Apply ]** is selected, and leaving the page with an unapplied draft asks for confirmation.
 
 ## Canonical state and compatibility files
 

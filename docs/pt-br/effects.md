@@ -3,7 +3,7 @@ title: Efeitos
 description: Configure animações, o blur global do Hyprland e a transparência por superfície.
 ---
 
-**Control Center → Hyprland** contém **Animações** e **Blur**. Os controles de ativação de Transparência ficam nas páginas de cada superfície.
+**Control Center → Hyprland** contém **Animações**, **Blur** e **Bordas**, cuja página **Sombra** controla a sombra das janelas. Os controles de ativação de Transparência ficam nas páginas de cada superfície.
 
 Os controles das superfícies são independentes. A página de Configuração da Central de Controle possui seu próprio valor de Transparência e controle de ativação do Blur; o blur usa os valores globais de Blur.
 
@@ -14,7 +14,7 @@ A Central de Controle é iniciada pelo Foot com um perfil dedicado gerado em `$X
 Existem duas chaves mestras independentes, ambas aplicadas ao `hyprland.lua` pelas configurações canônicas de `/effects`:
 
 - **Animações** (`/effects/animations`) controla tudo que se move: animações de workspace, janela, fade, borda e layers.
-- **Efeitos** é um atalho para o blur (`/effects/blur_global_enabled`) e a transparência de Terminal, Launcher, Widget Telemetry, Control Panel e Taskbar (`/effects/transparency_<superfície>_enabled`, que também comandam as sombras das janelas). Ligar ou desligar grava todas elas (e também a transparência do Control Center). Cada superfície mantém a sua própria página de transparência, então Efeitos aparece como **ativo quando pelo menos uma delas está ativa** e só como inativo quando todas estão desligadas.
+- **Efeitos** é um atalho para o blur (`/effects/blur_global_enabled`) e a transparência de Terminal, Launcher, Widget Telemetry, Control Panel e Taskbar (`/effects/transparency_<superfície>_enabled`). Ligar ou desligar grava todas elas (e também a transparência do Control Center). Cada superfície mantém a sua própria página de transparência, então Efeitos aparece como **ativo quando pelo menos uma delas está ativa** e só como inativo quando todas estão desligadas.
 
 Use `argvus effects-toggle animations status|enable|disable|toggle` e `argvus effects-toggle effects status|enable|disable|toggle`. O card de Aparência do Control Panel mostra um interruptor para cada. Desligar uma chave mestra preserva todos os ajustes finos das páginas **Animações** e **Blur** (velocidades, curvas, chaves por item, tamanho e passes do blur), então ligar de novo restaura o mesmo visual. `effects status` imprime `enabled` quando o blur ou pelo menos uma dessas superfícies de transparência está ativa. Desligar a transparência de uma superfície deixa toda a superfície do Waybar opaca: além do fundo, as bordas translúcidas da taskbar e do Widget Telemetry viram a cor sólida que apareceria sobre o fundo do tema. Todos os efeitos vêm ativados por padrão em uma instalação nova, inclusive em máquinas virtuais e sessões de baixo consumo; apenas uma configuração explícita desliga algum.
 
@@ -99,6 +99,25 @@ O Blur é uma única configuração global do Hyprland, compartilhada por toda s
 Use `↑/↓` para navegar, `←/→` (ou `+/-`) para alterar o valor selecionado pelo passo, e `Enter` para digitar um valor exato; valores fora da faixa são recusados. Nada é gravado durante a edição: o controle e os valores permanecem no rascunho até selecionar **[ Aplicar ]** no fim da página. Aplicar grava todos os valores alterados em uma única chamada e depois recarrega o Hyprland. Sair da página com um rascunho não aplicado pede confirmação.
 
 Os valores são enviados ao Hyprland como estão; o ARGVUS não os deriva mais de uma porcentagem. Alterar o controle de uma superfície não altera os valores.
+
+## Sombra
+
+A sombra das janelas é uma configuração global do Hyprland, em **Control Center → Hyprland → Bordas → Sombra**. Ela é independente da transparência e do blur: vem desligada por padrão, e ligar ou desligar a transparência de uma superfície não altera a sombra.
+
+| Linha | Chave de configuração | Padrão | Faixa | Passo `←/→` |
+|---|---|---|---|---|
+| Ativar | `effects.shadow_enabled` | `false` | — | — |
+| Nítida | `effects.shadow_sharp` | `false` | — | — |
+| Cor | `effects.shadow_color` | vazia (segue o destaque) | vazia ou `RRGGBBAA` | — |
+| Alcance | `effects.shadow_range` | `6` | 0–100 | 1 |
+| Potência de renderização | `effects.shadow_render_power` | `6` | 1–10 | 1 |
+| Deslocamento X | `effects.shadow_offset_x` | `0` | −100 a 100 | 1 |
+| Deslocamento Y | `effects.shadow_offset_y` | `0` | −100 a 100 | 1 |
+| Escala | `effects.shadow_scale` | `1.00` | 0–1 | 0,05 |
+
+Uma cor vazia segue o destaque do tema ativo com alfa `99`, então o destaque azul padrão resulta em `3590bd99`. Digite oito dígitos hexadecimais (`RRGGBBAA`) para fixar a cor, ou deixe o campo vazio para voltar a seguir o destaque. A cor é lida quando a configuração do Hyprland é carregada, então, após trocar o tema ou o destaque, ela passa a usar o novo destaque na próxima recarga da configuração.
+
+Como o Blur, a página edita um rascunho: nada é gravado até selecionar **[ Aplicar ]**, e sair da página com um rascunho não aplicado pede confirmação.
 
 ## Estado canônico e arquivos de compatibilidade
 
