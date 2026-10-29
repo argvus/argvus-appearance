@@ -18,7 +18,10 @@ config_bool() {
   if command -v argvus >/dev/null 2>&1; then
     _value="$(argvus config get "$_pointer" --effective --raw 2>/dev/null || true)"
     case "$_value" in
-      true|false) printf '%s\n' "$_value"; return 0 ;;
+    true | false)
+      printf '%s\n' "$_value"
+      return 0
+      ;;
     esac
   fi
   printf '%s\n' "$_default"
@@ -29,7 +32,10 @@ config_str() {
   _default="$2"
   if command -v argvus >/dev/null 2>&1; then
     _value="$(argvus config get "$_pointer" --effective --raw 2>/dev/null || true)"
-    [ -n "$_value" ] && { printf '%s\n' "$_value"; return 0; }
+    [ -n "$_value" ] && {
+      printf '%s\n' "$_value"
+      return 0
+    }
   fi
   printf '%s\n' "$_default"
 }
@@ -66,7 +72,7 @@ replace_group_modules() {
       }
       print
     }
-  ' "$_file" > "${_file}.tmp" && mv "${_file}.tmp" "$_file"
+  ' "$_file" >"${_file}.tmp" && mv "${_file}.tmp" "$_file"
 }
 
 # Extracts the raw JSON array text of "modules": [...] from the block
@@ -132,7 +138,7 @@ replace_field_array() {
       }
       print
     }
-  ' "$_file" > "${_file}.tmp" && mv "${_file}.tmp" "$_file"
+  ' "$_file" >"${_file}.tmp" && mv "${_file}.tmp" "$_file"
 }
 
 # Inserts $2 (one or more literal lines, already newline-joined) immediately
@@ -153,7 +159,7 @@ insert_block_before() {
       }
       print
     }
-  ' "$_file" > "${_file}.tmp" && mv "${_file}.tmp" "$_file"
+  ' "$_file" >"${_file}.tmp" && mv "${_file}.tmp" "$_file"
 }
 
 # Replaces the first line matching $2 (a JSON field, e.g. '"format":') found
@@ -174,7 +180,7 @@ replace_in_block() {
       }
       print
     }
-  ' "$_file" > "${_file}.tmp" && mv "${_file}.tmp" "$_file"
+  ' "$_file" >"${_file}.tmp" && mv "${_file}.tmp" "$_file"
 }
 
 apply_mode() {
@@ -208,8 +214,15 @@ apply_mode() {
     "on-click": "argvus launcher"
   },' "$_target_config"
   fi
+  if ! grep -q '"group/focus":' "$_target_config"; then
+    insert_block_before '"group/right-2":' '  "group/focus": {
+    "orientation": "inherit",
+    "modules": ["custom/focus"]
+  },' "$_target_config"
+  fi
 
   _audio_player_enabled="$(config_bool /taskbar/icons/audio_player_enabled true)"
+  _focus_enabled="$(config_bool /taskbar/icons/focus_enabled true)"
   _launcher_enabled="$(config_bool /taskbar/icons/launcher_enabled false)"
   _network_enabled="$(config_bool /taskbar/icons/network_enabled true)"
   _power_profile_enabled="$(config_bool /taskbar/icons/power_profile_enabled true)"
@@ -227,7 +240,7 @@ apply_mode() {
   # unlike config_bool's "true"/"false" case match — so the unset default
   # must be caught here too, or it would be written verbatim as the path.
   case "$_launcher_icon_path" in
-    null) _launcher_icon_path='' ;;
+  null) _launcher_icon_path='' ;;
   esac
   # No custom icon: the menu icon of the theme build, in the theme's accent, or
   # argvus-branding's menu-default-dark.svg/menu-default-light.svg for the
@@ -236,12 +249,12 @@ apply_mode() {
     _active_theme="$(cat "${ARGVUS_CONFIG_HOME}/argvus/data/.active-theme" 2>/dev/null || true)"
     [ -n "$_active_theme" ] || _active_theme='argvus-dark'
     case "${_active_theme%-float}" in
-      argvus-dark)  _launcher_icon_path='/usr/share/argvus/svg/menu-default-dark.svg' ;;
-      argvus-light) _launcher_icon_path='/usr/share/argvus/svg/menu-default-light.svg' ;;
-      *)
-        _launcher_icon_path="${ARGVUS_CONFIG_HOME}/argvus/data/generated/theme/current/taskbar/menu.svg"
-        [ -f "$_launcher_icon_path" ] || _launcher_icon_path='/usr/share/argvus/svg/menu-default-dark.svg'
-        ;;
+    argvus-dark) _launcher_icon_path='/usr/share/argvus/svg/menu-default-dark.svg' ;;
+    argvus-light) _launcher_icon_path='/usr/share/argvus/svg/menu-default-light.svg' ;;
+    *)
+      _launcher_icon_path="${ARGVUS_CONFIG_HOME}/argvus/data/generated/theme/current/taskbar/menu.svg"
+      [ -f "$_launcher_icon_path" ] || _launcher_icon_path='/usr/share/argvus/svg/menu-default-dark.svg'
+      ;;
     esac
   fi
 
@@ -282,6 +295,15 @@ apply_mode() {
   ')"
   replace_group_modules '"group/right-1":' "$_right1_filtered" "$_target_config"
 
+  _focus_canonical="$(extract_group_modules '"group/focus":' "$_system_config")"
+  [ -n "$_focus_canonical" ] || _focus_canonical='["custom/focus"]'
+  if [ "$_focus_enabled" = true ]; then
+    _focus_filtered="$_focus_canonical"
+  else
+    _focus_filtered='[]'
+  fi
+  replace_group_modules '"group/focus":' "$_focus_filtered" "$_target_config"
+
   # A group whose "modules" array ended up empty still renders as a visible
   # empty box in Waybar unless its own key is also dropped from the
   # modules-left/modules-right array that references it. Always recompute
@@ -293,6 +315,8 @@ apply_mode() {
   [ "$_left2_modules" = '[]' ] || _left2_present=true
   _right1_present=false
   [ "$_right1_filtered" = '[]' ] || _right1_present=true
+  _focus_present=false
+  [ "$_focus_filtered" = '[]' ] || _focus_present=true
 
   _modules_left_canonical="$(extract_field_array '"modules-left":' "$_system_config")"
   _modules_left_filtered="$(printf '%s' "$_modules_left_canonical" | jq -c \
@@ -307,8 +331,10 @@ apply_mode() {
 
   _modules_right_canonical="$(extract_field_array '"modules-right":' "$_system_config")"
   _modules_right_filtered="$(printf '%s' "$_modules_right_canonical" | jq -c \
-    --argjson icons "$_right1_present" '
+    --argjson icons "$_right1_present" \
+    --argjson focus "$_focus_present" '
     map(select(. != "group/right-1" or $icons))
+    | map(select(. != "group/focus" or $focus))
   ')"
   replace_field_array '"modules-right":' "$_modules_right_filtered" "$_target_config"
 
@@ -327,11 +353,26 @@ apply_mode() {
     "$_target_config"
 
   case "${_time_format}:${_time_seconds_enabled}" in
-    24h:false) _clock_strftime='%H:%M' ;   _clock_interval=60 ;;
-    24h:true)  _clock_strftime='%H:%M:%S' ; _clock_interval=1 ;;
-    12h:false) _clock_strftime='%I:%M %p' ; _clock_interval=60 ;;
-    12h:true)  _clock_strftime='%I:%M:%S %p' ; _clock_interval=1 ;;
-    *)         _clock_strftime='%H:%M' ;   _clock_interval=60 ;;
+  24h:false)
+    _clock_strftime='%H:%M'
+    _clock_interval=60
+    ;;
+  24h:true)
+    _clock_strftime='%H:%M:%S'
+    _clock_interval=1
+    ;;
+  12h:false)
+    _clock_strftime='%I:%M %p'
+    _clock_interval=60
+    ;;
+  12h:true)
+    _clock_strftime='%I:%M:%S %p'
+    _clock_interval=1
+    ;;
+  *)
+    _clock_strftime='%H:%M'
+    _clock_interval=60
+    ;;
   esac
   replace_in_block '"clock#time":' '"format":' \
     "    \"format\": \"<span font_family='Symbols Nerd Font Mono'>󰅐</span> {:L${_clock_strftime}}\"," \
@@ -353,14 +394,14 @@ status() {
 }
 
 case "${1:-status}" in
-  status)
-    status
-    ;;
-  apply)
-    apply_mode
-    ;;
-  *)
-    printf '%s\n' "usage: $0 {status|apply}" >&2
-    exit 2
-    ;;
+status)
+  status
+  ;;
+apply)
+  apply_mode
+  ;;
+*)
+  printf '%s\n' "usage: $0 {status|apply}" >&2
+  exit 2
+  ;;
 esac
