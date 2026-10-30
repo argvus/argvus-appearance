@@ -970,12 +970,13 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn('"position": "top"', bar)
         for edge in ("top", "left", "right"):
             self.assertIn(f'"margin-{edge}": 0', bar)
-        self.assertIn('"margin-bottom": 0', bar)
+        self.assertIn('"margin-bottom": 2', bar)
         spaces_status = subprocess.run(
             ["sh", str(self.system / "hyprland/sh/spaces-switch.sh"), "--status"],
             env=self.env, capture_output=True, text=True, check=True,
         ).stdout
         self.assertIn("gaps_in=2", spaces_status)
+        self.assertIn("waybar_bottom=2", spaces_status)
         for edge in ("top", "left", "right", "bottom"):
             self.assertIn(f"gaps_out_{edge}=0", spaces_status)
 
