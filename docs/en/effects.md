@@ -138,3 +138,7 @@ Disabling a surface's Transparency or Blur switch affects only that surface; sav
 Theme export/import includes the active theme's transparency and blur values, together with the existing effect states. Inactive themes are not included in the profile. Generated Waybar, Quickshell and Hyprland runtime files are regenerated when the profile is applied.
 
 All surface pages apply their drafts together with the `[ Apply ]` button. Control Center writes the canonical document through the effects helper, lets `argvus-config` project the effects tree, reloads affected consumers and reads the effective value back. Theme export/import includes the canonical appearance/effects scope; generated files are recreated rather than imported as authoritative state.
+
+## Night Light
+
+**SUPER + Shift + B** keeps the brightness selector and adds a separate Night Light toggle with effective state/temperature. It calls `argvus config display night-light status|toggle`. Night Light requires Hyprland and a responding Hyprsunset >= 0.4.0, independently of brightness support. The range is 1000–20000 K; configuration is under **Desktop & Input > Displays > Night Light** in Control Center. A toggle is persistent without scheduling, or a volatile override until the next transition with scheduling. Cancelling the menu changes nothing.

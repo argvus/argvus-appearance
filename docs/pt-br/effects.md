@@ -138,3 +138,7 @@ Desativar Transparência ou Blur em uma superfície afeta somente aquela superf�
 A exportação/importação de temas inclui os valores de transparência e blur do tema ativo, junto com os estados de efeitos existentes. Temas inativos não são incluídos no perfil. Os arquivos gerados do Waybar, Quickshell e Hyprland são recriados quando o perfil é aplicado.
 
 As páginas de superfície aplicam o rascunho com o botão `[ Aplicar ]`. O Control Center grava o documento canônico pelo helper de efeitos, deixa o `argvus-config` projetar a árvore de efeitos, recarrega os consumidores afetados e lê novamente o valor efetivo. A exportação/importação inclui o escopo canônico de aparência/efeitos; arquivos gerados são recriados, não importados como fonte de verdade.
+
+## Luz noturna
+
+**SUPER + Shift + B** preserva o seletor de brilho e acrescenta uma ação separada de luz noturna com estado/temperatura efetiva. Usa `argvus config display night-light status|toggle`. Requer Hyprland e Hyprsunset >= 0.4.0 respondendo, independentemente do suporte a brilho. O intervalo é 1000–20000 K; a configuração fica em **Área de trabalho e entrada > Monitores > Luz noturna** na Central de Controle. O toggle é persistente sem programação, ou uma sobreposição volátil até a próxima transição com programação. Cancelar o menu não altera nada.

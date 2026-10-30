@@ -2,7 +2,7 @@
 # Control display brightness via brightnessctl (laptop backlight) or
 # ddcutil (desktop monitors with DDC/CI), with a rofi menu.
 # Usage: brightness-switch.sh [--status|--get|--up|--down|--set <percent>|--menu|PERCENT]
-# shellcheck disable=SC1091
+# shellcheck disable=SC1090,SC1091
 
 set -u
 
@@ -101,33 +101,50 @@ select_menu() {
   _inc="$(argvus_tr appearance brightness.increase)"
   _dec="$(argvus_tr appearance brightness.decrease)"
 
+  _night_row=""
+  if _night_status=$(argvus config display night-light status 2>/dev/null) &&
+      printf '%s' "$_night_status" | jq -e '.available == true' >/dev/null 2>&1; then
+    if printf '%s' "$_night_status" | jq -e '.active == true' >/dev/null 2>&1; then
+      _temperature=$(printf '%s' "$_night_status" | jq -r '.effective_temperature')
+      _night_row="11 - $(argvus_tr appearance brightness.night_light_on "temperature=$_temperature")"
+    else
+      _night_row="11 - $(argvus_tr appearance brightness.night_light_off)"
+    fi
+  fi
+  if [ "$BACKEND" = "none" ] && [ -z "$_night_row" ]; then
+    notify_error "$(argvus_tr appearance brightness.title_short)" "$(argvus_tr appearance brightness.unavailable)"
+    return 1
+  fi
   _selection=$(
-    rofi -config "$(paths_config launcher/config/config.rasi)" -dmenu -p "$_prompt" -i -theme-str 'listview {lines: 10;}' <<EOF
-01 - $_inc +10%
-02 - $_inc +5%
-03 - $_dec -5%
-04 - $_dec -10%
-05 - 10%
-06 - 25%
-07 - 50%
-08 - 75%
-09 - 90%
-10 - 100%
-EOF
+    {
+      if [ "$BACKEND" != "none" ]; then
+        printf '%s\n' "01 - $_inc +10%" "02 - $_inc +5%" "03 - $_dec -5%" "04 - $_dec -10%" \
+          "05 - 10%" "06 - 25%" "07 - 50%" "08 - 75%" "09 - 90%" "10 - 100%"
+      fi
+      if [ -n "$_night_row" ]; then printf '%s\n' "$_night_row"; fi
+    } | rofi -config "$(paths_config launcher/config/config.rasi)" -dmenu -p "$_prompt" -i -theme-str 'listview {lines: 11;}'
   )
   [ -z "$_selection" ] && return 1
 
-  case "$_selection" in
-    "01 - $_inc +10%") apply "+10%" ;;
-    "02 - $_inc +5%")  apply "+5%" ;;
-    "03 - $_dec -5%")  apply "5%-" ;;
-    "04 - $_dec -10%") apply "10%-" ;;
-    *" 10%")  apply "10%" ;;
-    *" 25%")  apply "25%" ;;
-    *" 50%")  apply "50%" ;;
-    *" 75%")  apply "75%" ;;
-    *" 90%")  apply "90%" ;;
-    *" 100%") apply "100%" ;;
+  # Numeric action IDs stay stable across translations.
+  case "${_selection%% *}" in
+    01) apply "+10%" ;;
+    02) apply "+5%" ;;
+    03) apply "5%-" ;;
+    04) apply "10%-" ;;
+    05) apply "10%" ;;
+    06) apply "25%" ;;
+    07) apply "50%" ;;
+    08) apply "75%" ;;
+    09) apply "90%" ;;
+    10) apply "100%" ;;
+    11)
+      [ -n "$_night_row" ] || return 1
+      if ! argvus config display night-light toggle; then
+        notify_error "$(argvus_tr appearance brightness.title_short)" "$(argvus_tr appearance brightness.night_light_failed)"
+        return 1
+      fi
+      ;;
     *) argvus_tr appearance brightness.invalid >&2; return 1 ;;
   esac
 }
@@ -141,14 +158,8 @@ case "${1:-}" in
   --down)   apply "5%-" ;;
   --set)    [ -n "${2:-}" ] || { argvus_tr appearance brightness.missing_percent >&2; exit 1; }
             apply "$2" ;;
-  --menu|"")
-    [ "$BACKEND" = "none" ] && {
-      notify_error "$(argvus_tr appearance brightness.title_short)" \
-        "$(argvus_tr appearance brightness.unavailable)"
-      exit 1
-    }
-    select_menu
-  ;;
+  --menu|"") select_menu ;;
+
   *)
     case "$1" in
       +*|*%-|*%) apply "$1" ;;
