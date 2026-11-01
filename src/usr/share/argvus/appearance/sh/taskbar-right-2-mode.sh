@@ -23,40 +23,10 @@ mode() {
 }
 
 apply_mode() {
-  _taskbar_config="$(paths_config taskbar/config/argvus-taskbar.jsonc)"
-  [ -f "$_taskbar_config" ] || {
-    printf '%s\n' "missing taskbar configuration: $_taskbar_config" >&2
-    return 1
-  }
+  # The widgets projector owns drawer and module generation together.
+  # Repeated mode changes must not accumulate comment prefixes.
+  "$(dirname -- "$0")/taskbar-widgets-mode.sh" apply
 
-  case "$(mode)" in
-    auto)
-      sed -i '/ARGVUS_RIGHT_2_AUTO_BEGIN/,/ARGVUS_RIGHT_2_AUTO_END/{
-        /ARGVUS_RIGHT_2_AUTO_BEGIN/b
-        /ARGVUS_RIGHT_2_AUTO_END/b
-        s|^//||
-      }' "$_taskbar_config"
-      sed -i 's|^//\([[:space:]]*"custom/right-2-expander",\)$|\1|' "$_taskbar_config"
-      sed -i '/ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_BEGIN/,/ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_END/{
-        /ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_BEGIN/b
-        /ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_END/b
-        s|^\([[:space:]]*\)"on-click":.*$|\1"on-click": "argvus removable-devices menu"|
-      }' "$_taskbar_config"
-      ;;
-    always-expanded)
-      sed -i '/ARGVUS_RIGHT_2_AUTO_BEGIN/,/ARGVUS_RIGHT_2_AUTO_END/{
-        /ARGVUS_RIGHT_2_AUTO_BEGIN/b
-        /ARGVUS_RIGHT_2_AUTO_END/b
-        s|^|//|
-      }' "$_taskbar_config"
-      sed -i 's|^\([[:space:]]*"custom/right-2-expander",\)$|//\1|' "$_taskbar_config"
-      sed -i '/ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_BEGIN/,/ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_END/{
-        /ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_BEGIN/b
-        /ARGVUS_RIGHT_2_REMOVABLE_DEVICES_CLICK_END/b
-        s|^\([[:space:]]*\)"on-click":.*$|\1"on-click": "/usr/share/argvus/removable-devices/sh/removable-devices-menu.sh --root {x} {y}"|
-      }' "$_taskbar_config"
-      ;;
-  esac
 }
 
 case "${1:-status}" in

@@ -183,6 +183,43 @@ replace_in_block() {
   ' "$_file" >"${_file}.tmp" && mv "${_file}.tmp" "$_file"
 }
 
+insert_in_block_before() {
+  _block_key="$1"
+  _field_match="$2"
+  _lines="$3"
+  _file="$4"
+  awk -v block="$_block_key" -v field="$_field_match" -v lines="$_lines" '
+    BEGIN { in_block = 0; done = 0 }
+    {
+      if (index($0, block) > 0) in_block = 1
+      if (in_block && !done && index($0, field) > 0) {
+        print lines
+        done = 1
+      }
+      print
+      if (in_block && $0 ~ /^  },?$/) in_block = 0
+    }
+  ' "$_file" >"${_file}.tmp" && mv "${_file}.tmp" "$_file"
+}
+
+project_right2_modules() {
+  _file="$1"
+  shift
+  _modules='[]'
+  for _module in custom/notifications custom/removable-devices custom/recording custom/bluetooth pulseaudio#input pulseaudio#output custom/keep-awake; do
+    if [ "$1" = true ]; then
+      _modules="$(printf '%s' "$_modules" | jq -c --arg module "$_module" '. + [$module]')"
+    fi
+    shift
+  done
+  _expanded="$(config_bool /taskbar/icons/utilities/expanded true)"
+  if [ "$_expanded" = false ] && [ "$_modules" != '[]' ]; then
+    _modules="$(printf '%s' "$_modules" | jq -c '["custom/right-2-expander"] + .')"
+  fi
+  replace_group_modules '"group/right-2":' "$_modules" "$_file"
+
+}
+
 apply_mode() {
   _system_config="$(paths_system_config taskbar/config/argvus-taskbar.jsonc)"
   _target_config="$(paths_config taskbar/config/argvus-taskbar.jsonc)"
@@ -194,6 +231,12 @@ apply_mode() {
     printf '%s\n' "missing taskbar configuration: $_target_config" >&2
     return 1
   }
+
+  _destination_config="$_target_config"
+  mkdir -p /tmp/argvus
+  _target_config="$(mktemp /tmp/argvus/taskbar-config.XXXXXX)"
+  trap 'rm -f "$_target_config" "${_target_config}.tmp"' EXIT HUP INT TERM
+  cp "$_destination_config" "$_target_config"
 
   # Upgrade path: a per-user config generated before this feature shipped
   # has no "group/left0"/"image#argvus-logo" blocks at all — the
@@ -231,6 +274,18 @@ apply_mode() {
   _cpu_enabled="$(config_bool /taskbar/icons/cpu_enabled true)"
   _cpu_temperature_enabled="$(config_bool /taskbar/icons/cpu_temperature_enabled true)"
   _gpu_temperature_enabled="$(config_bool /taskbar/icons/gpu_temperature_enabled true)"
+  _date_enabled="$(config_bool /taskbar/icons/date_enabled true)"
+  _clock_enabled="$(config_bool /taskbar/icons/clock_enabled true)"
+  _battery_enabled="$(config_bool /taskbar/icons/battery_enabled true)"
+  _tray_enabled="$(config_bool /taskbar/icons/tray_enabled true)"
+  _notifications_enabled="$(config_bool /taskbar/icons/notifications_enabled true)"
+  _removable_devices_enabled="$(config_bool /taskbar/icons/removable_devices_enabled true)"
+  _recording_enabled="$(config_bool /taskbar/icons/recording_enabled true)"
+  _bluetooth_enabled="$(config_bool /taskbar/icons/bluetooth_enabled true)"
+  _audio_input_enabled="$(config_bool /taskbar/icons/audio_input_enabled true)"
+  _audio_output_enabled="$(config_bool /taskbar/icons/audio_output_enabled true)"
+  _keep_awake_enabled="$(config_bool /taskbar/icons/keep_awake_enabled true)"
+  _workspace_presentation="$(config_str /taskbar/workspaces/presentation labels)"
   _date_format="$(config_str /taskbar/date/format weekday_day_month)"
   _time_seconds_enabled="$(config_bool /taskbar/time/seconds_enabled false)"
   _time_format="$(config_str /taskbar/time/format 24h)"
@@ -281,7 +336,8 @@ apply_mode() {
     --argjson memory "$_memory_enabled" \
     --argjson cpu "$_cpu_enabled" \
     --argjson cpu_temp "$_cpu_temperature_enabled" \
-    --argjson gpu_temp "$_gpu_temperature_enabled" '
+    --argjson gpu_temp "$_gpu_temperature_enabled" \
+    --argjson battery "$_battery_enabled" '
     map(select(
       (. == "custom/network" and $network) or
       (. == "power-profiles-daemon" and $power_profile) or
@@ -290,10 +346,55 @@ apply_mode() {
       (. == "cpu" and $cpu) or
       (. == "custom/cpu-temp" and $cpu_temp) or
       (. == "custom/gpu-temp" and $gpu_temp) or
-      (. == "battery")
+      (. == "battery" and $battery)
     ))
   ')"
   replace_group_modules '"group/right-1":' "$_right1_filtered" "$_target_config"
+
+  _right0_canonical="$(extract_group_modules '"group/right-0":' "$_system_config")"
+  [ -n "$_right0_canonical" ] || _right0_canonical='[]'
+  _right0_filtered="$(printf '%s' "$_right0_canonical" | jq -c \
+    --argjson date "$_date_enabled" --argjson clock "$_clock_enabled" '
+    map(select((. == "custom/date" and $date) or (. == "clock#time" and $clock)))
+  ')"
+  replace_group_modules '"group/right-0":' "$_right0_filtered" "$_target_config"
+  project_right2_modules "$_target_config" \
+    "$_notifications_enabled" "$_removable_devices_enabled" \
+    "$_recording_enabled" "$_bluetooth_enabled" "$_audio_input_enabled" \
+    "$_audio_output_enabled" "$_keep_awake_enabled"
+
+  if ! awk '/"hyprland\/workspaces":/{found=1} found && /"workspace-taskbar":/{ok=1} found && /^  },?$/ {found=0} END{exit !ok}' "$_target_config"; then
+    insert_in_block_before '"hyprland/workspaces":' '"format":' \
+      '    "workspace-taskbar": {
+      "enable": false,
+      "update-active-window": false,
+      "icon-size": 16
+    },' \
+      "$_target_config"
+  fi
+  _expanded="$(config_bool /taskbar/icons/utilities/expanded true)"
+  awk -v expanded="$_expanded" '
+    /ARGVUS_RIGHT_2_AUTO_BEGIN/ {
+      print
+      if (expanded == "false") {
+        print "    \"drawer\": {\"transition-duration\": 240, \"children-class\": \"right-2-drawer-item\", \"reveal-delay\": 80, \"start-expanded\": false, \"click-to-reveal\": false},"
+      }
+      skip=1; next
+    }
+    /ARGVUS_RIGHT_2_AUTO_END/ {skip=0}
+    !skip {print}
+  ' "$_target_config" >"${_target_config}.tmp" && mv "${_target_config}.tmp" "$_target_config"
+
+  _workspace_taskbar_enabled=false
+  [ "$_workspace_presentation" = app-icons ] && _workspace_taskbar_enabled=true
+  replace_in_block '"hyprland/workspaces":' '"enable":' \
+    "      \"enable\": $_workspace_taskbar_enabled," \
+    "$_target_config"
+
+  _workspace_format='{name}'
+  [ "$_workspace_taskbar_enabled" = false ] || _workspace_format='{name} {windows}'
+  replace_in_block '"hyprland/workspaces":' '"format":' \
+    "    \"format\": \"${_workspace_format}\"," "$_target_config"
 
   _focus_canonical="$(extract_group_modules '"group/focus":' "$_system_config")"
   [ -n "$_focus_canonical" ] || _focus_canonical='["custom/focus"]'
@@ -317,6 +418,15 @@ apply_mode() {
   [ "$_right1_filtered" = '[]' ] || _right1_present=true
   _focus_present=false
   [ "$_focus_filtered" = '[]' ] || _focus_present=true
+  _right0_present=false
+  [ "$_right0_filtered" = '[]' ] || _right0_present=true
+  _right2_present=false
+  if [ "$_notifications_enabled" = true ] || [ "$_removable_devices_enabled" = true ] \
+    || [ "$_recording_enabled" = true ] || [ "$_bluetooth_enabled" = true ] \
+    || [ "$_audio_input_enabled" = true ] || [ "$_audio_output_enabled" = true ] \
+    || [ "$_keep_awake_enabled" = true ]; then
+    _right2_present=true
+  fi
 
   _modules_left_canonical="$(extract_field_array '"modules-left":' "$_system_config")"
   _modules_left_filtered="$(printf '%s' "$_modules_left_canonical" | jq -c \
@@ -335,6 +445,13 @@ apply_mode() {
     --argjson focus "$_focus_present" '
     map(select(. != "group/right-1" or $icons))
     | map(select(. != "group/focus" or $focus))
+  ')"
+  _modules_right_filtered="$(printf '%s' "$_modules_right_filtered" | jq -c \
+    --argjson tray "$_tray_enabled" --argjson right2 "$_right2_present" \
+    --argjson right0 "$_right0_present" '
+    map(select((. != "tray" or $tray)
+      and (. != "group/right-2" or $right2)
+      and (. != "group/right-0" or $right0)))
   ')"
   replace_field_array '"modules-right":' "$_modules_right_filtered" "$_target_config"
 
@@ -383,6 +500,9 @@ apply_mode() {
   replace_in_block '"clock#time":' '"interval":' \
     "    \"interval\": ${_clock_interval}" \
     "$_target_config"
+  # Validate before publishing: generated JSONC uses whole-line comments.
+  sed '/^[[:space:]]*\/\//d' "$_target_config" | jq -e . >/dev/null
+  cat "$_target_config" >"$_destination_config"
 }
 
 status() {

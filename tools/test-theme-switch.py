@@ -211,7 +211,9 @@ class ThemeSwitchTests(unittest.TestCase):
                 with self.subTest(theme=theme):
                     self.apply(theme)
                     margin = 18 if theme.endswith("-float") else 0
-                    bottom_margin = 18 if theme.endswith("-float") else 0
+                    # Sticky reserves the taskbar's two-pixel bottom gap;
+                    # Float uses the eighteen-pixel baseline.
+                    bottom_margin = 18 if theme.endswith("-float") else 2
                     bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
                     for edge in ("top", "left", "right"):
                         self.assertIn(f'"margin-{edge}": {margin}', bar)
@@ -958,6 +960,57 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn("#custom-removable-devices", css)
         self.assertNotIn("#custom-storage", css)
         self.assertIn(["argvus", "widget-telemetry-toggle", "blocks", "apply"], self.commands())
+
+    def test_taskbar_module_preferences_project_without_losing_drawer_markers(self):
+        self.apply("argvus-dark")
+        taskbar_path = self.user / "waybar/argvus-taskbar.jsonc"
+        old_taskbar = taskbar_path.read_text()
+        old_taskbar = re.sub(
+            r'    "workspace-taskbar": \{\n.*?\n    \},\n',
+            "", old_taskbar, count=1, flags=re.S,
+        )
+        taskbar_path.write_text(old_taskbar)
+        modules = (
+            "audio_player", "focus", "launcher", "network", "power_profile",
+            "keyboard_layout", "memory", "cpu", "cpu_temperature", "gpu_temperature",
+            "date", "clock", "battery", "tray", "notifications", "removable_devices",
+            "recording", "bluetooth", "audio_input", "audio_output", "keep_awake",
+        )
+        disabled = {f"/taskbar/icons/{module}_enabled": False for module in modules}
+        disabled["/taskbar/workspaces/presentation"] = "app-icons"
+        subprocess.run(
+            [str(self.cmd_bin / "argvus"), "config", "patch", "-"],
+            env=self.env | {"ARGVUS_NO_RUNTIME": "1"},
+            input=json.dumps(disabled), capture_output=True, text=True, check=True,
+        )
+        subprocess.run(
+            ["sh", str(self.system / "appearance/sh/taskbar-widgets-mode.sh"), "apply"],
+            env=self.env | {"ARGVUS_NO_RUNTIME": "1"}, capture_output=True,
+            text=True, check=True,
+        )
+        taskbar = taskbar_path.read_text()
+        self.assertIn('"enable": true', taskbar)
+        generated = json.loads(re.sub(r"(?m)^\s*//.*$", "", taskbar))
+        self.assertEqual(generated["group/right-2"]["modules"], [])
+        self.assertEqual(generated["hyprland/workspaces"]["format"], "{name} {windows}")
+        self.assertIn("ARGVUS_RIGHT_2_AUTO_BEGIN", taskbar)
+        self.assertNotIn('"tray",', taskbar.split('"modules-right":', 1)[1].split('],', 1)[0])
+
+        enabled = {f"/taskbar/icons/{module}_enabled": True for module in modules}
+        subprocess.run(
+            [str(self.cmd_bin / "argvus"), "config", "patch", "-"],
+            env=self.env | {"ARGVUS_NO_RUNTIME": "1"},
+            input=json.dumps(enabled), capture_output=True, text=True, check=True,
+        )
+        subprocess.run(
+            ["sh", str(self.system / "appearance/sh/taskbar-widgets-mode.sh"), "apply"],
+            env=self.env | {"ARGVUS_NO_RUNTIME": "1"}, capture_output=True,
+            text=True, check=True,
+        )
+        restored = taskbar_path.read_text()
+        self.assertIn('"custom/notifications",', restored)
+        self.assertIn('"group/right-2"', restored)
+        self.assertIn("ARGVUS_RIGHT_2_AUTO_BEGIN", restored)
 
     def test_theme_switch_resets_spacing_to_mode_defaults(self):
         (self.user / ".spaces").write_text(
