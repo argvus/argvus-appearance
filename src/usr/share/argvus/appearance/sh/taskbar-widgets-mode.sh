@@ -206,6 +206,11 @@ project_right2_modules() {
   _file="$1"
   shift
   _modules='[]'
+  # Optional integrations own their runtime availability checks. Preserve the
+  # AI module whenever the taskbar template defines it, including repeat applies.
+  if [ "$(config_bool /taskbar/icons/ai_agents_enabled true)" = true ] && grep -q '"custom/ai":' "$_file"; then
+    _modules='["custom/ai"]'
+  fi
   for _module in custom/notifications custom/removable-devices custom/recording custom/bluetooth pulseaudio#input pulseaudio#output custom/keep-awake; do
     if [ "$1" = true ]; then
       _modules="$(printf '%s' "$_modules" | jq -c --arg module "$_module" '. + [$module]')"
@@ -421,6 +426,9 @@ apply_mode() {
   _right0_present=false
   [ "$_right0_filtered" = '[]' ] || _right0_present=true
   _right2_present=false
+  if [ "$(config_bool /taskbar/icons/ai_agents_enabled true)" = true ] && grep -q '"custom/ai":' "$_target_config"; then
+    _right2_present=true
+  fi
   if [ "$_notifications_enabled" = true ] || [ "$_removable_devices_enabled" = true ] \
     || [ "$_recording_enabled" = true ] || [ "$_bluetooth_enabled" = true ] \
     || [ "$_audio_input_enabled" = true ] || [ "$_audio_output_enabled" = true ] \

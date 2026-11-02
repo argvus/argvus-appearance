@@ -36,3 +36,9 @@ Themes are looked up in `/usr/share/icons`, `$XDG_DATA_HOME/icons` and `~/.icons
 Use the font controls in the Control Center. Font preferences are canonical in `config.json`, at `fonts.targets.<target>` for family, style and size plus `fonts.rendering` for antialiasing, hinting, subpixel order and DPI. The Control Center persists them through `argvus-config`; it does not write consumer files itself. `argvus-config` then projects `data/generated/fonts.conf` and rewrites the delimited font block inside `data/waybar/argvus-taskbar.css` and `data/waybar/argvus-widget-telemetry.css`, so font edits outside those blocks survive a font change. Terminal and GTK fontconfig rules remain native adapter targets. The package runs the font cache update during installation.
 
 Taskbar module generation validates the resulting JSONC before publishing it. Utilities module lists are rebuilt from enabled preferences, including a drawer expander only in hover mode. Workspace icon mode renders `{windows}` alongside `{name}`. System tray visibility only affects background application icons.
+
+
+The utility-group projector preserves custom/ai when enabled in Optional modules and defined by the taskbar template. Its nf-md-robot glyph (U+F06A9) opens the shared AI agents menu; availability remains controlled by the module, including when all other utility icons are disabled.
+
+
+The AI icon visibility is controlled by /taskbar/icons/ai_agents_enabled (default true), exposed under Control Center > Appearance > Taskbar > Icons > Optional modules > AI Agents. The projector honors disabled state on every apply and retains the utility group when only AI Agents is enabled.

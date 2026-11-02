@@ -36,3 +36,9 @@ Os temas são procurados em `/usr/share/icons`, `$XDG_DATA_HOME/icons` e `~/.ico
 As preferências de fonte são canônicas no `config.json`, em `fonts.targets.<alvo>` para família, estilo e tamanho, mais `fonts.rendering` para antialiasing, hinting, ordem de subpixel e DPI. O Control Center as persiste através do `argvus-config`; ele não escreve arquivos consumidor sozinho. O `argvus-config` então projeta `data/generated/fonts.conf` e reescreve o bloco de fonte delimitado dentro de `data/waybar/argvus-taskbar.css` e `data/waybar/argvus-widget-telemetry.css`, então edições de fonte feitas fora desses blocos sobrevivem a uma mudança de fonte. As regras de fontconfig do terminal e do GTK continuam sendo alvos nativos de adapter. O pacote atualiza o cache de fontes durante a instalação.
 
 A geração dos módulos da taskbar valida o JSONC antes de publicar o resultado. A lista de Utilities é reconstruída conforme as preferências, com expansor somente no modo hover. O modo de ícones dos workspaces renderiza `{windows}` junto de `{name}`. A visibilidade da bandeja afeta os ícones dos aplicativos em segundo plano.
+
+
+O projetor do grupo de utilitários preserva custom/ai quando habilitado nos módulos opcionais e definido no template da taskbar. O glifo nf-md-robot (U+F06A9) abre o menu compartilhado de agentes de IA; a disponibilidade continua sendo controlada pelo módulo, inclusive quando os demais ícones estão desabilitados.
+
+
+A visibilidade do ícone de IA é controlada por /taskbar/icons/ai_agents_enabled (padrão true), exposta em Control Center > Appearance > Taskbar > Icons > Optional modules > Agentes de IA. O projetor respeita a opção desabilitada em cada aplicação e mantém o grupo de utilitários quando somente Agentes de IA está habilitado.
