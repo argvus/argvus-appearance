@@ -49,12 +49,11 @@ THEME_FAMILY="${THEME_FAMILY%-float}"
 # again for the new mode and applies it in place: it rewrites the per-mode files,
 # resets gaps and borders, reloads Hyprland and restarts only the two bars, whose
 # margins are layer-shell settings. No splash and no configuration-service reload.
-# Release this script's lock first (the transaction takes the same lock). The canonical
-# commit is skipped: /layout/variant is already set, and a commit would reset the custom
-# wallpaper. `.active-theme` is left to the transaction, which compares it with the
-# mode it applies to tell that the layout changed.
+# Release this script's lock first (the transaction takes the same lock). The
+# transaction reapplies the active theme's appearance profile or defaults after
+# the mode has been selected, while preserving the selected variant.
 exec 9>&-
-if command -v argvus >/dev/null 2>&1 && ARGVUS_SKIP_CANONICAL=1 argvus theme-switch "$THEME_FAMILY"; then
+if command -v argvus >/dev/null 2>&1 && argvus theme-switch "$THEME_FAMILY"; then
   exit 0
 fi
 

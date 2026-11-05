@@ -43,6 +43,11 @@ if name == "argvus" and sys.argv[1:2] == ["theme-switch"] and os.environ.get("TE
     open(os.environ["TEST_THEME_SWITCH_RECORD"], "w").write(sys.argv[2] + "\\n")
 if name == "argvus" and sys.argv[1:] == ["sessionctl", "reload"]:
     sys.exit(int(os.environ.get("TEST_RELOAD_FAIL", "0")))
+if name == "argvus" and sys.argv[1:] == ["sessionctl", "apply-config-runtime"]:
+    sys.exit(int(os.environ.get("TEST_SESSIONCTL_RUNTIME_FAIL", "0")))
+if name == "argvus" and sys.argv[1:2] == ["sessionctl"]:
+    command = os.environ["TEST_SESSIONCTL"]
+    os.execv(command, [command, *sys.argv[2:]])
 if name == "systemctl" and sys.argv[1:] == ["--user", "reload", "argvus-config.service"]:
     sys.exit(int(os.environ.get("TEST_CONFIG_RELOAD_FAIL", "0")))
 if name == "hyprctl":
@@ -137,6 +142,7 @@ class ThemeSwitchTests(unittest.TestCase):
             raise RuntimeError(
                 f"missing {ARGVUS_BIN}; run `cargo build --bin argvus` in de/argvus")
         (self.cmd_bin / "argvus").symlink_to(ARGVUS_BIN)
+        sessionctl = ROOT / "argvus-session/src/usr/bin/argvus-sessionctl"
         # Every program a theme switch talks to on the desktop is recorded
         # instead: the switch must never reach the session running the tests.
         for name in ("hyprctl", "systemctl", "pgrep", "pkill", "dunstctl", "qs",
@@ -173,6 +179,7 @@ class ThemeSwitchTests(unittest.TestCase):
             "WALLPAPER_ROOT": str(self.backgrounds / "argvus"),
             "TEST_COMMAND_LOG": str(self.log),
             "TEST_ARGVUS_BIN": str(ARGVUS_BIN),
+            "TEST_SESSIONCTL": str(sessionctl),
             "TEST_SPLASH_ARGS": str(self.splash_args),
             "ARGVUS_LOADING_THEME_BIN": str(splash),
             "ARGVUS_COMMANDS_DIR": str(self.cmd_bin),
@@ -488,7 +495,10 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn(["argvus", "config", "project"], commands)
         # Every registered consumer reloads in place.
         self.assertIn(["argvus", "config", "theme-runtime", "hyprland"], commands)
-        self.assertIn(["dunstctl", "reload", str(self.user / "dunst/dunstrc")], commands)
+        self.assertTrue(
+            ["dunstctl", "reload", str(self.user / "dunst/dunstrc")] in commands
+            or ["argvus", "notifications", "theme", "reload", str(self.user / "dunst/dunstrc")] in commands
+        )
         self.assertIn(["qs", "-c", "argvus-control-panel", "ipc", "call", "theme", "reload"], commands)
         self.assertTrue(any(c[0] == "pkill" and "kitty" in c and "SIGUSR1" in c for c in commands))
         self.assertTrue(any(c[0] == "pkill" and "btop" in c and "SIGUSR2" in c for c in commands))
@@ -505,6 +515,20 @@ class ThemeSwitchTests(unittest.TestCase):
         restarts = [c for c in self.commands() if c[:3] == ["systemctl", "--user", "try-restart"]]
         self.assertEqual(restarts, [["systemctl", "--user", "try-restart",
                                      "argvus-taskbar.service", "argvus-widget-telemetry.service"]])
+
+    def test_live_theme_switch_applies_the_session_reload_plan(self):
+        self.apply("sunset")
+        self.log.write_text("")
+        self.env["HYPRLAND_INSTANCE_SIGNATURE"] = "test-instance"
+        self.env["TEST_HYPRPAPER_RUNNING"] = "1"
+        self.apply("dracula", runtime=True)
+        commands = self.commands()
+        self.assertIn(["argvus", "sessionctl", "apply-config-runtime"], commands)
+        self.assertFalse(any(
+            command[:3] == ["systemctl", "--user", "restart"]
+            and command[-1] == "argvus-session.target"
+            for command in commands
+        ))
 
     def test_partly_registered_components_restart_only_their_surfaces(self):
         # A component package older than the registry registers nothing, even

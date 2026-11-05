@@ -129,15 +129,15 @@ O percentual antigo `effects.blur_global_value` não é mais lido. Um perfil que
 $XDG_CONFIG_HOME/argvus/config.json
 ```
 
-`data/generated/effects/<tema-ativo>.conf` é a projeção única dos efeitos, escrita somente pelo `argvus config`; o `argvus effects-toggle` é um delegate fino para `argvus config effects`, sem saída própria, e não é uma segunda fonte de verdade. Defaults específicos do tema só são usados quando o campo canônico está ausente, e um `false` explícito nunca é tratado como ausência. Ao trocar de tema, os overrides canônicos são preservados e as projeções afetadas são recriadas.
+`data/generated/effects/<tema-ativo>.conf` é a projeção dos efeitos, escrita somente pelo `argvus config`; `argvus effects-toggle` delega para `argvus config effects`. Uma troca de tema ou modo reaplica o perfil visual exportado do tema ativo, incluindo valores por superfície de `effects.conf` quando houver. Temas sem perfil restauram os padrões empacotados de efeitos. Exporte o tema depois de alterar os efeitos para preservar esses valores nas próximas trocas.
 
 Desativar Transparência ou Blur em uma superfície afeta somente aquela superfície; os valores numéricos continuam salvos para quando o recurso for reativado.
 
 ## Perfis
 
-A exportação/importação de temas inclui os valores de transparência e blur do tema ativo, junto com os estados de efeitos existentes. Temas inativos não são incluídos no perfil. Os arquivos gerados do Waybar, Quickshell e Hyprland são recriados quando o perfil é aplicado.
+A exportação de tema inclui configurações canônicas de aparência/efeitos e a projeção de efeitos por superfície do tema ativo. Os arquivos gerados do Waybar, Quickshell e Hyprland são recriados quando o tema é aplicado.
 
-As páginas de superfície aplicam o rascunho com o botão `[ Aplicar ]`. O Control Center grava o documento canônico pelo helper de efeitos, deixa o `argvus-config` projetar a árvore de efeitos, recarrega os consumidores afetados e lê novamente o valor efetivo. A exportação/importação inclui o escopo canônico de aparência/efeitos; arquivos gerados são recriados, não importados como fonte de verdade.
+As páginas de superfície aplicam o rascunho com o botão `[ Aplicar ]`. O Control Center grava o documento canônico pelo helper de efeitos, deixa o `argvus-config` projetar a árvore de efeitos, recarrega os consumidores afetados e lê novamente o valor efetivo. Arquivos gerados são recriados, não importados como fonte de verdade.
 
 ## Luz noturna
 

@@ -8,11 +8,10 @@ points `generated/theme/current` at it and reloads the running consumers in
 place, as the theme registry (`/usr/share/argvus/theme/consumers.d`) declares:
 the Waybar bars re-read their stylesheet, the Control Panel re-reads its
 `Theme.qml`, Hyprland evaluates the new colours, hyprpaper shows the theme's
-wallpaper, and Dunst, btop and kitty reload their configuration. No overlay is
-shown and no service is stopped. Hyprland reloads its configuration only when
-the layout or the theme's effects changed, and a Sticky/Float change restarts
-the two Waybar bars, because a CSS reload does not update their layer-shell
-margins.
+wallpaper, and Dunst, btop and kitty reload their configuration. The projection
+manifest drives the session controller's targeted runtime actions, including
+reloading Hyprland for changed generated settings and restarting surfaces whose
+settings require recreation. The whole session target is not restarted.
 
 Sticky/Float is the layout mode (`/layout/variant` in `argvus config`,
 `sticky` or `float`) and is independent of the active theme: selecting a
@@ -24,11 +23,16 @@ triggered either from the `SUPER + Shift + M` Rofi picker
 rounding and window gaps to the sticky defaults; applying Float resets them to
 the float defaults (see `reset_layout_geometry` in `argvus config`). The
 script writes the mode and runs the theme transaction for the active family,
-so a mode switch shows no splash and reloads no configuration service: only
-Hyprland reloads and the two bars restart. A component whose package registers
-no consumer yet is restarted by the switch instead of reloaded in place. The
-Control Panel can then change and apply its own values until the next mode
-switch or theme switch, both of which reset to the active mode's defaults.
+so a mode switch reloads no configuration service: Hyprland and the two bars
+update through the targeted runtime plan. The session controller may show its
+loading overlay when a surface must be recreated, but it does not restart the
+whole session target. A component whose package registers no consumer yet is
+restarted by the switch instead of reloaded in place. The
+Control Panel can then change and apply its own visual values until the next
+mode switch or theme switch. Each switch reapplies the active theme's optional
+`appearance.json` profile, or the packaged appearance defaults when the theme
+has no profile. The active mode is preserved. An exported profile also carries
+per-surface effects in `effects.conf` when those values exist.
 
 Packaged files remain under `/usr/share/argvus/<component>/{config,sh,docs}`.
 Managed user copies retain their compatibility paths under

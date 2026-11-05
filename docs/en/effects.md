@@ -129,15 +129,15 @@ The former `effects.blur_global_value` percentage is no longer read. A profile t
 $XDG_CONFIG_HOME/argvus/config.json
 ```
 
-`data/generated/effects/<active-theme>.conf` is the single projection for effects, written only by `argvus config`; `argvus effects-toggle` is a thin delegate to `argvus config effects` with no output of its own, and it is not a competing source of truth. Theme-specific defaults are used only when the canonical field is absent, and an explicit `false` is never treated as missing. Switching themes preserves canonical overrides and regenerates the affected projections.
+`data/generated/effects/<active-theme>.conf` is the effects projection, written only by `argvus config`; `argvus effects-toggle` delegates to `argvus config effects`. A theme or mode switch reapplies the active theme's exported visual profile, including per-surface values from `effects.conf` when present. Themes without a profile restore packaged effect defaults. Export the theme after changing effects if you want those values to survive another theme or mode switch.
 
 Disabling a surface's Transparency or Blur switch affects only that surface; saved numeric values are retained for later re-enabling.
 
 ## Profiles
 
-Theme export/import includes the active theme's transparency and blur values, together with the existing effect states. Inactive themes are not included in the profile. Generated Waybar, Quickshell and Hyprland runtime files are regenerated when the profile is applied.
+Theme export includes canonical appearance/effects settings and the active theme's per-surface effects projection. Generated Waybar, Quickshell and Hyprland runtime files are regenerated when the theme is applied.
 
-All surface pages apply their drafts together with the `[ Apply ]` button. Control Center writes the canonical document through the effects helper, lets `argvus-config` project the effects tree, reloads affected consumers and reads the effective value back. Theme export/import includes the canonical appearance/effects scope; generated files are recreated rather than imported as authoritative state.
+All surface pages apply their drafts together with the `[ Apply ]` button. Control Center writes the canonical document through the effects helper, lets `argvus-config` project the effects tree, reloads affected consumers and reads the effective value back. Generated files are recreated rather than imported as authoritative state.
 
 ## Night Light
 
