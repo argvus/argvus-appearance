@@ -9,9 +9,12 @@ place, as the theme registry (`/usr/share/argvus/theme/consumers.d`) declares:
 the Waybar bars re-read their stylesheet, the Control Panel re-reads its
 `Theme.qml`, Hyprland evaluates the new colours, hyprpaper shows the theme's
 wallpaper, and Dunst, btop and kitty reload their configuration. The projection
-manifest drives the session controller's targeted runtime actions, including
-reloading Hyprland for changed generated settings and restarting surfaces whose
-settings require recreation. The whole session target is not restarted.
+manifest drives the session controller's targeted runtime actions. Applying a
+custom user theme forces restarts of `argvus-taskbar.service`,
+`argvus-hyprland.service`, `argvus-wallpaper.service` and
+`argvus-control-panel.service`, so its complete exported profile reaches each
+surface even when the values match the previous projection. The whole session
+target is not restarted.
 
 Sticky/Float is the layout mode (`/layout/variant` in `argvus config`,
 `sticky` or `float`) and is independent of the active theme: selecting a
@@ -22,17 +25,18 @@ triggered either from the `SUPER + Shift + M` Rofi picker
 `Appearance > Mode` screen. Applying Sticky resets taskbar margins, border
 rounding and window gaps to the sticky defaults; applying Float resets them to
 the float defaults (see `reset_layout_geometry` in `argvus config`). The
-script writes the mode and runs the theme transaction for the active family,
-so a mode switch reloads no configuration service: Hyprland and the two bars
-update through the targeted runtime plan. The session controller may show its
-loading overlay when a surface must be recreated, but it does not restart the
-whole session target. A component whose package registers no consumer yet is
-restarted by the switch instead of reloaded in place. The
-Control Panel can then change and apply its own visual values until the next
-mode switch or theme switch. Each switch reapplies the active theme's optional
-`appearance.json` profile, or the packaged appearance defaults when the theme
-has no profile. The active mode is preserved. An exported profile also carries
-per-surface effects in `effects.conf` when those values exist.
+script writes the mode and runs the theme transaction for the active family.
+Every mode switch reapplies the selected mode's spacing, border and taskbar
+geometry, then restarts `argvus-taskbar.service`,
+`argvus-widget-telemetry.service` and `argvus-hyprland.service`, including when
+the mode was already selected. The mode's geometry takes precedence over
+geometry stored in a theme profile. The session controller may show its loading
+overlay when a surface must be recreated, but it does not restart the whole
+session target. Applying any theme replaces independent visual edits with that
+theme's exported profile or the packaged defaults when it has no profile. To
+keep personal visual settings across theme or mode changes, save them through
+Control Center's **Export theme** action. An exported profile includes its
+appearance settings and per-surface effects in `effects.conf` when present.
 
 Packaged files remain under `/usr/share/argvus/<component>/{config,sh,docs}`.
 Managed user copies retain their compatibility paths under

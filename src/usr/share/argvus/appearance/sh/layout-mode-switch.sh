@@ -46,14 +46,15 @@ THEME_FAMILY="${THEME_FAMILY%-float}"
 
 # Sticky and Float differ in the geometry of every themed file, the Hyprland gaps,
 # borders and rounding, and the bar margins. The theme transaction renders the family
-# again for the new mode and applies it in place: it rewrites the per-mode files,
-# resets gaps and borders, reloads Hyprland and restarts only the two bars, whose
-# margins are layer-shell settings. No splash and no configuration-service reload.
+# again for the new mode. The mode marker keeps an exported profile from restoring
+# geometry owned by the selected mode, and sessionctl always restarts the taskbar,
+# telemetry and Hyprland reload services. No configuration-service reload.
 # Release this script's lock first (the transaction takes the same lock). The
-# transaction reapplies the active theme's appearance profile or defaults after
-# the mode has been selected, while preserving the selected variant.
+# transaction reapplies the active theme's non-geometric profile values or defaults
+# after the mode has been selected, while preserving the selected variant.
 exec 9>&-
-if command -v argvus >/dev/null 2>&1 && argvus theme-switch "$THEME_FAMILY"; then
+if command -v argvus >/dev/null 2>&1 &&
+  ARGVUS_MODE_SWITCH=1 argvus theme-switch "$THEME_FAMILY"; then
   exit 0
 fi
 

@@ -585,9 +585,8 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertTrue(any(c[:2] == ["hyprctl", "eval"] and "gaps_out" in c[2]
                             for c in commands if len(c) > 2))
 
-    def test_theme_switch_keeps_the_taskbar_shape(self):
-        # Height and border are Control Center settings: refreshing the managed
-        # Waybar files from the packaged copies must not reset them.
+    def test_theme_switch_resets_the_taskbar_shape(self):
+        # A theme restores its saved taskbar shape or the packaged defaults.
         self.apply("argvus-dark")
         for arguments in (["taskbar-height", "36"], ["taskbar-border", "3"]):
             subprocess.run(
@@ -601,8 +600,9 @@ class ThemeSwitchTests(unittest.TestCase):
                     [str(self.cmd_bin / "argvus"), "config", "taskbar-shape"],
                     env=self.env, capture_output=True, text=True, check=True,
                 ).stdout
-                self.assertIn("height=36", shape)
-                self.assertIn("border=3", shape)
+                self.assertIn("height=28", shape)
+                self.assertNotIn("height=36", shape)
+                self.assertNotIn("border=3", shape)
 
     def test_theme_switch_border_follows_the_theme_until_set(self):
         self.apply("slate-dark")
@@ -960,26 +960,25 @@ class ThemeSwitchTests(unittest.TestCase):
             env=self.env, capture_output=True, text=True, check=True,
         )
 
-    def test_theme_switch_preserves_taskbar_utility_group_mode(self):
-        self.set_taskbar_mode("always-expanded")
+    def test_theme_switch_resets_taskbar_utility_group_mode(self):
+        self.set_taskbar_mode("auto")
 
         self.apply("argvus-dark")
 
+        expanded = subprocess.run(
+            [str(self.cmd_bin / "argvus"), "config", "get",
+             "/taskbar/icons/utilities/expanded", "--raw"],
+            env=self.env, capture_output=True, text=True, check=True,
+        ).stdout.strip()
+        self.assertEqual(expanded, "true")
         taskbar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
         self.assertIn('"custom/removable-devices"', taskbar)
         self.assertNotIn('"custom/storage"', taskbar)
-        self.assertIn('//    "drawer": {', taskbar)
-        self.assertIn('//      "custom/right-2-expander",', taskbar)
+        auto_drawer = taskbar.split("ARGVUS_RIGHT_2_AUTO_BEGIN", 1)[1].split(
+            "ARGVUS_RIGHT_2_AUTO_END", 1
+        )[0]
+        self.assertNotIn('"drawer": {', auto_drawer)
         self.assertIn('"on-click": "/usr/share/argvus/removable-devices/sh/removable-devices-menu.sh --root {x} {y}"', taskbar)
-
-        self.set_taskbar_mode("auto")
-        self.apply("argvus-dark")
-
-        taskbar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
-        self.assertIn('    "drawer": {', taskbar)
-        self.assertIn('      "custom/right-2-expander",', taskbar)
-        self.assertIn('"on-click": "argvus removable-devices menu"', taskbar)
-        self.assertNotIn('"on-click": "/usr/share/argvus/removable-devices/sh/removable-devices-menu.sh --root {x} {y}"', taskbar)
         css = (self.user / "waybar/argvus-taskbar.css").read_text()
         self.assertIn("#custom-removable-devices", css)
         self.assertNotIn("#custom-storage", css)
@@ -1015,7 +1014,7 @@ class ThemeSwitchTests(unittest.TestCase):
         taskbar = taskbar_path.read_text()
         self.assertIn('"enable": true', taskbar)
         generated = json.loads(re.sub(r"(?m)^\s*//.*$", "", taskbar))
-        self.assertEqual(generated["group/right-2"]["modules"], [])
+        self.assertEqual(generated["group/right-2"]["modules"], ["custom/ai"])
         self.assertEqual(generated["hyprland/workspaces"]["format"], "{name} {windows}")
         self.assertIn("ARGVUS_RIGHT_2_AUTO_BEGIN", taskbar)
         self.assertNotIn('"tray",', taskbar.split('"modules-right":', 1)[1].split('],', 1)[0])
