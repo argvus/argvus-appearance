@@ -42,3 +42,5 @@ O projetor do grupo de utilitários preserva custom/ai quando habilitado nos mó
 
 
 A visibilidade do ícone de IA é controlada por /taskbar/icons/ai_agents_enabled (padrão true), exposta em Control Center > Appearance > Taskbar > Icons > Optional modules > Agentes de IA. O projetor respeita a opção desabilitada em cada aplicação e mantém o grupo de utilitários quando somente Agentes de IA está habilitado.
+
+O gerador da taskbar coloca Estado das atualizações em um grupo próprio entre Utilities e rede/desempenho quando `/taskbar/icons/update_status_enabled` está ativo. Ele também adiciona a definição do módulo às configurações geradas antigas.

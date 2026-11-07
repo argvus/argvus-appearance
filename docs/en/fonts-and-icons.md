@@ -42,3 +42,5 @@ The utility-group projector preserves custom/ai when enabled in Optional modules
 
 
 The AI icon visibility is controlled by /taskbar/icons/ai_agents_enabled (default true), exposed under Control Center > Appearance > Taskbar > Icons > Optional modules > AI Agents. The projector honors disabled state on every apply and retains the utility group when only AI Agents is enabled.
+
+The taskbar projector places Update Status in a separate group between Utilities and the network/performance group when `/taskbar/icons/update_status_enabled` is true. It also upgrades older generated configurations with the module definition.

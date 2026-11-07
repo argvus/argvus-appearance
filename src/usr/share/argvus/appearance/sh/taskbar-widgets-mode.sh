@@ -269,10 +269,27 @@ apply_mode() {
   },' "$_target_config"
   fi
 
+  if ! grep -q '"group/update-status":' "$_target_config"; then
+    insert_block_before '"group/focus":' '  "group/update-status": {
+    "orientation": "inherit",
+    "modules": ["custom/update-status"]
+  },' "$_target_config"
+  fi
+  if ! grep -q '"custom/update-status":' "$_target_config"; then
+    insert_block_before '"custom/icon-window":' '  "custom/update-status": {
+    "exec": "/usr/share/argvus/taskbar/sh/waybar-update-status.sh",
+    "return-type": "json",
+    "format": "<span font_family='\''Symbols Nerd Font Mono'\''>󰚰</span> {}",
+    "interval": 3600,
+    "on-click": "argvus control-center packages updates"
+  },' "$_target_config"
+  fi
+
   _audio_player_enabled="$(config_bool /taskbar/icons/audio_player_enabled true)"
   _focus_enabled="$(config_bool /taskbar/icons/focus_enabled true)"
   _launcher_enabled="$(config_bool /taskbar/icons/launcher_enabled false)"
   _network_enabled="$(config_bool /taskbar/icons/network_enabled true)"
+  _update_status_enabled="$(config_bool /taskbar/icons/update_status_enabled true)"
   _power_profile_enabled="$(config_bool /taskbar/icons/power_profile_enabled true)"
   _keyboard_layout_enabled="$(config_bool /taskbar/icons/keyboard_layout_enabled true)"
   _memory_enabled="$(config_bool /taskbar/icons/memory_enabled true)"
@@ -448,6 +465,13 @@ apply_mode() {
   replace_field_array '"modules-left":' "$_modules_left_filtered" "$_target_config"
 
   _modules_right_canonical="$(extract_field_array '"modules-right":' "$_system_config")"
+  # Insert from the canonical array even when upgrading an older system template.
+  _modules_right_canonical="$(printf '%s' "$_modules_right_canonical" | jq -c \
+    --argjson enabled "$_update_status_enabled" '
+    map(select(. != "group/update-status"))
+    | if $enabled then (index("group/right-1") // length) as $i
+      | .[:$i] + ["group/update-status"] + .[$i:] else . end
+  ')"
   _modules_right_filtered="$(printf '%s' "$_modules_right_canonical" | jq -c \
     --argjson icons "$_right1_present" \
     --argjson focus "$_focus_present" '
