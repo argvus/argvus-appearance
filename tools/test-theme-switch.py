@@ -1014,7 +1014,7 @@ class ThemeSwitchTests(unittest.TestCase):
         taskbar = taskbar_path.read_text()
         self.assertIn('"enable": true', taskbar)
         generated = json.loads(re.sub(r"(?m)^\s*//.*$", "", taskbar))
-        self.assertEqual(generated["group/right-2"]["modules"], ["custom/ai"])
+        self.assertEqual(generated["group/right-2"]["modules"], ["custom/window-mode", "custom/ai"])
         self.assertEqual(generated["hyprland/workspaces"]["format"], "{name} {windows}")
         self.assertIn("ARGVUS_RIGHT_2_AUTO_BEGIN", taskbar)
         self.assertNotIn('"tray",', taskbar.split('"modules-right":', 1)[1].split('],', 1)[0])

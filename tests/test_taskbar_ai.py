@@ -44,11 +44,12 @@ class Projection(unittest.TestCase):
                         self.assertEqual(right.index("group/right-1"), right.index("group/update-status") + 1)
                     self.assertIn("font_family='Symbols Nerd Font Mono'", data["custom/update-status"]["format"])
                     modules = data["group/right-2"]["modules"]
+                    self.assertEqual(modules.count("custom/window-mode"), 1)
                     self.assertEqual(modules.count("custom/ai"), int(ai == "true"))
-                    self.assertEqual("group/right-2" in data["modules-right"], ai == "true" or utilities == "true")
+                    self.assertEqual("group/right-2" in data["modules-right"], True)
                     self.assertEqual("pulseaudio#input" in modules, utilities == "true")
                     self.assertEqual("pulseaudio#output" in modules, utilities == "true")
-                    self.assertEqual("custom/right-2-expander" in modules, expanded == "false" and (ai == "true" or utilities == "true"))
+                    self.assertEqual("custom/right-2-expander" in modules, expanded == "false")
 
 
 class ClockProjection(unittest.TestCase):

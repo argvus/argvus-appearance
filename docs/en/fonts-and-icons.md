@@ -44,3 +44,7 @@ The utility-group projector preserves custom/ai when enabled in Optional modules
 The AI icon visibility is controlled by /taskbar/icons/ai_agents_enabled (default true), exposed under Control Center > Appearance > Taskbar > Icons > Optional modules > AI Agents. The projector honors disabled state on every apply and retains the utility group when only AI Agents is enabled.
 
 The taskbar projector places Update Status in a separate group between Utilities and the network/performance group when `/taskbar/icons/update_status_enabled` is true. It also upgrades older generated configurations with the module definition.
+
+The helper is `argvus window-mode-menu`; `argvus window-mode-menu --status` emits Waybar JSON. It is shipped by the master `argvus` package. Existing customized taskbar copies are preserved: add the `custom/window-mode` module definition and group entry from the packaged template to opt in, or use Control Center. The appearance projector preserves the module when its definition is present, even if other utility icons are disabled.
+
+The `window-bar` and `window-controls` theme consumers derive their colors from bg, fg and accent. Title-bar colors reload through `argvus windows decorations`; the window bar observes its generated stylesheet. Tile/Floating is independent of Sticky/Spaced appearance geometry.
