@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# layout-mode-menu - Rofi picker for the Sticky/Float layout mode, independent
+# layout-mode-menu - Rofi picker for the Sticky/Spaced layout mode, independent
 # of theme selection. Same two-pass structure as theme-menu.sh.
 # shellcheck disable=SC1090,SC1091
 
@@ -22,13 +22,13 @@ run_menu() {
 }
 
 _sticky="$(argvus_tr appearance theme.model.sticky)"
-_float="$(argvus_tr appearance theme.model.float)"
+_spaced="$(argvus_tr appearance theme.model.spaced)"
 
-_mode="$(run_menu "$(argvus_tr appearance layout_mode.select)" "$_sticky" "$_float")" || exit 0
+_mode="$(run_menu "$(argvus_tr appearance layout_mode.select)" "$_sticky" "$_spaced")" || exit 0
 _mode="$(printf '%s' "$_mode" | sed 's/[[:space:]]*$//')"
 
 case "$_mode" in
   "$_sticky") exec sh "$LAYOUT_MODE_SWITCH" sticky >/dev/null 2>&1 ;;
-  "$_float") exec sh "$LAYOUT_MODE_SWITCH" float >/dev/null 2>&1 ;;
+  "$_spaced") exec sh "$LAYOUT_MODE_SWITCH" spaced >/dev/null 2>&1 ;;
   *) exit 0 ;;
 esac

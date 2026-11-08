@@ -62,7 +62,7 @@ if name == "argvus" and sys.argv[1:4] == ["config", "get", "/layout/variant"]:
     if not override:
         marker = Path(os.environ["ARGVUS_CONFIG_HOME"]) / "argvus/data/.active-theme"
         theme = marker.read_text().strip() if marker.is_file() else "argvus-dark"
-        override = "float" if theme.endswith("-float") else "sticky"
+        override = "spaced" if theme.endswith("-spaced") else "sticky"
     print(override)
 '''
 
@@ -190,11 +190,11 @@ class ThemeSwitchTests(unittest.TestCase):
             self.env.pop(variable, None)
 
     def apply(self, theme, runtime=False, fail_dpms=False, expected_status=0):
-        # Sticky/Float is /layout/variant, written only by layout-mode-switch.sh;
-        # a theme switch never changes it. A "-float" name therefore sets the
-        # Float mode first and then applies the bare theme family.
-        mode = "float" if theme.endswith("-float") else "sticky"
-        family = theme.removesuffix("-float")
+        # Sticky/Spaced is /layout/variant, written only by layout-mode-switch.sh;
+        # a theme switch never changes it. A "-spaced" name therefore sets the
+        # Spaced mode first and then applies the bare theme family.
+        mode = "spaced" if theme.endswith("-spaced") else "sticky"
+        family = theme.removesuffix("-spaced")
         subprocess.run(
             ["sh", str(self.system / "appearance/sh/layout-mode-switch.sh"), mode],
             env=self.env | {"ARGVUS_NO_RUNTIME": "1"},
@@ -214,20 +214,20 @@ class ThemeSwitchTests(unittest.TestCase):
     def test_all_pairs_float_to_sticky_and_imports(self):
         themes = self.system / "themes"
         for sticky in sorted(p.name for p in themes.iterdir() if (p / "theme.toml").is_file()):
-            for theme in (sticky + "-float", sticky):
+            for theme in (sticky + "-spaced", sticky):
                 with self.subTest(theme=theme):
                     self.apply(theme)
-                    margin = 18 if theme.endswith("-float") else 0
+                    margin = 18 if theme.endswith("-spaced") else 0
                     # Sticky reserves the taskbar's two-pixel bottom gap;
-                    # Float uses the eighteen-pixel baseline.
-                    bottom_margin = 18 if theme.endswith("-float") else 2
+                    # Spaced uses the eighteen-pixel baseline.
+                    bottom_margin = 18 if theme.endswith("-spaced") else 2
                     bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
                     for edge in ("top", "left", "right"):
                         self.assertIn(f'"margin-{edge}": {margin}', bar)
                     self.assertIn(f'"margin-bottom": {bottom_margin}', bar)
                     widget = (self.user / "waybar/argvus-widget-telemetry.jsonc").read_text()
-                    effective_left = 18 if theme.endswith("-float") else 0
-                    effective_bottom = 18 if theme.endswith("-float") else 0
+                    effective_left = 18 if theme.endswith("-spaced") else 0
+                    effective_bottom = 18 if theme.endswith("-spaced") else 0
                     self.assertIn('"margin-top": 0', widget)
                     self.assertIn(f'"margin-left": {effective_left}', widget)
                     self.assertIn(f'"margin-bottom": {effective_bottom}', widget)
@@ -236,7 +236,7 @@ class ThemeSwitchTests(unittest.TestCase):
                             self.assertTrue((css.parent / ref).is_file(), (theme, css, ref))
                     telemetry_file = self.current_build() / "widget-telemetry/theme.css"
                     self.assertTrue(telemetry_file.is_file())
-                    if theme in ("one-dark", "one-dark-float"):
+                    if theme in ("one-dark", "one-dark-spaced"):
                         telemetry_theme = telemetry_file.read_text()
                         self.assertIn(
                             "@define-color th-window-bg-rgba rgba(44, 49, 58, 0.35);",
@@ -245,7 +245,7 @@ class ThemeSwitchTests(unittest.TestCase):
                     # The launcher and Qt read the theme build of this theme.
                     current = self.current_build()
                     build = (current / "build.toml").read_text()
-                    self.assertIn(f'theme = "{theme.removesuffix("-float")}"', build)
+                    self.assertIn(f'theme = "{theme.removesuffix("-spaced")}"', build)
                     rofi = (self.user / "rofi/theme.rasi").read_text()
                     self.assertIn(f'@import "{current}/launcher/theme.rasi"', rofi)
                     for version in ("gtk-3.0", "gtk-4.0"):
@@ -267,7 +267,7 @@ class ThemeSwitchTests(unittest.TestCase):
             "argvus-light": ("F7F7F7", "235, 235, 235"),
         }
         for sticky, (panel_rgb, telemetry_rgb) in light_themes.items():
-            for theme in (sticky, f"{sticky}-float"):
+            for theme in (sticky, f"{sticky}-spaced"):
                 with self.subTest(theme=theme):
                     self.apply(theme)
 
@@ -284,7 +284,7 @@ class ThemeSwitchTests(unittest.TestCase):
                     telemetry_theme = (
                         self.current_build() / "widget-telemetry/theme.css"
                     ).read_text()
-                    # Sticky and Float share the theme's palette.
+                    # Sticky and Spaced share the theme's palette.
                     self.assertIn(
                         f"@define-color th-window-bg-rgba rgba({telemetry_rgb}, 0.82);",
                         telemetry_theme,
@@ -511,7 +511,7 @@ class ThemeSwitchTests(unittest.TestCase):
         self.apply("sunset")
         self.log.write_text("")
         self.env["TEST_HYPRPAPER_RUNNING"] = "1"
-        self.apply("sunset-float", runtime=True)
+        self.apply("sunset-spaced", runtime=True)
         restarts = [c for c in self.commands() if c[:3] == ["systemctl", "--user", "try-restart"]]
         self.assertEqual(restarts, [["systemctl", "--user", "try-restart",
                                      "argvus-taskbar.service", "argvus-widget-telemetry.service"]])
@@ -546,7 +546,7 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertNotIn(["argvus", "config", "theme-runtime", "hyprland"], commands)
 
     def test_layout_mode_switch_applies_in_place(self):
-        # Sticky/Float goes through the theme transaction only: no splash, no
+        # Sticky/Spaced goes through the theme transaction only: no splash, no
         # configuration-service reload and no early Waybar restart.
         self.apply("sunset")
         self.log.write_text("")
@@ -593,7 +593,7 @@ class ThemeSwitchTests(unittest.TestCase):
                 [str(self.cmd_bin / "argvus"), "config", *arguments],
                 env=self.env, capture_output=True, text=True, check=True,
             )
-        for theme in ("sunset", "slate-dark", "argvus-light-float"):
+        for theme in ("sunset", "slate-dark", "argvus-light-spaced"):
             with self.subTest(theme=theme):
                 self.apply(theme)
                 shape = subprocess.run(
@@ -614,11 +614,11 @@ class ThemeSwitchTests(unittest.TestCase):
         return self.user / "generated/theme/current"
 
     def test_switch_points_the_consumers_at_the_theme_build(self):
-        self.apply("sunset-float")
+        self.apply("sunset-spaced")
         current = self.current_build()
         build = (current / "build.toml").read_text()
         self.assertIn('theme = "sunset"', build)
-        self.assertIn('variant = "float"', build)
+        self.assertIn('variant = "spaced"', build)
 
         css = (self.user / "waybar/argvus-taskbar.css").read_text()
         self.assertIn(f'@import url("{current}/taskbar/theme.css");', css)
@@ -697,7 +697,7 @@ class ThemeSwitchTests(unittest.TestCase):
         }
 
         for theme, background in expected.items():
-            for selected in (theme, f"{theme}-float"):
+            for selected in (theme, f"{theme}-spaced"):
                 with self.subTest(theme=selected):
                     self.apply(selected)
                     cache = self.base / "cache/argvus-taskbar-calendar/theme.css"
@@ -706,7 +706,7 @@ class ThemeSwitchTests(unittest.TestCase):
                     self.assertNotIn("@import", contents)
                     self.assertIn("@define-color argvus_bg ", contents)
                     self.assertIn(f"@define-color argvus_bg {background};", contents)
-                    if selected.endswith("-float"):
+                    if selected.endswith("-spaced"):
                         self.assertIn("border-radius: 4px", contents)
 
     def test_theme_menu_exposes_category_family_then_model_protocol(self):
@@ -733,9 +733,9 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertEqual(result.stdout, "")
 
     def test_theme_is_published_for_pre_authentication_greeter(self):
-        self.apply("argvus-light-float")
+        self.apply("argvus-light-spaced")
         projection = self.greeter_state / str(os.getuid())
-        self.assertEqual(projection.read_text(), "argvus-light-float\n")
+        self.assertEqual(projection.read_text(), "argvus-light-spaced\n")
         self.assertFalse((self.greeter_state / f"{os.getuid()}.tmp").exists())
 
     def test_catppuccin_latte_uses_its_packaged_wallpaper(self):
@@ -871,7 +871,7 @@ class ThemeSwitchTests(unittest.TestCase):
 
     def test_dark_monokai_float_applies_geometry_and_telemetry_transparency(self):
         self.set_transparency("enabled")
-        self.apply("monokai-dark-float")
+        self.apply("monokai-dark-spaced")
 
         spaces = subprocess.run(
             ["sh", str(self.system / "hyprland/sh/spaces-switch.sh"), "--status"],
@@ -937,7 +937,7 @@ class ThemeSwitchTests(unittest.TestCase):
 
     def is_light_theme(self, theme):
         """Drop-in packages declare their category; built-ins are listed."""
-        manifest = self.system / "themes" / theme.removesuffix("-float") / "theme.toml"
+        manifest = self.system / "themes" / theme.removesuffix("-spaced") / "theme.toml"
         if manifest.is_file():
             with manifest.open("rb") as handle:
                 return tomllib.load(handle).get("category") == "light"
@@ -1056,7 +1056,7 @@ class ThemeSwitchTests(unittest.TestCase):
         for edge in ("top", "left", "right", "bottom"):
             self.assertIn(f"gaps_out_{edge}=0", spaces_status)
 
-        self.apply("argvus-light-float")
+        self.apply("argvus-light-spaced")
         bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
         for edge in ("top", "left", "right", "bottom"):
             self.assertIn(f'"margin-{edge}": 18', bar)
@@ -1166,7 +1166,7 @@ class ThemeSwitchTests(unittest.TestCase):
                 )
 
     def test_sticky_float_geometry_resolves_from_data_markers(self):
-        # Guards the Sticky/Float contract end to end: the mode owns rounding,
+        # Guards the Sticky/Spaced contract end to end: the mode owns rounding,
         # the geometry from data/, while borders-switch.sh derives its defaults
         # from the canonical /layout/variant. If either reader falls back to the
         # legacy root or the .active-theme suffix, a mode change silently
@@ -1179,13 +1179,13 @@ class ThemeSwitchTests(unittest.TestCase):
         ):
             self.assertIn(f'_data_home .. "/{marker}', lua)
         self.assertIn(
-            'theme.gaps_in = _layout_variant == "float" and 10 or 2',
+            'theme.gaps_in = _layout_variant == "spaced" and 10 or 2',
             lua,
         )
 
         for theme, expected in (
             ("argvus-dark", ("rounded=0", "rounding=0", "thickness=1")),
-            ("argvus-dark-float", ("rounded=1", "rounding=4", "thickness=1")),
+            ("argvus-dark-spaced", ("rounded=1", "rounding=4", "thickness=1")),
         ):
             with self.subTest(theme=theme):
                 self.apply(theme)
@@ -1199,13 +1199,13 @@ class ThemeSwitchTests(unittest.TestCase):
                 # The derived marker keeps the variant suffix for consumers.
                 active = (self.user / ".active-theme").read_text().strip()
                 self.assertEqual(active, theme)
-                self.assertEqual(active.endswith("-float"),
+                self.assertEqual(active.endswith("-spaced"),
                                  "rounded=1" in status)
 
     def test_borders_defaults_follow_canonical_variant_not_active_theme(self):
         # A manual layout.json edit changes /layout/variant without touching the
         # .active-theme marker. borders-switch.sh must follow the canonical
-        # value so borders no longer stay Sticky while spacing went Float.
+        # value so borders no longer stay Sticky while spacing went Spaced.
         borders = self.system / "hyprland/sh/borders-switch.sh"
         self.apply("argvus-dark")
         (self.user / ".active-theme").write_text("argvus-dark")
@@ -1216,9 +1216,9 @@ class ThemeSwitchTests(unittest.TestCase):
         ).stdout
         self.assertIn("rounded=0", status)
 
-        # Simulate the canonical variant being Float while the marker still
+        # Simulate the canonical variant being Spaced while the marker still
         # reads Sticky: the canonical source must win.
-        variant = self.env | {"TEST_VARIANT": "float"}
+        variant = self.env | {"TEST_VARIANT": "spaced"}
         status = subprocess.run(
             ["sh", str(borders), "--defaults"],
             env=variant, capture_output=True, text=True, check=True,
@@ -1235,7 +1235,7 @@ class ThemeSwitchTests(unittest.TestCase):
         custom.parent.mkdir(parents=True, exist_ok=True)
         custom.write_text("/tmp/argvus-custom-pick.jpg\n")
         legacy.write_text("/tmp/argvus-legacy-pick.jpg\n")
-        self.apply("monokai-dark-float")
+        self.apply("monokai-dark-spaced")
         self.assertFalse(custom.exists(), "canonical custom wallpaper survived")
         self.assertFalse(legacy.exists(), "legacy custom wallpaper survived")
         hyprpaper = (self.user / "hypr/hyprpaper.conf").read_text()
@@ -1289,7 +1289,7 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn("rounding=0", borders_status)
         self.assertIn("thickness=1", borders_status)
 
-        self.apply("argvus-dark-float")
+        self.apply("argvus-dark-spaced")
         css = (self.user / "waybar/argvus-taskbar.css").read_text()
         telemetry_css = (self.user / "waybar/argvus-widget-telemetry.css").read_text()
         rofi = (self.user / "rofi/theme.rasi").read_text()

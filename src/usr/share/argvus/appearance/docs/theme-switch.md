@@ -16,15 +16,15 @@ custom user theme forces restarts of `argvus-taskbar.service`,
 surface even when the values match the previous projection. The whole session
 target is not restarted.
 
-Sticky/Float is the layout mode (`/layout/variant` in `argvus config`,
-`sticky` or `float`) and is independent of the active theme: selecting a
+Sticky/Spaced is the layout mode (`/layout/variant` in `argvus config`,
+`sticky` or `spaced`) and is independent of the active theme: selecting a
 theme never changes it, and switching the mode never changes the theme. The
-mode is applied with `appearance/sh/layout-mode-switch.sh <sticky|float>`,
+mode is applied with `appearance/sh/layout-mode-switch.sh <sticky|spaced>`,
 triggered either from the `SUPER + Shift + M` Rofi picker
 (`appearance/sh/layout-mode-menu.sh`) or from Control Center's
 `Appearance > Mode` screen. Applying Sticky resets taskbar margins, border
-rounding and window gaps to the sticky defaults; applying Float resets them to
-the float defaults (see `reset_layout_geometry` in `argvus config`). The
+rounding and window gaps to the sticky defaults; applying Spaced resets them to
+the Spaced defaults (see `reset_layout_geometry` in `argvus config`). The
 script writes the mode and runs the theme transaction for the active family.
 Every mode switch reapplies the selected mode's spacing, border and taskbar
 geometry, then restarts `argvus-taskbar.service`,

@@ -325,7 +325,9 @@ apply_mode() {
   if [ -z "$_launcher_icon_path" ]; then
     _active_theme="$(cat "${ARGVUS_CONFIG_HOME}/argvus/data/.active-theme" 2>/dev/null || true)"
     [ -n "$_active_theme" ] || _active_theme='argvus-dark'
-    case "${_active_theme%-float}" in
+    _active_theme="${_active_theme%-spaced}"
+    _active_theme="${_active_theme%-float}"
+    case "$_active_theme" in
     argvus-dark) _launcher_icon_path='/usr/share/argvus/svg/menu-default-dark.svg' ;;
     argvus-light) _launcher_icon_path='/usr/share/argvus/svg/menu-default-light.svg' ;;
     *)

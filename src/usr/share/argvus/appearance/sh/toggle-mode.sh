@@ -11,6 +11,7 @@ ACTIVE_FILE="$ARGVUS_CONFIG_HOME/argvus/data/.active-theme"
 [ -s "$ACTIVE_FILE" ] || ACTIVE_FILE="$ARGVUS_CONFIG_HOME/argvus/.active-theme"
 THEME="$(sed -n '1p' "$ACTIVE_FILE" 2>/dev/null || true)"
 [ -n "$THEME" ] || THEME="argvus-dark"
+THEME="${THEME%-spaced}"
 THEME="${THEME%-float}"
 
 # A light theme (any of them, for example github-light) switches to ARGVUS Dark and a dark

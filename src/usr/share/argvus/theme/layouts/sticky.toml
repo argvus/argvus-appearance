@@ -1,5 +1,5 @@
 # Sticky layout geometry, read by theme templates as layout.<name>.
-# rounded: 1 keeps the Float-only rules of the calendar and TUI stylesheets.
+# rounded: 1 keeps the Spaced-only rules of the calendar and TUI stylesheets.
 appstyle_roundness = 0
 calendar_radius = 0
 hypr_gaps_in = 1
