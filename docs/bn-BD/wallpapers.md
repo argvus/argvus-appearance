@@ -1,5 +1,5 @@
 ---
-title: Wallpapers
+title: ওয়ালপেপার
 description: বিল্ট-ইন এবং কাস্টম ARGVUS ওয়ালপেপার ব্যবহার করুন।
 ---
 

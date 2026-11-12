@@ -1,5 +1,5 @@
 ---
-title: Layout modes
+title: लेआउट मोड
 description: स्टिकी या स्पेस्ड डेस्कटॉप लेआउट चुनें।
 ---
 

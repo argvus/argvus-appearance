@@ -1,5 +1,5 @@
 ---
-title: Effects
+title: Efek
 description: Konfigurasikan animasi, keburaman Hyprland global, dan transparansi per permukaan.
 ---
 
@@ -7,24 +7,24 @@ Pusat Kontrol diluncurkan melalui Foot dengan profil khusus yang dihasilkan di `
 
 ## Saklar Animasi dan Efek
 
-There are two independent master switches, both applied to 
+There are two independent master switches, both applied to
 
  through the canonical `hyprland.lua` /effects/animations  `/effects`  settings:
 
 - **Animations** (
 
 ) controls everything that moves: workspace, window, fade, border and layer animations.
-- **Efek** adalah pintasan untuk blur ( `/effects/animations` `/effects/blur_global_enabled`) dan transparansi Terminal, Peluncur, Telemetri Widget, Panel Kontrol, dan Bilah Tugas (`/effects/transparency_<surface>_enabled`). Menghidupkan atau mematikannya akan menulis semuanya (dan transparansi Pusat Kontrol juga). Setiap permukaan menyimpan halaman transparansinya sendiri, sehingga Efek dibaca sebagai **aktif ketika setidaknya salah satu dari mereka aktif** dan mati hanya ketika semuanya mati.Use 
+- **Efek** adalah pintasan untuk blur ( `/effects/animations` `/effects/blur_global_enabled`) dan transparansi Terminal, Peluncur, Telemetri Widget, Panel Kontrol, dan Bilah Tugas (`/effects/transparency_<surface>_enabled`). Menghidupkan atau mematikannya akan menulis semuanya (dan transparansi Pusat Kontrol juga). Setiap permukaan menyimpan halaman transparansinya sendiri, sehingga Efek dibaca sebagai **aktif ketika setidaknya salah satu dari mereka aktif** dan mati hanya ketika semuanya mati.Use
 
- and `argvus effects-toggle animations status|enable|disable|toggle`. The Control Panel Appearance card shows one switch for each. Turning a master switch off keeps every fine setting of the **Animations** and **Blur** pages (speeds, curves, per-leaf switches, blur size and passes), so turning it on again restores the same look. `argvus effects-toggle effects status|enable|disable|toggle` prints `effects status` `enabled`  when blur or at least one of those transparency surfaces is enabled. Turning a surface's transparency off makes the whole Waybar surface opaque: besides the background, the translucent borders of the taskbar and the Widget Telemetry become the solid color they show over the theme background. Every effect is enabled by default on a fresh install, including on virtual machines and low-power sessions; only an explicit setting turns one off.
+ dan `argvus effects-toggle animations status|enable|disable|toggle`. Kartu Tampilan Panel Kontrol menunjukkan satu tombol untuk masing-masing tombol. Mematikan tombol master akan menjaga setiap pengaturan halus pada halaman **Animasi** dan **Blur** (kecepatan, kurva, peralihan per daun, ukuran blur, dan lintasan), jadi menyalakannya kembali akan mengembalikan tampilan yang sama. `argvus effects-toggle effects status|enable|disable|toggle` mencetak `effects status` `enabled` ketika buram atau setidaknya salah satu permukaan transparansi tersebut diaktifkan. Menonaktifkan transparansi permukaan akan membuat seluruh permukaan Waybar menjadi buram: selain latar belakang, batas transparan bilah tugas dan Telemetri Widget menjadi warna solid yang ditampilkan di atas latar belakang tema. Setiap efek diaktifkan secara default pada instalasi baru, termasuk pada mesin virtual dan sesi berdaya rendah; hanya pengaturan eksplisit yang mematikannya.
 
 ## Semua efek sekaligus
 
-`argvus effects-toggle` tanpa komponen bertindak pada animasi, blur dan transparansi secara bersamaan: `status` mencetak `enabled` hanya ketika ketiganya diaktifkan, `enable` dan `disable` mengganti ketiganya, dan `toggle` mematikan semuanya ketika `status` adalah `enabled` dan aktif otherwise. **SUPER + F6** runs this toggle. To act on a single group, name it: `argvus effects-toggle animations|effects|blur|transparency status|enable|disable|toggle`. The **Animations** page of the Control Center uses the per-component form, so its **Enable** switch still changes animations only.
+`argvus effects-toggle` tanpa komponen bertindak pada animasi, blur dan transparansi secara bersamaan: `status` mencetak `enabled` hanya ketika ketiganya diaktifkan, `enable` dan `disable` mengganti ketiganya, dan `toggle` mematikan semuanya ketika `status` adalah `enabled` dan aktif sebaliknya. **SUPER + F6** menjalankan tombol ini. Untuk bertindak dalam satu grup, beri nama: `argvus effects-toggle animations|effects|blur|transparency status|enable|disable|toggle`. Halaman **Animasi** di Pusat Kontrol menggunakan formulir per komponen, sehingga tombol **Aktifkan** tetap hanya mengubah animasi saja.
 
-## Transparency
+## Transparansi
 
-Setiap permukaan memiliki submenu **Transparansi** sendiri dengan tombol dan nilai pengaktifan.The **Appearance → Launchers** page controls the official Rofi-based launcher and picker flows: the main launcher, emoji picker, calculator, clipboard picker, cheatsheets and Rofi removable-device menus. Its Transparency value is the final background alpha, so `50` means an effective background opacity of approximately `0.50`; text, icons and selected rows remain opaque. WithTransparansi dimatikan, peluncur menggunakan warna latar belakang tema aktif, sepenuhnya buram. Sakelar Blur-nya memilih lapisan `rofi` ke dalam pengaturan Blur global.Setiap nilai berkisar dari `0%` (tidak tembus pandang) hingga `100%` (sepenuhnya tembus pandang). Gunakan `+` dan `-` dalam langkah 5%, kemudian pilih **Terapkan** di halaman permukaan. Meninggalkan halaman akan membatalkan draft yang belum diterapkan.
+Setiap permukaan memiliki submenu **Transparansi** sendiri dengan tombol dan nilai pengaktifan. Halaman **Penampilan → Peluncur** mengontrol alur peluncur dan pemilih resmi berbasis Rofi: peluncur utama, pemilih emoji, kalkulator, pemilih papan klip, lembar contekan, dan menu perangkat yang dapat dilepas Rofi. Nilai Transparansinya adalah alfa latar belakang akhir, jadi `50` berarti opasitas latar belakang efektif sekitar `0.50`; teks, ikon, dan baris yang dipilih tetap buram. Dengan Transparansi dimatikan, peluncur menggunakan warna latar belakang tema aktif, sepenuhnya buram. Sakelar Blur-nya memilih lapisan `rofi` ke dalam pengaturan Blur global.Setiap nilai berkisar dari `0%` (tidak tembus pandang) hingga `100%` (sepenuhnya tembus pandang). Gunakan `+` dan `-` dalam langkah 5%, kemudian pilih **Terapkan** di halaman permukaan. Meninggalkan halaman akan membatalkan draft yang belum diterapkan.
 
 Gunakan `↑` dan `↓` untuk berpindah antara **Enable** dan **Value**. Pada baris **Value**, `+` dan `-` menyesuaikan draf tanpa mengubah fokus. Tekan `Tab` untuk membuka **Actions**, lalu aktifkan **[ Apply ]**; `Esc` kembali ke halaman permukaan induk.
 
@@ -60,9 +60,9 @@ Kontrol: `↑/↓` berpindah antar baris; `←/→` (atau `+/-`) mengubah nilai 
 
 Default daun yang dikirimkan Hyprland 0.56.2 dalam konfigurasi stoknya (setiap baris kecuali Ruang kerja khusus, Sudut gradien perbatasan, dan Monitor ditambahkan) adalah kecepatan, gaya, dan kurva stok. Ketiganya tetap menggunakan default ARGVUS, karena konfigurasi stok tidak menentukannya.Setiap daun hanya menawarkan gaya yang diterima Hyprland 0.56.2. Penawaran pembukaan dan penutupan jendela `slide`, `popin`, `slidefade`, `slidevert`, `slidefadevert` dan `gnomed`. Penawaran lapisan masuk dan keluar `slide`, `popin`, `fade`, `slidefade`, `slidevert` dan `slidefadevert`. Daun ruang kerja (peralihan, masuk, keluar, dan ruang kerja khusus) menawarkan `slide`, `fade`, `slidefade`, `slidevert` dan `slidefadevert`, tanpa `popin` atau `gnomed`. Gaya yang disimpan di luar daftar daunnya diabaikan dan daun tersebut menggunakan gaya defaultnya. Setiap animasi dimulai dengan kurva `default`. Sebuah halaman hanya menawarkan baris yang didukung animasinya. Kunci yang disimpan adalah `effects.animation_<key>_speed`, `_curve`, `_style` (where offered), `_popin` (window opening and closing) and `_enabled` (where offered).
 
-### Curves
+### kurva
 
-| Curve | Behavior | Parameters (key → default) |
+| Kurva | Perilaku | Parameter (kunci → default) |
 |---|---|---|
 | `default` | Kurva Hyprland 0.56.2 dikirim untuk animasi itu (misalnya `easeOutQuint`, `almostLinear`, `quick`, `linear`atau`easy`musim semi). Animasi tanpa kurva stok menggunakan Bézier bawaan ARGVUS. | Diperbaiki. |
 | `bezier` | Gerakan halus yang dipercepat dan diperlambat, dibentuk oleh dua titik kontrol. | `bezier_x1` 0.23, `bezier_y1` 1, `bezier_x2` 0.32, `bezier_y2` 1 (x 0–1, y −2–3) |
@@ -74,36 +74,36 @@ Di bawah **Kurva Kustom**, setiap kurva memiliki halamannya sendiri. Bézier men
 
 Rentang dan langkah: **Kecepatan** 1–10 dengan desimal (langkah 0,1, kecepatan stok dalam desimal); **Persentase pop-in** 1–100 dalam bilangan bulat (langkah 5, stok 87); Bézier poin seperti di atas (langkah 0,05); Massa pegas 0,5–10 (langkah 0,1), kekakuan 0,5–2000 (langkah 10) dan peredaman 0,5–200 (langkah 1).Tidak ditawarkan: Hyprland 0.56.2 tidak memiliki animasi terpisah untuk mengubah ukuran jendela, untuk popup, atau untuk sudut gradien bayangan dan cahaya, jadi halaman tidak menampilkan baris untuk mereka.
 
-## Blur
+## Kabur
 
 Blur adalah satu pengaturan global Hyprland, yang dibagikan oleh setiap permukaan yang memilih untuk ikut. Buka **Control Center → Hyprland → Blur**. Halaman ini memiliki sakelar **Enable** dan daftar **Values** dengan parameter `decoration:blur` Hyprland, di bawah nama yang digunakan Hyprland:
 
-| Row | Config key | Default | Range | `←/→` step |
+| Baris | Kunci konfigurasi | Bawaan | Rentang | Langkah `←/→` |
 |---|---|---|---|---|
-| Size | `effects.blur_size` | `6` | 1–64 | 1 |
-| Passes | `effects.blur_passes` | `2` | 1–8 | 1 |
-| Brightness | `effects.blur_brightness` | `1` | 0–2 | 0.05 |
-| Noise | `effects.blur_noise` | `0.00` | 0–1 | 0.01 |
-| Contrast | `effects.blur_contrast` | `0.900000` | 0–2 | 0.05 |
-| Vibrancy | `effects.blur_vibrancy` | `0.100000` | 0–1 | 0.01 |
-| Vibrancy darkness | `effects.blur_vibrancy_darkness` | `0` | 0–1 | 0.01 |
+| Ukuran | `effects.blur_size` | `6` | 1–64 | 1 |
+| Lulus | `effects.blur_passes` | `2` | 1–8 | 1 |
+| Kecerahan | `effects.blur_brightness` | `1` | 0–2 | 0,05 |
+| Kebisingan | `effects.blur_noise` | `0.00` | 0–1 | 0,01 |
+| Kontras | `effects.blur_contrast` | `0.900000` | 0–2 | 0,05 |
+| Semangat | `effects.blur_vibrancy` | `0.100000` | 0–1 | 0,01 |
+| Kegelapan yang cerah | `effects.blur_vibrancy_darkness` | `0` | 0–1 | 0,01 |
 
-Use `↑/↓` to move, `←/→` (or `+/-`) to change the selected value by its step, and `Enter` to type an exact value; values outside the range are refused. Nothing is written while you edit: the switch and the values stay in the draft until **[ Apply ]** at the bottom of thehalaman dipilih. Terapkan menulis setiap nilai yang diubah dalam satu panggilan, dan memuat ulang Hyprland setelahnya. Meninggalkan halaman dengan draf yang belum diterapkan akan meminta konfirmasi.
+Gunakan `↑/↓` untuk memindahkan, `←/→` (atau `+/-`) untuk mengubah nilai yang dipilih berdasarkan langkahnya, dan `Enter` untuk mengetikkan nilai yang tepat; nilai di luar rentang ditolak. Tidak ada yang tertulis saat Anda mengedit: tombol dan nilai tetap berada di draf hingga **[ Terapkan ]** di bagian bawah halaman yang dipilih. Terapkan penulisan setiap nilai yang diubah dalam satu panggilan, dan memuat ulang Hyprland setelahnya. Meninggalkan halaman dengan draf yang belum diterapkan akan meminta konfirmasi.
 
 Nilai-nilai diteruskan ke Hyprland sebagaimana adanya; ARGVUS tidak memperolehnya dari persentase. Mengubah saklar satu permukaan tidak mengubah nilainya.## Shadow
 
 Bayangan jendela adalah pengaturan global Hyprland, di bawah **Control Center → Hyprland → Borders → Shadow**. Hal ini independen dari transparansi dan blur: secara default dimatikan, dan mengaktifkan atau menonaktifkan transparansi sebuah permukaan tidak mengubahnya.
 
-| Row | Config key | Default | Range | `←/→` step |
+| Baris | Kunci konfigurasi | Bawaan | Rentang | Langkah `←/→` |
 |---|---|---|---|---|
-| Enable | `effects.shadow_enabled` | `false` | — | — |
-| Sharp | `effects.shadow_sharp` | `false` | — | — |
-| Color | `effects.shadow_color` | empty (follows the accent) | empty or `RRGGBBAA` | — |
-| Range | `effects.shadow_range` | `6` | 0–100 | 1 |
-| Render power | `effects.shadow_render_power` | `6` | 1–10 | 1 |
-| Offset X | `effects.shadow_offset_x` | `0` | −100 to 100 | 1 |
-| Offset Y | `effects.shadow_offset_y` | `0` | −100 to 100 | 1 |
-| Scale | `effects.shadow_scale` | `1.00` | 0–1 | 0.05 |
+| Aktifkan | `effects.shadow_enabled` | `false` | — | — |
+| Tajam | `effects.shadow_sharp` | `false` | — | — |
+| Warna | `effects.shadow_color` | kosong (mengikuti aksen) | kosong atau `RRGGBBAA` | — |
+| Rentang | `effects.shadow_range` | `6` | 0–100 | 1 |
+| Kekuatan render | `effects.shadow_render_power` | `6` | 1–10 | 1 |
+| Mengimbangi X | `effects.shadow_offset_x` | `0` | −100 hingga 100 | 1 |
+| Mengimbangi Y | `effects.shadow_offset_y` | `0` | −100 hingga 100 | 1 |
+| Skala | `effects.shadow_scale` | `1.00` | 0–1 | 0,05 |
 
 Warna kosong mengikuti aksen dari tema aktif dengan alfa `99`, sehingga aksen biru default memberikan `3590bd99`. Ketik delapan digit heksadesimal (`RRGGBBAA`) untuk mengatur warna, atau biarkan prompt kosong untuk kembali mengikuti aksen. Warna akan dibaca saat konfigurasi Hyprland dimuat, jadi setelah perubahan tema atau aksen, warna baru akan diterapkan pada pemuatan konfigurasi berikutnya.
 
@@ -123,7 +123,7 @@ $XDG_CONFIG_HOME/argvus/config.json
 
 Menonaktifkan saklar Transparansi atau Blur pada suatu permukaan hanya memengaruhi permukaan tersebut; nilai numerik yang disimpan tetap tersimpan untuk diaktifkan kembali nanti. Ekspor tema
 
-## Profiles
+## Profil
 
 mencakup pengaturan tampilan/efek kanonik dan proyeksi efek per-permukaan dari tema aktif. File runtime Waybar, Quickshell, dan Hyprland yang dihasilkan dibuat ulang saat tema diterapkan.
 

@@ -1,5 +1,5 @@
 ---
-title: Fonts and icons
+title: فونٹس اور شبیہیں
 description: ARGVUS ۔ﮟﯾﺩ ﺐﯿﺗﺮﺗ ﻮﮐ ﺰﻤﯿﮭﺗ ﻦﮑﺋﺁ ﺭﻭﺍ ﺲﭩﻧﻮﻓ ﮯﻟﺍﻭ ﮯﻧﻮﮨ ﻝﺎﻤﻌﺘﺳﺍ ﮟﯿﻣ
 ---
 
@@ -7,19 +7,19 @@ description: ARGVUS ۔ﮟﯾﺩ ﺐﯿﺗﺮﺗ ﻮﮐ ﺰﻤﯿﮭﺗ ﻦﮑﺋ
 
 ##                                                                       ﭧﻧﻮﻓ ﻢﮨﺍ
 
-The ARGVUS default primary font is **IBM Plex Mono**, with the  `Regular` `argvus-fonts` style. It is the default family used by the font targets exposed in Control Center. The bundled `13` package provides IBM Plex Mono and the supporting icon/terminal families used by the desktop.
+ARGVUS ڈیفالٹ پرائمری فونٹ **IBM Plex Mono** ہے، جس میں `Regular` `argvus-fonts` طرز ہے۔ یہ کنٹرول سینٹر میں سامنے آنے والے فونٹ اہداف کے ذریعہ استعمال ہونے والا ڈیفالٹ فیملی ہے۔ بنڈل `13` پیکیج IBM Plex Mono اور ڈیسک ٹاپ کے ذریعہ استعمال ہونے والے معاون آئیکن/ٹرمینل فیملیز فراہم کرتا ہے۔
 
 :ﮯﮑﺳ ﺎﺟ ﺎﯾﺩ ﺐﯿﺗﺮﺗ ﻮﮐ ﻑﺍﺪﮨﺍ ﯼﺩﺍﺮﻔﻧﺍ ﮧﮐﺎﺗ **ﺲﭩﻧﻮﻓ → ﺮﭩﻨﯿﺳ ﻝﻭﺮﭩﻨ
 
-- taskbar;
-- telemetry/system information;
-- Control Panel;
-- ARGVUS system interface;
-- applications;
-- terminal;
-- browser.
+- ٹاسک بار؛
+- ٹیلی میٹری/سسٹم کی معلومات؛
+- کنٹرول پینل؛
+- ARGVUS سسٹم انٹرفیس؛
+- ایپلی کیشنز؛
+- ٹرمینل؛
+- براؤزر
 
-The default sizes are target-specific: taskbar, system and terminal use `14`; telemetry and Control Panel use `12`; applications use `10`; and browser uses argvus-appearance. These defaults can be restored from the Fonts page.
+پہلے سے طے شدہ سائز ہدف کے لیے مخصوص ہیں: ٹاسک بار، سسٹم اور ٹرمینل کا استعمال `14`؛ ٹیلی میٹری اور کنٹرول پینل کا استعمال `12`؛ ایپلیکیشنز `10` استعمال کرتی ہیں اور براؤزر argvus-ظہور کا استعمال کرتا ہے۔ ان ڈیفالٹس کو فونٹس کے صفحہ سے بحال کیا جا سکتا ہے۔
 
 ## ﻢﯿﮭﺗ ﻦﮑﯿﺋﺁ
 
@@ -29,7 +29,7 @@ The default sizes are target-specific: taskbar, system and terminal use `14`; te
 
 - GNOME ﺕﺎﺒﯿﺗﺮﺗ ﯽﮐ: `org.gnome.desktop.interface icon-theme`;
 - GTK 3 ﺭﻭﺍ GTK 4: `gtk-icon-theme-name`                                              ﮟﯿﻣ ﯽﻣﺎﻘﻣ ﺭﻭﺍ ﺲﯾﺍ ﻮﯾ ﯼﻭ ﯽﺟ ﺭﺁ ﯼﺍ`settings.ini` files;
-- Qt: `icon_theme` ﻢﻈﻨﻣ `qt6ct.conf` ﯽﺗﺭﺪﻗ ﺭﻭﺍ ،ﮟﯿﻣ `qt6ct.conf` 
+- Qt: `icon_theme` ﻢﻈﻨﻣ `qt6ct.conf` ﯽﺗﺭﺪﻗ ﺭﻭﺍ ،ﮟﯿﻣ `qt6ct.conf`
 
 
 

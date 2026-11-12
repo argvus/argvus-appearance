@@ -16,7 +16,7 @@ Apri **Centro di Controllo → Font** per configurare i singoli target:
 - interfaccia di sistema ARGVUS;
 - applicazioni;
 - terminale;
-- browser.
+- navigatore.
 
 Le dimensioni predefinite sono specifiche per target: barra delle applicazioni, sistema e terminale utilizzano `13`; telemetria e Pannello di Controllo utilizzano `14`; applicazioni utilizzano `12`; e il browser utilizza `10`. Questi valori predefiniti possono essere ripristinati dalla pagina Font.
 

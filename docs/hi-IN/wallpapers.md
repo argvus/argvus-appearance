@@ -1,5 +1,5 @@
 ---
-title: Wallpapers
+title: वॉलपेपर
 description: बिल्ट-इन और कस्टम ARGVUS वॉलपेपर का उपयोग करें।
 ---
 
@@ -10,6 +10,6 @@ description: बिल्ट-इन और कस्टम ARGVUS वॉलप�
 
 उपयोगकर्ता-सामना करने वाले दिखावे नियंत्रण Hyprland सहायक `hypr-wallpaper-pick.sh` का उपयोग करते हैं, जो स्वयं वॉलपेपर स्थिति संग्रहीत करने के बजाय चुने हुए पथ को `argvus config` के माध्यम से प्रतिबद्ध करता है। सीधे उत्पन्न वॉलपेपर कॉन्फ़िगरेशन को संपादित न करें।
 
- for the installed and user paths. for the installed and user paths.(/docs/components/argvus-themes/import-and-export/).
+ स्थापित और उपयोगकर्ता पथों के लिए। स्थापित और उपयोगकर्ता पथ के लिए। (/docs/components/argvus-themes/import-and-export/)।
 
 जब किसी थीम को निर्यात किया जाता है, तो वर्तमान वॉलपेपर इमेज शामिल की जाती है जब यह पढ़ने योग्य होती है। आयात करने पर थीम इंस्टॉल होती है; इसे लागू करने पर इसका वॉलपेपर सक्रिय हो जाता है। देखें [थीम्स को आयात और निर्यात करना](/docs/components/argvus-themes/import-and-export/).

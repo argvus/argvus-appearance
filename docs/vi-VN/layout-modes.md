@@ -1,5 +1,5 @@
 ---
-title: Layout modes
+title: Các chế độ bố cục
 description: Chọn bố cục desktop Sticky hoặc Spaced.
 ---
 

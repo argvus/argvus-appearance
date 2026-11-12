@@ -1,23 +1,23 @@
 ---
-title: Fonts and icons
+title: Phông chữ và biểu tượng
 description: Cấu hình phông chữ và chủ đề biểu tượng được ARGVUS sử dụng.
 ---
 
 `argvus-fonts` cài đặt các phông chữ đi kèm theo mục `/usr/share/fonts/`; `argvus-icons` cài đặt các chủ đề biểu tượng ARGVUS. `argvus-appearance` và Trung tâm Điều khiển kết nối các tài nguyên này với chủ đề desktop.
 
-## 
+##
 
 Phông chữ chính mặc định của ARGVUS là **IBM Plex Mono**, với kiểu `Regular`. Đây là họ mặc định được sử dụng bởi các mục tiêu phông chữ được hiển thị trong Trung tâm Điều khiển. Gói `argvus-fonts` đi kèm cung cấp IBM Plex Mono và các họ biểu tượng/terminal hỗ trợ được sử dụng bởi máy tính để bàn. Mở
 
 **Trung tâm Điều khiển → Phông chữ** để cấu hình các mục tiêu riêng lẻ:
 
-- taskbar;
-- telemetry/system information;
-- Control Panel;
-- ARGVUS system interface;
-- applications;
-- terminal;
-- browser.
+- thanh tác vụ;
+- thông tin từ xa/hệ thống;
+- Bảng điều khiển;
+- Giao diện hệ thống ARGVUS;
+- ứng dụng;
+- phần cuối;
+- trình duyệt.
 
 Kích thước mặc định phụ thuộc vào từng mục tiêu: thanh tác vụ, hệ thống và terminal sử dụng `13`; theo dõi và Bảng điều khiển sử dụng `14`; ứng dụng sử dụng `12`; và trình duyệt sử dụng `10`. Có thể khôi phục các mặc định này từ trang Phông chữ.
 

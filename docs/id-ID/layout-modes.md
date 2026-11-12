@@ -1,5 +1,5 @@
 ---
-title: Layout modes
+title: Mode tata letak
 description: Pilih tata letak desktop Sticky atau Spaced.
 ---
 

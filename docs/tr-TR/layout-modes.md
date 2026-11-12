@@ -1,5 +1,5 @@
 ---
-title: Layout modes
+title: Düzen modları
 description: Sticky veya Aralıklı masaüstü düzenini seçin.
 ---
 

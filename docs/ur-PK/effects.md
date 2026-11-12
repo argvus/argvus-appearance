@@ -1,5 +1,5 @@
 ---
-title: Effects
+title: اثرات
 description:                 ۔ﺖﯿﻓﺎﻔﺷ ﺢﻄﺳ ﯽﻓ ﺭﻭﺍ ﺮﻠﺑ ﮉﻨﯿﻟﺮﭙﺋﺎﮨ ﯽﻤﻟﺎﻋ ،ﮟﯾﺩ ﺐﯿﺗﺮﺗ ﻮﮐ ﺰﻨﺸﯿﻤﯿﻨﯾﺍ
 ---
 
@@ -13,15 +13,15 @@ description:                 ۔ﺖﯿﻓﺎﻔﺷ ﺢﻄﺳ ﯽﻓ ﺭﻭﺍ ﺮ
 
 
 
-- **اینیمیشن** ( /effects  hyprland.lua  [colors-dark] blur  [colors-dark] alpha  `$XDG_CONFIG_HOME/argvus/data/control-center/foot.ini`  `[colors-dark] alpha`  `[colors-dark] blur`  `hyprland.lua`  `/effects` `/effects/animations`) حرکت کرنے والی ہر چیز کو کنٹرول کرتا ہے: ورک اسپیس، ونڈو، فیڈ، بارڈر اور پرت اینیمیشن۔-                                   ) ﮯﮨ ﭧﮐ ﭦﺭﺎﺷ ﮏﯾﺍ ﮯﯿﻟ ﮯﮐ ﮯﻧﺮﮐ ﻻ﻿ﺪﻨﮬﺩ **ﺕﺍﺮﺛﺍ**`/effects/blur_global_enabled`     ) ﺖﯿﻓﺎﻔﺷ ﯽﮐ ﺭﺎﺑ ﮏﺳﺎﭨ ﺭﻭﺍ ﻞﻨﯿﭘ ﻝﻭﺮﭩﻨﮐ ،ﯼﺮﭩﯿﻣ ﯽﻠﯿﭨ ﭧﯿﺟﻭ ،ﺮﭽﻧﻻ﻿ ،ﻞﻨﯿﻣﺮﭨ ﺭﻭﺍ (`/effects/transparency_<surface>_enabled`۔ﮞﻮﮨ ﻑﺁ ﺐﺳ ﺐﺟ ﺮﭘ ﺭﻮﻃ ﮯﮐ ﻑﺁ ﺐﺗ ﻑﺮﺻ ﺭﻭﺍ **ﻮﮨ ﻥﺁ ﮏﯾﺍ ﻢﮐ ﺯﺍ ﻢﮐ ﺐﺟ ﮯﮨ ﺎﺗﺎﺟ ﺎﮬﮍﭘ ﺮﭘ 
+- **اینیمیشن** ( /effects  hyprland.lua  [colors-dark] blur  [colors-dark] alpha  `$XDG_CONFIG_HOME/argvus/data/control-center/foot.ini`  `[colors-dark] alpha`  `[colors-dark] blur`  `hyprland.lua`  `/effects` `/effects/animations`) حرکت کرنے والی ہر چیز کو کنٹرول کرتا ہے: ورک اسپیس، ونڈو، فیڈ، بارڈر اور پرت اینیمیشن۔-                                   ) ﮯﮨ ﭧﮐ ﭦﺭﺎﺷ ﮏﯾﺍ ﮯﯿﻟ ﮯﮐ ﮯﻧﺮﮐ ﻻ﻿ﺪﻨﮬﺩ **ﺕﺍﺮﺛﺍ**`/effects/blur_global_enabled`     ) ﺖﯿﻓﺎﻔﺷ ﯽﮐ ﺭﺎﺑ ﮏﺳﺎﭨ ﺭﻭﺍ ﻞﻨﯿﭘ ﻝﻭﺮﭩﻨﮐ ،ﯼﺮﭩﯿﻣ ﯽﻠﯿﭨ ﭧﯿﺟﻭ ،ﺮﭽﻧﻻ﻿ ،ﻞﻨﯿﻣﺮﭨ ﺭﻭﺍ (`/effects/transparency_<surface>_enabled`۔ﮞﻮﮨ ﻑﺁ ﺐﺳ ﺐﺟ ﺮﭘ ﺭﻮﻃ ﮯﮐ ﻑﺁ ﺐﺗ ﻑﺮﺻ ﺭﻭﺍ **ﻮﮨ ﻥﺁ ﮏﯾﺍ ﻢﮐ ﺯﺍ ﻢﮐ ﺐﺟ ﮯﮨ ﺎﺗﺎﺟ ﺎﮬﮍﭘ ﺮﭘ
 
 Use `argvus effects-toggle animations status|enable|disable|toggle` and `argvus effects-toggle effects status|enable|disable|toggle`. The Control Panel Appearance card shows one switch for each. Turning a master switch off keeps every fine setting of the **Animations** and **Blur** pages (speeds, curves, per-leaf switches, blur size and passes), so turning it on again restores the same look. `effects status` prints `enabled` when blur or at least one of those transparency surfaces is enabled. Turning a surface's transparency off makes the whole Waybar surface opaque: besides the background, the translucent borders of the taskbar and the Widget Telemetry become the solid color they show ۔ﮯﮨ ﯽﺗﺮﮐ ﺪﻨﺑ ﮯﺳﺍ ﮓﻨﭩﯿﺳ ﺢﺿﺍﻭ ﮏﯾﺍ ﻑﺮﺻ ؛ﺰﻨﺸﯿﺳ ﮯﻟﺍﻭ ﯽﺋﺎﻧﺍﻮﺗ ﻢﮐ ﺭﻭ
 
-## 
+##
 
 `argvus effects-toggle`     :ﮯﮨ ﺎﺘﻟﺍﮈ ﺮﺛﺍ ﺮﭘ ﺖﯿﻓﺎﻔﺷ ﺭﻭﺍ ﻦﭘ ﻻ﻿ﺪﻨﮬﺩ ،ﻦﺸﯿﻤﯿﻨﯾﺍ ﮫﺗﺎﺳ ﮏﯾﺍ ﻮﺟ ﮯﮐ ﺰﺟ ﯽﺴﮐ ﺮﯿﻐﺑ`status` prints `enabled`                                                     ،ﮞﻮﮨ ﻝﺎﻌﻓ ﮞﻮﻨﯿﺗ ﺐﺟ ﺐﺗ ﻑﺮﺻ`enable` and `disable`                                                       ﺭﻭﺍ ،ﮟﯾﺮﮐ ﭻﺋﻮﺳ ﻮﮐ ﮞﻮﻨﯿﺗ`toggle`                                                      ﮯﮨ ﺎﺘﯾﺩ ﺮﮐ ﺪﻨﺑ ﮫﭽﮐ ﺐﺳ ﺐﺟ`status` is `enabled`:ﮟﯾﺩ ﻡﺎﻧ ﮯﺳﺍ ،ﮯﯿﻟ ﮯﮐ ﮯﻧﺮﮐ ﻞﻤﻋ ﺮﭘ ﭖﻭﺮﮔ ﮏﯾﺍ ﯽﺴﮐ ۔ﮯﮨ ﺎﺗﻮﮨ ﻝﺎﻤﻌﺘﺳﺍ ﮯﯿﻟ ﮯﮐ ﮯﻧﻼ﻿ﭼ ﻮﮐ `argvus effects-toggle animations|effects|blur|transparency status|enable|disable|toggle`۔ﮯﮨ ﺎﺗﺮﮐ ﻞﯾﺪﺒﺗ ﻮﮐ ﺮﯾﻭﺎﺼﺗ ﮎﺮﺤﺘﻣ ﻑﺮﺻ ﯽﮭﺑ ﺏﺍ ﭻﺋﻮﺳ **Enable** ﺎﮐ ﺱﺍ ﮯﯿﻟ ﺱﺍ ،ﮯﮨ ﺎﺗﺮ
 
-## Transparency
+## شفافیت
 
 
 
@@ -29,15 +29,15 @@ Use `argvus effects-toggle animations status|enable|disable|toggle` and `argvus 
 
 
 
-Use  -  +  100%  `0%`  `100%`  `+`  `-` `↑` and `↓` to move between **Enable** and **Value**. On the **Value** row, `+` and `-` adjust the draft without changing focus. Press `Tab` to open **Actions**, then activate **[ Apply ]**; `Esc` returns to the parent surface page.
+استعمال کریں - + 100% `0%` `100%` `+` `-` `↑` اور `↓` **Enable** اور **Value** کے درمیان منتقل کرنے کے لیے۔ **ویلیو** قطار پر، `+` اور `-` فوکس کو تبدیل کیے بغیر ڈرافٹ کو ایڈجسٹ کریں۔ **Actions** کھولنے کے لیے `Tab` کو دبائیں، پھر فعال کریں **[ اپلائی کریں]**؛ `Esc` بنیادی سطح کے صفحہ پر واپس آتا ہے۔
 
-## Animations
+## متحرک تصاویر
 
 ۔ﮯﮨ ﺎﺗﻮﮨ ﻒﺻ **ﮟﯾﺮﮐ ﻝﺎﻌﻓ** ﮏﯾﺍ ﯽﮭﺑ ﺱﺎﭘ ﮯﮐ ﻥﺍ ﮯﮨ ﺎﺘﮑﺳ ﺮﮐ ﺪﻨﺑ ﮉﻨ
 
 
 
-Controls:  `effects.animations` `↑/↓` moves between rows; `←/→` (or `+/-`) changes the selected value and cycles **Style** and **Curve**; `Enter` types an exact **Speed**, **Pop-in percentage** or curve parameter (out-of-range values are refused), and cycles **Style** and **Curve** forward.
+Controls:  `effects.animations` `↑/↓` قطاروں کے درمیان حرکت کرتا ہے۔ `←/→` (یا `+/-`) منتخب قدر اور سائیکل کو تبدیل کرتا ہے **اسٹائل** اور **کرو**؛ `Enter` ایک عین مطابق **رفتار**، **پاپ ان فیصد** یا وکر پیرامیٹر (حد سے باہر کی قدروں سے انکار کر دیا گیا ہے)، اور **اسٹائل** اور **کرو** کو آگے بڑھاتے ہیں۔
 
 ###                                                               ﮟﯿﺘﮐﺮﺣ ﺭﻭﺍ ﻡﺎﺴﻗﺍ
 
@@ -63,9 +63,9 @@ Controls:  `effects.animations` `↑/↓` moves between rows; `←/→` (or `+/-
 
 
 
-### Curves
+### منحنی خطوط
 
-| Curve | Behavior | Parameters (key → default) |
+| وکر | سلوک | پیرامیٹرز (کلید → ڈیفالٹ) |
 |---|---|---|
 |  _enabled  _popin  _style  _curve  effects.animation_<key>_speed  default  gnomed  popin  slidefadevert  slidevert  slidefade  fade  `slide`  slidefadevert  slidevert  slidefade  fade  `popin`  slide  gnomed  slidefadevert  slidevert  `slidefade`  `slidevert` `slidefadevert`  `gnomed`   `slide`  `popin`  `fade`  `slidefade`  `slidevert`  `slidefadevert`  `slide`  `fade`  `slidefade`  `slidevert`  `slidefadevert`  `popin`  `gnomed`  `default`  `effects.animation_<key>_speed`  `_curve`  `_style`  `_popin`  `_enabled` `default` | The curve Hyprland 0.56.2 ships for that animation (for example `easeOutQuint`, `almostLinear`, `quick`, `linear` or the `easy` spring). Animations without a stock curve use ARGVUS's built-in Bézier. | Fixed. |
 | `bezier` | ۔ﯽﺌﮔ ﯼﺩ ﻞﮑﺷ ﮯﻌﯾﺭﺫ ﮯﮐ ﺲﭩﻨﺋﺍﻮﭘ ﻝﻭﺮﭩﻨﮐ ﻭﺩ ،ﮯﮨ ﯽﺗﻮﮨ ﺖﺴﺳ ﺭﻭﺍ ﺰﯿﺗ ﻮﺟ ﺖﮐﺮﺣ ﺭﺍﻮﻤﮨ |`bezier_x1` 0.23, `bezier_y1` 1, `bezier_x2` 0.32, `bezier_y2` 1 (x 0–1, y −2–3) |
@@ -79,27 +79,27 @@ Controls:  `effects.animations` `↑/↓` moves between rows; `←/→` (or `+/-
 
 
 
-## Blur
+## دھندلا
 
 
 
 | Row | Config key | Default | Range |  `decoration:blur` `←/→` step |
 |---|---|---|---|---|
-| Size | `effects.blur_size` | `6` | 1–64 | 1 |
-| Passes | `effects.blur_passes` | `2` | 1–8 | 1 |
-| Brightness | `effects.blur_brightness` | `1` | 0–2 | 0.05 |
-| Noise | `effects.blur_noise` | `0.00` | 0–1 | 0.01 |
-| Contrast | `effects.blur_contrast` | `0.900000` | 0–2 | 0.05 |
-| Vibrancy | `effects.blur_vibrancy` | `0.100000` | 0–1 | 0.01 |
-| Vibrancy darkness | `effects.blur_vibrancy_darkness` | `0` | 0–1 | 0.01 |
+| سائز | `effects.blur_size` | `6` | 1–64 | 1 |
+| پاس | `effects.blur_passes` | `2` | 1–8 | 1 |
+| چمک | `effects.blur_brightness` | `1` | 0–2 | 0.05 |
+| شور | `effects.blur_noise` | `0.00` | 0–1 | 0.01 |
+| کنٹراسٹ | `effects.blur_contrast` | `0.900000` | 0–2 | 0.05 |
+| متحرک | `effects.blur_vibrancy` | `0.100000` | 0–1 | 0.01 |
+| متحرک تاریکی | `effects.blur_vibrancy_darkness` | `0` | 0–1 | 0.01 |
 
 
 
 ۔ﮟﯿﺗﻮﮨ ﮟﯿﮩﻧ ﻞﯾﺪﺒﺗ ﺯﻮﯿﻠﯾﻭ ﮯﺳ ﮯﻧﺮﮐ ﻞﯾﺪﺒﺗ ﻮﮐ ﭻﺋﻮﺳ ﮯﮐ ﺢﻄﺳ ﮏﯾﺍ ۔ﺎﺘﻟﺎﮑﻧ ﮟﯿﮩﻧ ﮯﺳ ﺪﺼﯿﻓ
 
-## Shadow
+## سایہ
 
-۔ﺎﺗﻮﮨ ﮟﯿﮩﻧ ﻞﯾﺪﺒﺗ ﮧﯾ ﮯﺳ ﮯﻧﺮﮐ ﻑﺁ ﺎﯾ ﻥﺁ ﻮﮐ ﺖﯿﻓﺎﻔﺷ ﯽﮐ ﺢﻄﺳ ﯽﺴﮐ ﺭﻭﺍ ،ﮯﮨ ﺪﻨﺑ ﮯﺳ ﮯﻠﮩﭘ 
+۔ﺎﺗﻮﮨ ﮟﯿﮩﻧ ﻞﯾﺪﺒﺗ ﮧﯾ ﮯﺳ ﮯﻧﺮﮐ ﻑﺁ ﺎﯾ ﻥﺁ ﻮﮐ ﺖﯿﻓﺎﻔﺷ ﯽﮐ ﺢﻄﺳ ﯽﺴﮐ ﺭﻭﺍ ،ﮯﮨ ﺪﻨﺑ ﮯﺳ ﮯﻠﮩﭘ
 
 | Row | Config key | Default | Range |  Enter  +/-  ←/→  `↑/↓`  `←/→`  `+/-`  `Enter` `←/→` step |
 |---|---|---|---|---|
@@ -108,8 +108,8 @@ Controls:  `effects.animations` `↑/↓` moves between rows; `←/→` (or `+/-
 | رنگ | `effects.shadow_color` | خالی (لہجے کی پیروی کرتا ہے) | خالی یا `RRGGBBAA` | - |
 | رینج | `effects.shadow_range` | `6` | 0–100 | 1 |
 | رینڈر پاور | `effects.shadow_render_power` | `6` | 1–10 | 1 || Offset X | `effects.shadow_offset_x` | `0` | −100 to 100 | 1 |
-| Offset Y | `effects.shadow_offset_y` | `0` | −100 to 100 | 1 |
-| Scale | `effects.shadow_scale` | `1.00` | 0–1 | 0.05 |
+| آفسیٹ Y | `effects.shadow_offset_y` | `0` | −100 سے 100 | 1 |
+| پیمانہ | `effects.shadow_scale` | `1.00` | 0–1 | 0.05 |
 
 
 
@@ -125,7 +125,7 @@ $XDG_CONFIG_HOME/argvus/config.json
 
 ۔ﮟﯿﮨ ﯽﺗﺎﺟ ﯽﮭﮐﺭ ﺭﺍﺮﻗﺮﺑ ﮯﯿﻟ ﮯﮐ ﮯﻧﺮﮐ ﻝﺎﻌﻓ ﮦﺭﺎﺑﻭﺩ ﮟﯿﻣ ﺪﻌﺑ ﺭﺍﺪﻗﺍ ﯼﺩﺪﻋ ﮦﺪﺷ ﻅﻮﻔﺤﻣ ؛ﮯﮨ
 
-## Profiles
+## پروفائلز
 
 ۔ﮟﯿﮨ ﯽﺗﺎﺟ ﯽﮐ ﭧﯾﺮﻨﺟ ﮦﺭﺎﺑﻭﺩ ﺰﻠﺋﺎﻓ ﻢﺋﺎﭨ ﻥﺭ ﮉﻨﯿﻟﺮﭙﺋﺎﮨ ﺭﻭﺍ ﻞﯿﺷ ﮏﯿﺋﻮﮐ ،ﺭﺎﺑ ﮮﻭ ﮦﺪﺷ ﭧﯾ
 
@@ -133,4 +133,4 @@ $XDG_CONFIG_HOME/argvus/config.json
 
 ## ﭧﺋﻻ﻿ ﭧﺋﺎﻧ
 
-**SUPER + Shift + B** keeps the brightness selector and adds a separate Night Light toggle with effective state/temperature. It calls  argvus-config  `[ Apply ]`  `argvus-config` `argvus config display night-light status|toggle`. Night Light requires Hyprland and a responding Hyprsunset >= 0.4.0, independently of brightness support. The range is 1000–20000 K; configuration is under **Desktop ۔ﺎﺘﻟﺪﺑ ﮟﯿﮩﻧ ﮫﭽﮐ ﮯﺳ ﮯﻧﺮﮐ ﺥﻮﺴﻨﻣ ﻮﻨﯿﻣ ۔ﮯﮨ ﺎﺗﻮﮨ ﮉﯿﺋﺍﺭ ﺭﻭﻭﺍ ﯽﺿﺭﺎﻋ
+**SUPER + Shift + B** برائٹنس سلیکٹر کو برقرار رکھتا ہے اور موثر حالت/درجہ حرارت کے ساتھ ایک علیحدہ نائٹ لائٹ ٹوگل شامل کرتا ہے۔ یہ argvus-config `[ Apply ]` `argvus-config` `argvus config display night-light status|toggle` کو کال کرتا ہے۔ نائٹ لائٹ کے لیے Hyprland اور جواب دینے والے Hyprsunset >= 0.4.0 کی ضرورت ہوتی ہے، آزادانہ طور پر برائٹنس سپورٹ۔ رینج 1000–20000 K ہے۔ کنفیگریشن **Desktop ۔@ﺎﺗﻟﺪﺑ ﮟﯿﮩﻧ ﮫﭽﮐ ﮯﺳ ﮯﻧﺮﮐ ﺥﻮﺴﻨﻣ ﻮﻨﯿﻣ ۔ﮯﮨ ﺎﺗﻮﮨ ﮉﯿﺋﺍﺭ ﺭﻭﻭﺍ ﯽﺿﺭﺎﻋ کے تحت ہے

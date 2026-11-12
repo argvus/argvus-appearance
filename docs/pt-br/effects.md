@@ -82,7 +82,7 @@ Faixas e passos: **Speed** (Velocidade) 1–10 com decimais (passo 0.1, pois as 
 
 Não oferecido: o Hyprland 0.56.2 não tem animação separada para redimensionamento de janelas, para pop-ups nem para os ângulos de gradiente de sombra e de brilho, então a página não mostra linhas para eles.
 
-## Blur
+## Desfoque
 
 O Blur é uma única configuração global do Hyprland, compartilhada por toda superfície que a ativa. Abra **Control Center → Hyprland → Blur**. A página tem o controle **Ligar** e a lista **Valores** com os parâmetros de `decoration:blur` do Hyprland, com os nomes usados pelo Hyprland:
 

@@ -1,5 +1,5 @@
 ---
-title: Fonts and icons
+title: Font dan ikon
 description: Konfigurasikan font dan tema ikon yang digunakan oleh ARGVUS.
 ---
 
@@ -11,13 +11,13 @@ Font utama default ARGVUS adalah **IBM Plex Mono**, dengan gaya `Regular`. Ini a
 
 Buka **Control Center → Fonts** untuk mengonfigurasi target individu:
 
-- taskbar;
-- telemetry/system information;
-- Control Panel;
-- ARGVUS system interface;
-- applications;
+- bilah tugas;
+- telemetri/sistem informasi;
+- Panel Kontrol;
+- Antarmuka sistem ARGVUS;
+- aplikasi;
 - terminal;
-- browser.
+- peramban.
 
 Ukuran default bersifat spesifik sesuai target: taskbar, sistem, dan terminal menggunakan `13`; telemetri dan Panel Kontrol menggunakan `14`; aplikasi menggunakan `12`; dan browser menggunakan `10`. Default ini dapat dikembalikan dari halaman Font.
 
@@ -27,7 +27,7 @@ Tema ikon aktif disimpan secara kanonik sebagai `appearance.icon_theme` di `conf
 
 `sh/icon-switch.sh` menyelesaikan tema yang efektif dan menerapkannya ke setiap pengguna:
 
-- GNOME settings: `org.gnome.desktop.interface icon-theme`;
+- Pengaturan GNOME: `org.gnome.desktop.interface icon-theme`;
 - GTK 3 dan GTK 4: `gtk-icon-theme-name`di ARGVUS dan asli`settings.ini` files;
 - Qt: `icon_theme`dalam yang dikelola`qt6ct.conf`, dan dalam bahasa asli`qt6ct.conf` saat itu dihasilkan oleh ARGVUS.
 

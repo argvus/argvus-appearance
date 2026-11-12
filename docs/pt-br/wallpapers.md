@@ -1,5 +1,5 @@
 ---
-title: Wallpapers
+title: Papéis de parede
 description: Use wallpapers integrados e personalizados.
 ---
 

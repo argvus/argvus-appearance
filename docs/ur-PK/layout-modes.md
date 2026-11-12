@@ -1,6 +1,6 @@
 ---
-title: Layout modes
+title: لے آؤٹ موڈز
 description:                                   ۔ﮟﯾﺮﮐ ﺐﺨﺘﻨﻣ ﭦﺅﺁ ﮯﻟ ﭖﺎﭨ ﮏﺴﯾﮈ ﮦﺪﺷ ﻒﻗﻭ ﺎﯾ ﺎﭙﭽﭙﭼ
 ---
 
- -float  float  -spaced  spaced  sticky  /layout/variant  `SUPER + Shift + M` `/layout/variant`  `sticky`  `spaced`  `-spaced`  `float`  `-float`  
+ -float  float  -spaced  spaced  sticky  /layout/variant  `SUPER + Shift + M` `/layout/variant`  `sticky`  `spaced`  `-spaced`  `float`  `-float`

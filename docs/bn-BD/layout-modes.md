@@ -1,5 +1,5 @@
 ---
-title: Layout modes
+title: লেআউট মোড
 description: স্টিকি বা স্পেসড ডেস্কটপ লেআউট নির্বাচন করুন।
 ---
 

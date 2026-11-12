@@ -137,6 +137,6 @@ L'esportazione del tema include le impostazioni canoniche di aspetto/effetti e l
 
 Tutte le pagine di superficie applicano le loro bozze insieme al pulsante `[ Apply ]`. Il Centro di Controllo scrive il documento canonico tramite l'assistente degli effetti, permette a `argvus-config` di proiettare l'albero degli effetti, ricarica i consumatori interessati e legge nuovamente il valore effettivo. I file generati vengono ricreati piuttosto che importati come stato autorevole.
 
-## Night Light
+## Luce notturna
 
 **SUPER + Shift + B** mantiene il selettore della luminosità e aggiunge un toggle Night Light separato con stato/temperatura effettiva. Chiama `argvus config display night-light status|toggle`. Night Light richiede Hyprland e un Hyprsunset rispondente >= 0.4.0, indipendentemente dal supporto della luminosità. L'intervallo è 1000–20000 K; la configurazione si trova sotto **Desktop & Input > Displays > Night Light** nel Centro di Controllo. Un toggle è persistente senza programmazione, oppure un override volatile fino alla prossima transizione con programmazione. Annullare il menu non cambia nulla.

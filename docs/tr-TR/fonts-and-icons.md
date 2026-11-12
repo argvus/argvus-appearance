@@ -1,5 +1,5 @@
 ---
-title: Fonts and icons
+title: Yazı tipleri ve simgeler
 description: ARGVUS tarafından kullanılan yazı tiplerini ve simge temalarını yapılandırın.
 ---
 
@@ -11,13 +11,13 @@ ARGVUS varsayılan birincil yazı tipi **IBM Plex Mono** olup, `Regular` stilind
 
 Aç **Kontrol Merkezi → Yazı Tipleri** ile bireysel hedefleri yapılandırabilirsiniz:
 
-- taskbar;
-- telemetry/system information;
-- Control Panel;
-- ARGVUS system interface;
-- applications;
+- görev çubuğu;
+- telemetri/sistem bilgisi;
+- Kontrol Paneli;
+- ARGVUS sistem arayüzü;
+- uygulamalar;
 - terminal;
-- browser.
+- tarayıcı.
 
 Varsayılan boyutlar hedefe özeldir: görev çubuğu, sistem ve terminal `13` kullanır; telemetri ve Denetim Masası `14` kullanır; uygulamalar `12` kullanır; ve tarayıcı `10` kullanır. Bu varsayılanlar Yazı Tipleri sayfasından geri yüklenebilir.
 

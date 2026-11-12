@@ -1,5 +1,5 @@
 ---
-title: Wallpapers
+title: Hình nền
 description: Sử dụng hình nền ARGVUS tích hợp sẵn và tùy chỉnh.
 ---
 

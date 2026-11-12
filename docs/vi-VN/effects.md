@@ -1,5 +1,5 @@
 ---
-title: Effects
+title: Hiệu ứng
 description: Định cấu hình hoạt ảnh, độ mờ Hyprland toàn cầu và độ trong suốt trên mỗi bề mặt.
 ---
 
@@ -12,13 +12,13 @@ Có hai công tắc chính độc lập, cả hai đều được áp dụng cho
 - **Hoạt hình** (`/effects/animations`) điều khiển mọi thứ chuyển động: không gian làm việc, cửa sổ, mờ dần, viền và các hoạt hình lớp.
 - **Hiệu ứng** là một phím tắt cho hiệu ứng mờ (`/effects/blur_global_enabled`) và độ trong suốt của Terminal, Launcher, Widget Telemetry, Bảng điều khiển và Thanh tác vụ (`/effects/transparency_<surface>_enabled`). Bật hoặc tắt nó sẽ ghi tất cả chúng (và cả độ trong suốt của Trung tâm Điều khiển). Mỗi bề mặt giữ trang độ trong suốt riêng của nó, vì vậy Hiệu ứng sẽ được coi là **bật khi ít nhất một trong số chúng được bật** và sẽ tắt chỉ khi tất cả đều tắt.
 
-Sử dụng `argvus effects-toggle animations status|enable|disable|toggle` và `argvus effects-toggle effects status|enable|disable|toggle`. Thẻ Giao diện Bảng Điều khiển hiển thị một công tắc cho mỗi nút. Việc tắt công tắc chính sẽ giữ nguyên mọi cài đặt tốt của các trang **Hoạt hình** và **Blur** (tốc độ, đường cong, công tắc trên mỗi lá, kích thước làm mờ và đường chuyền), do đó, bật lại công tắc này sẽ khôi phục giao diện tương tự. `effects status` in `enabled` khi bị mờ hoặc ở least one of those transparency surfaces is enabled. Turning a surface's transparency off makes the whole Waybar surface opaque: besides the background, the translucent borders of the taskbar and the Widget Telemetry become the solid color they show over the theme background. Every effect is enabled by default on a fresh install, including on virtual machines and low-power sessions; only an explicit setting turns one off.
+Sử dụng `argvus effects-toggle animations status|enable|disable|toggle` và `argvus effects-toggle effects status|enable|disable|toggle`. Bảng điều khiển Giao diện Thẻ hiển thị một quy tắc cho mỗi nút. Việc tắt công tắc chính sẽ giữ nguyên mọi cài đặt tốt của các trang ** Hoạt hình** và **Blur** (tốc độ, đường cong, công tắc trên mỗi lá, kích thước làm mờ và đường sóc), do đó, hãy bật lại công tắc này sẽ khôi phục lại giao diện tương tự. `effects status` trong `enabled` khi bị mờ hoặc có ít nhất một trong các bề mặt trong suốt đó được bật. Việc tắt độ trong suốt của một bề mặt sẽ làm cho toàn bộ bề mặt Waybar mờ đục: ngoài nền, các đường viền mờ của thanh tác vụ và Widget Telemetry trở thành màu đồng nhất mà chúng hiển thị trên nền chủ đề. Theo mặc định, mọi hiệu ứng đều được bật trên bản cài đặt mới, bao gồm cả trên máy ảo và các phiên sử dụng năng lượng thấp; chỉ có một cài đặt rõ ràng sẽ tắt một cái.
 
 ## Tất cả các hiệu ứng cùng lúc
 
 `argvus effects-toggle` không có một thành phần nào thao tác trên hoạt ảnh, mờ và trong suốt cùng nhau: `status` in `enabled` chỉ khi cả ba được bật, `enable` và `disable` chuyển đổi cả ba, và `toggle` tắt tất cả mọi thứ khi `status` là `enabled` và bật trong các trường hợp khác. **SUPER + F6** chạy công tắc này. Để thao tác trên một nhóm duy nhất, đặt tên cho nó: `argvus effects-toggle animations|effects|blur|transparency status|enable|disable|toggle`. Trang **Hoạt ảnh** của Trung tâm Điều khiển sử dụng dạng theo thành phần, vì vậy công tắc **Bật** của nó vẫn chỉ thay đổi hoạt ảnh.
 
-## Transparency
+## Minh bạch
 
 Mỗi bề mặt có menu con **Độ trong suốt** riêng với công tắc bật và giá trị.
 
@@ -28,7 +28,7 @@ Mỗi giá trị dao động từ `0%` (mờ đục) đến `100%` (hoàn toàn 
 
 Sử dụng `↑` và `↓` để di chuyển giữa **Bật** và **Giá trị**. Trên hàng **Giá trị**, `+` và `-` điều chỉnh bản nháp mà không thay đổi tiêu điểm. Nhấn `Tab` để mở **Hành động**, sau đó kích hoạt **[ Áp dụng ]**; `Esc` quay lại trang bề mặt cha.
 
-## Animations
+## Hoạt hình
 
 Mở **Trung tâm điều khiển → Hyprland → Hoạt ảnh**. Trang này có một công tắc **Bật** và một danh sách **Tùy chọn** với **Đường cong tùy chỉnh** và năm danh mục. Mỗi danh mục liệt kê các hoạt ảnh của nó, và mỗi hoạt ảnh có trang riêng với **Phong cách**, **Tốc độ**, **Đường cong** và, đối với việc mở và đóng cửa sổ, **Phần trăm pop-in**. Các hoạt ảnh mà Hyprland có thể tắt cũng có một hàng **Bật**.
 
@@ -38,23 +38,23 @@ Mỗi giá trị trên các trang này thuộc về một bản nháp được c
 
 ### Danh mục và hoạt ảnh| Category | Animation | Key (`effects.animation_<key>_*`) | Style (default) | Speed | Enable |
 |---|---|---|---|---|---|
-| Windows | Opening of windows | `opening` | `popin`, pop-in 87% | 4.1 | — |
-| Windows | Closing of windows | `closing` | `popin`, pop-in 87% | 1.49 | — |
-| Windows | Moving windows | `moving` | — | 4.79 | yes |
-| Workspaces | Switching workspaces | `switching` | `fade` | 1.94 | — |
-| Workspaces | Workspace entrance | `workspace_in` | `fade` | 1.21 | — |
-| Workspaces | Workspace exit | `workspace_out` | `fade` | 1.94 | — |
-| Workspaces | Special workspaces | `special_workspace` | `slide` | 5 | — |
-| Layers & popups | Layer surfaces | `layers` | — | 3.81 | yes |
-| Layers & popups | Layer entrance | `layers_in` | `fade` | 4 | — |
-| Layers & popups | Layer exit | `layers_out` | `fade` | 1.5 | — |
-| Layers & popups | Fade | `fade` | — | 3.03 | yes |
-| Layers & popups | Fade in | `fade_in` | — | 1.73 | yes |
-| Layers & popups | Fade out | `fade_out` | — | 1.46 | yes |
-| Borders & effects | Border color | `border` | — | 5.39 | yes |
-| Borders & effects | Border gradient angle | `border_angle` | — | 5 | yes |
-| Other animations | Zoom factor | `zoom` | — | 7 | yes |
-| Other animations | Monitor added | `monitor_added` | — | 5 | yes |
+| Windows | Mở cửa sổ | `opening` | `popin`, bật lên 87% | 4.1 | — |
+| Windows | Đóng cửa sổ | `closing` | `popin`, bật lên 87% | 1,49 | — |
+| Windows | Cửa sổ di chuyển | `moving` | — | 4,79 | vâng |
+| Không gian làm việc | Chuyển đổi không gian làm việc | `switching` | `fade` | 1,94 | — |
+| Không gian làm việc | Lối vào không gian làm việc | `workspace_in` | `fade` | 1,21 | — |
+| Không gian làm việc | Thoát không gian làm việc | `workspace_out` | `fade` | 1,94 | — |
+| Không gian làm việc | Không gian làm việc đặc biệt | `special_workspace` | `slide` | 5 | — |
+| Lớp & cửa sổ bật lên | Bề mặt lớp | `layers` | — | 3,81 | vâng |
+| Lớp & cửa sổ bật lên | Lối vào lớp | `layers_in` | `fade` | 4 | — |
+| Lớp & cửa sổ bật lên | Thoát lớp | `layers_out` | `fade` | 1,5 | — |
+| Lớp & cửa sổ bật lên | Mờ dần | `fade` | — | 3.03 | vâng |
+| Lớp & cửa sổ bật lên | Làm mờ dần | `fade_in` | — | 1,73 | vâng |
+| Lớp & cửa sổ bật lên | Mờ dần | `fade_out` | — | 1,46 | vâng |
+| Biên giới & hiệu ứng | Màu viền | `border` | — | 5,39 | vâng |
+| Biên giới & hiệu ứng | Góc dốc viền | `border_angle` | — | 5 | vâng |
+| Hoạt hình khác | Hệ số thu phóng | `zoom` | — | 7 | vâng |
+| Hoạt hình khác | Đã thêm màn hình | `monitor_added` | — | 5 | vâng |
 
 Các mặc định của các mục mà Hyprland 0.56.2 cung cấp trong cấu hình mặc định của nó (mọi hàng ngoại trừ Không gian làm việc Đặc biệt, Góc Gradient viền và Màn hình được thêm) là tốc độ, kiểu dáng và đường cong mặc định. Ba yếu tố này giữ mặc định ARGVUS, vì cấu hình mặc định không định nghĩa chúng.
 
@@ -75,40 +75,40 @@ Phạm vi và các bước: **Tốc độ** 1–10 với số thập phân (bư�
 
 Không được cung cấp: Hyprland 0.56.2 không có hoạt ảnh riêng cho việc thay đổi kích thước cửa sổ, cho các cửa sổ bật lên, hoặc cho các góc gradient của bóng và ánh sáng, vì vậy trang không hiển thị các hàng cho chúng.
 
-## Blur
+## Làm mờ
 
 Blur là một cài đặt toàn cầu của Hyprland, được chia sẻ bởi mọi bề mặt chọn tham gia. Mở **Control Center → Hyprland → Blur**. Trang này có một công tắc **Enable** và một danh sách **Values** với các tham số của `decoration:blur` của Hyprland, theo các tên mà Hyprland sử dụng:
 
-| Row | Config key | Default | Range | `←/→` step |
+| Hàng | Phím cấu hình | Mặc định | Phạm vi | Bước `←/→` |
 |---|---|---|---|---|
-| Size | `effects.blur_size` | `6` | 1–64 | 1 |
-| Passes | `effects.blur_passes` | `2` | 1–8 | 1 |
-| Brightness | `effects.blur_brightness` | `1` | 0–2 | 0.05 |
-| Noise | `effects.blur_noise` | `0.00` | 0–1 | 0.01 |
-| Contrast | `effects.blur_contrast` | `0.900000` | 0–2 | 0.05 |
-| Vibrancy | `effects.blur_vibrancy` | `0.100000` | 0–1 | 0.01 |
-| Vibrancy darkness | `effects.blur_vibrancy_darkness` | `0` | 0–1 | 0.01 |
+| Kích thước | `effects.blur_size` | `6` | 1–64 | 1 |
+| Vượt qua | `effects.blur_passes` | `2` | 1–8 | 1 |
+| Độ sáng | `effects.blur_brightness` | `1` | 0–2 | 0,05 |
+| Tiếng ồn | `effects.blur_noise` | `0.00` | 0–1 | 0,01 |
+| Tương phản | `effects.blur_contrast` | `0.900000` | 0–2 | 0,05 |
+| Sống động | `effects.blur_vibrancy` | `0.100000` | 0–1 | 0,01 |
+| Bóng tối sống động | `effects.blur_vibrancy_darkness` | `0` | 0–1 | 0,01 |
 
-Use 
+Use
 
- to move, `↑/↓` (or `←/→`) to change the selected value by its step, and `+/-` `Enter`  to type an exact value; values outside the range are refused. Nothing is written while you edit: the switch and the values stay in the draft until **[ Apply ]** at the bottom of the page is selected. Apply writes every changed value in one call, and reloads Hyprland after it. Leaving the page with an unapplied draft asks for confirmation.
+ để di chuyển, `↑/↓` (hoặc `←/→`) để thay đổi giá trị đã chọn theo bước của nó và `+/-` `Enter` để nhập một giá trị chính xác; các giá trị ngoài phạm vi bị từ chối. Không có gì được viết trong khi bạn chỉnh sửa: nút chuyển và các giá trị vẫn ở dạng bản nháp cho đến khi **[ Áp dụng ]** ở cuối trang được chọn. Áp dụng ghi mọi giá trị đã thay đổi trong một cuộc gọi và tải lại Hyprland sau đó. Để lại trang có bản nháp chưa được áp dụng sẽ yêu cầu xác nhận.
 
 Các giá trị được truyền đến Hyprland nguyên vẹn; ARGVUS không suy ra chúng từ phần trăm. Thay đổi công tắc của một bề mặt không thay đổi các giá trị.
 
-## Shadow
+## Bóng tối
 
 Bóng cửa sổ là một cài đặt toàn cục của Hyprland, nằm trong **Control Center → Hyprland → Borders → Shadow**. Nó độc lập với độ trong suốt và làm mờ: mặc định tắt, và bật hoặc tắt độ trong suốt của một bề mặt không thay đổi nó.
 
-| Row | Config key | Default | Range | `←/→` step |
+| Hàng | Phím cấu hình | Mặc định | Phạm vi | Bước `←/→` |
 |---|---|---|---|---|
-| Enable | `effects.shadow_enabled` | `false` | — | — |
-| Sharp | `effects.shadow_sharp` | `false` | — | — |
-| Color | `effects.shadow_color` | empty (follows the accent) | empty or `RRGGBBAA` | — |
-| Range | `effects.shadow_range` | `6` | 0–100 | 1 |
-| Render power | `effects.shadow_render_power` | `6` | 1–10 | 1 |
-| Offset X | `effects.shadow_offset_x` | `0` | −100 to 100 | 1 |
-| Offset Y | `effects.shadow_offset_y` | `0` | −100 to 100 | 1 |
-| Scale | `effects.shadow_scale` | `1.00` | 0–1 | 0.05 |
+| Bật | `effects.shadow_enabled` | `false` | — | — |
+| Sắc nét | `effects.shadow_sharp` | `false` | — | — |
+| Màu sắc | `effects.shadow_color` | trống (theo dấu) | trống hoặc `RRGGBBAA` | — |
+| Phạm vi | `effects.shadow_range` | `6` | 0–100 | 1 |
+| Kết xuất sức mạnh | `effects.shadow_render_power` | `6` | 1–10 | 1 |
+| Bù đắp X | `effects.shadow_offset_x` | `0` | −100 đến 100 | 1 |
+| Bù đắp Y | `effects.shadow_offset_y` | `0` | −100 đến 100 | 1 |
+| Quy mô | `effects.shadow_scale` | `1.00` | 0–1 | 0,05 |
 
 Màu trống đi theo điểm nhấn của chủ đề đang hoạt động với alpha `99`, do đó, điểm nhấn màu xanh lam mặc định sẽ tạo ra `3590bd99`. Nhập tám chữ số thập lục phân (`RRGGBBAA`) để sửa màu hoặc để trống lời nhắc để theo dõi lại dấu. Màu được đọc khi cấu hình Hyprland tải, do đó, sau khi thay đổi chủ đề hoặc giọng, nó sẽ lấy giọng mới trong lần tải lại cấu hình tiếp theo.
 
@@ -126,7 +126,7 @@ $XDG_CONFIG_HOME/argvus/config.json
 
 Vô hiệu hóa công tắc Độ trong suốt hoặc Làm mờ của một bề mặt chỉ ảnh hưởng đến bề mặt đó; các giá trị số đã lưu được giữ lại để sử dụng khi bật lại sau. Xuất chủ đề
 
-## Profiles
+## Hồ sơ
 
 bao gồm các cài đặt giao diện/hiệu ứng chuẩn và chiếu hiệu ứng từng bề mặt của chủ đề đang hoạt động. Các tệp chạy thời gian của Waybar, Quickshell và Hyprland được tạo lại khi áp dụng chủ đề.
 

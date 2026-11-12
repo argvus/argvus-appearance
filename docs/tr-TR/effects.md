@@ -1,5 +1,5 @@
 ---
-title: Effects
+title: Efektler
 description: Animasyonları, genel Hyprland bulanıklığını ve yüzey başına şeffaflığı yapılandırın.
 ---
 
@@ -14,19 +14,19 @@ Kontrol Merkezi, `$XDG_CONFIG_HOME/argvus/data/control-center/foot.ini`'de özel
 Her ikisi de standart /effects ayarları aracılığıyla `hyprland.lua`'ya uygulanan iki bağımsız ana anahtar vardır:- **Animasyonlar** ( `/effects` `/effects/animations`) hareket eden her şeyi kontrol eder: çalışma alanı, pencere, kaybolma, çerçeve ve katman animasyonları.
 - **Effects** is a shortcut for blur (
 
-) and the transparency of Terminal, Launcher, Widget Telemetry, Control Panel and Taskbar (`/effects/blur_global_enabled` `/effects/transparency_<surface>_enabled` ). Turning it on or off writes all of them (and the Control Center transparency too). Each surface keeps its own transparency page, so Effects reads as **on when at least one of them is on** and as off only when every one is off.
+) ve Terminal, Başlatıcı, Widget Telemetrisi, Kontrol Paneli ve Görev Çubuğunun (`/effects/blur_global_enabled` `/effects/transparency_<surface>_enabled`) şeffaflığı. Açmak veya kapatmak, hepsini (ve Kontrol Merkezi şeffaflığını da) yazar. Her yüzey kendi şeffaflık sayfasını tutar; böylece Efektler, en az biri açık olduğunda **açık** olarak ve yalnızca her biri kapalı olduğunda kapalı olarak görünür.
 
-Use `argvus effects-toggle animations status|enable|disable|toggle` and `argvus effects-toggle effects status|enable|disable|toggle`. The Control Panel Appearance card shows one switch for each. Turning a master switch off keeps every fine setting of the **Animations** and **Blur** pages (speeds, curves, per-leaf switches, blur size and passes), so turning it on again restores the same look. `effects status` prints `enabled` when blur or at least one of those transparency surfaces is enabled. Turning a surface's transparency off makes the whole Waybar surface opaque: besides the background, the translucent borders of the taskbar and the Widget Telemetry become the solid color they show over the theme background. Every effect is enabled by default on a fresh install, including on virtual machinesVe low-power sessions; only an explicit setting turns one off.
+`argvus effects-toggle animations status|enable|disable|toggle` ve `argvus effects-toggle effects status|enable|disable|toggle` kullanın. Kontrol Paneli Görünümü kartında her biri için bir anahtar gösterilir. Ana anahtarın kapatılması, **Animasyonlar** ve **Bulanıklaştırma** sayfalarının tüm ince ayarlarının (hızlar, eğriler, yaprak başına anahtarlar, bulanıklaştırma boyutu ve geçişler) korunmasını sağlar; böylece tekrar açıldığında aynı görünüm geri yüklenir. Bulanıklaştırma veya bu şeffaflık yüzeylerinden en az biri etkinleştirildiğinde `effects status` `enabled` yazdırır. Bir yüzeyin şeffaflığını kapatmak, tüm Waybar yüzeyini opak hale getirir: arka planın yanı sıra, görev çubuğunun yarı saydam kenarları ve Widget Telemetrisi, tema arka planı üzerinde gösterdikleri düz renk haline gelir. Sanal makineler ve düşük güçlü oturumlar da dahil olmak üzere her efekt, yeni kurulumda varsayılan olarak etkinleştirilir; yalnızca açık bir ayar birini kapatır.
 
 ## Tüm efektler bir kerede
 
 `argvus effects-toggle` bir bileşen olmadan animasyonlar, bulanıklık ve şeffaflık üzerinde birlikte işlem yapar: `status` yalnızca üçü de etkinleştirildiğinde `enabled` yazdırır, `enable` ve `disable` üçünün tümünü değiştirir ve `toggle`, `status` `enabled` olduğunda her şeyi kapatır, aksi takdirde açar. **SUPER + F6** bu geçişi çalıştırır. Tek bir grup üzerinde işlem yapmak için adlandırın: `argvus effects-toggle animations|effects|blur|transparency status|enable|disable|toggle`. Kontrol Merkezi'nin **Animasyonlar** sayfası bileşen başına formu kullanır, bu nedenle **Etkinleştir** anahtarı hâlâ yalnızca animasyonları değiştirir.
 
-## Transparency
+## Şeffaflık
 
 Her yüzeyin kendi **Şeffaflık** alt menüsü vardır ve etkinleştirme düğmesi ile değeri bulunur.
 
-**Görünüm → Başlatıcılar** sayfası, resmi Rofi tabanlı başlatıcı ve seçici akışlarını kontrol eder: ana başlatıcı, emoji seçici, hesap makinesi, pano seçici, hile sayfaları ve Rofi çıkarılabilir cihaz menüleri. Şeffaflık değeri son arka plan alfasıdır; dolayısıyla `50`, yaklaşık olarak `0.50` değerinde etkili bir arka plan opaklığı anlamına gelir; metin, simgeler ve seçilen satırlar opak kalır. İle Transparency turned off, the launcher uses the active theme's own background color, fully opaque. Its Blur switch opts the `rofi` layer into the global Blur settings.
+**Görünüm → Başlatıcılar** sayfası, resmi Rofi köklü başlatıcı ve seçici seçimlerini kontrol eder: başlatıcı, emoji seçimi, hesap makinesi, pano seçimi, hile sayfaları ve Rofi bulunan cihaz menüleri. Şeffaflık değeri son arka plan alfasıdır; dolayısıyla `50`, yaklaşık olarak `0.50` değerinde etkili bir arka plan opaklığı anlamına gelen gelir; metin, simgeler ve seçilen satırlar opak kalır. İle Şeffaflık kapalı, başlatıcı aktif temanın kendi arka plan rengini kullanıyor, tamamen opak. Bulanıklaştırma anahtarı, `rofi` katmanını genel Bulanıklaştırma ayarlarına dahil eder.
 
 Her değer `0%` (opak) ile `100%` (tam şeffaf) arasında değişir. `+` ve `-` değerlerini %5 adımlarla kullanın, ardından yüzey sayfasında **Uygula** seçeneğini tıklayın. Sayfayı terk etmek, uygulanmamış taslağı iptal eder.
 
@@ -42,31 +42,31 @@ Kontroller: `↑/↓` satırlar arasında hareket eder; `←/→` (veya `+/-`) s
 
 ### Kategoriler ve animasyonlar| Category | Animation | Key (`effects.animation_<key>_*`) | Style (default) | Speed | Enable |
 |---|---|---|---|---|---|
-| Windows | Opening of windows | `opening` | `popin`, pop-in 87% | 4.1 | — |
-| Windows | Closing of windows | `closing` | `popin`, pop-in 87% | 1.49 | — |
-| Windows | Moving windows | `moving` | — | 4.79 | yes |
-| Workspaces | Switching workspaces | `switching` | `fade` | 1.94 | — |
-| Workspaces | Workspace entrance | `workspace_in` | `fade` | 1.21 | — |
-| Workspaces | Workspace exit | `workspace_out` | `fade` | 1.94 | — |
-| Workspaces | Special workspaces | `special_workspace` | `slide` | 5 | — |
-| Layers & popups | Layer surfaces | `layers` | — | 3.81 | yes |
-| Layers & popups | Layer entrance | `layers_in` | `fade` | 4 | — |
-| Layers & popups | Layer exit | `layers_out` | `fade` | 1.5 | — |
-| Layers & popups | Fade | `fade` | — | 3.03 | yes |
-| Layers & popups | Fade in | `fade_in` | — | 1.73 | yes |
-| Layers & popups | Fade out | `fade_out` | — | 1.46 | yes |
-| Borders & effects | Border color | `border` | — | 5.39 | yes |
-| Borders & effects | Border gradient angle | `border_angle` | — | 5 | yes |
-| Other animations | Zoom factor | `zoom` | — | 7 | yes |
-| Other animations | Monitor added | `monitor_added` | — | 5 | yes |
+| Windows | Pencerelerin açılması | `opening` | `popin`, açılır %87 | 4.1 | — |
+| Windows | Pencerelerin kapatılması | `closing` | `popin`, açılır %87 | 1.49 | — |
+| Windows | Pencereleri taşıma | `moving` | — | 4.79 | evet |
+| Çalışma Alanları | Çalışma alanlarını değiştirme | `switching` | `fade` | 1.94 | — |
+| Çalışma Alanları | Çalışma alanı girişi | `workspace_in` | `fade` | 1.21 | — |
+| Çalışma Alanları | Çalışma alanı çıkışı | `workspace_out` | `fade` | 1.94 | — |
+| Çalışma Alanları | Özel çalışma alanları | `special_workspace` | `slide` | 5 | — |
+| Katmanlar ve açılır pencereler | Katman yüzeyleri | `layers` | — | 3.81 | evet |
+| Katmanlar ve açılır pencereler | Katman girişi | `layers_in` | `fade` | 4 | — |
+| Katmanlar ve açılır pencereler | Katman çıkışı | `layers_out` | `fade` | 1.5 | — |
+| Katmanlar ve açılır pencereler | Solmaya | `fade` | — | 3.03 | evet |
+| Katmanlar ve açılır pencereler | Yavaş yavaş | `fade_in` | — | 1.73 | evet |
+| Katmanlar ve açılır pencereler | Karart | `fade_out` | — | 1.46 | evet |
+| Kenarlıklar ve efektler | Kenarlık rengi | `border` | — | 5.39 | evet |
+| Kenarlıklar ve efektler | Sınır gradyan açısı | `border_angle` | — | 5 | evet |
+| Diğer animasyonlar | Yakınlaştırma faktörü | `zoom` | — | 7 | evet |
+| Diğer animasyonlar | Monitör eklendi | `monitor_added` | — | 5 | evet |
 
 Hyprland 0.56.2'nin stok yapılandırmasında gönderdiği yaprakların varsayılanları (Special workspaces, Border gradient angle ve Monitor added dışındaki her satır) stok hızlar, stiller ve eğrilerdir. Bu üçü ARGVUS varsayılanlarını korur, çünkü stok yapılandırma onları tanımlamaz.
 
 Her yaprak yalnızca Hyprland 0.56.2'nin onun için kabul ettiği stilleri sunar. Pencere açma ve kapama `slide`, `popin`, `slidefade`, `slidevert`, `slidefadevert` ve `gnomed` sunar. Katman giriş ve çıkışları `slide`, `popin`, `fade`, `slidefade`, `slidevert` ve `slidefadevert` sunar. Çalışma alanı yaprakları (değiştirme, giriş, çıkış ve özel çalışma alanları) `slide`, `fade`, `slidefade`, `slidevert` ve `slidefadevert` sunar, `popin` veya `gnomed` olmadan. Yaprağının listesi dışındaki bir saklı stil göz ardı edilir ve yaprak varsayılanını kullanır. Her animasyon `default` eğrisi ile başlar. Bir sayfa yalnızca animasyonunun desteklediği satırları sunar. Saklı anahtarlar `effects.animation_<key>_speed`, `_curve`, `_style` (sunulduğu yerde), `_popin` (pencere açma ve kapama) ve `_enabled`'dir (sunulduğu yerde).
 
-### Curves
+### Eğriler
 
-| Curve | Behavior | Parameters (key → default) |
+| Eğri | Davranış | Parametreler (anahtar → varsayılan) |
 |---|---|---|
 | `default` | Bu animasyon için Hyprland 0.56.2 eğrisi gönderilir (örneğin`easeOutQuint`, `almostLinear`, `quick`, `linear` veya `easy`bahar). Stok eğrisi olmayan animasyonlar ARGVUS'un yerleşik Bézier'ını kullanır. | Düzeltildi. |
 | `bezier` | İki kontrol noktasıyla şekillendirilmiş, hızlanan ve yavaşlayan düzgün hareket. | `bezier_x1` 0.23, `bezier_y1` 1, `bezier_x2` 0.32, `bezier_y2` 1 (x 0–1, y −2–3) |
@@ -78,40 +78,40 @@ Aralıklar ve adımlar: **Hız** 1–10 arası ondalıklarla (adım 0,1, varsay�
 
 Sunulmuyor: Hyprland 0.56.2, pencereleri yeniden boyutlandırma, açılır pencereler veya gölge ve parıltı gradyan açıları için ayrı bir animasyona sahip değildir, bu nedenle sayfa onlar için satır göstermemektedir.
 
-## Blur
+## Bulanıklaştırma
 
 Blur, katılmayı seçen her yüzey tarafından paylaşılan tek bir küresel Hyprland ayarıdır. **Kontrol Merkezi → Hyprland → Blur** bölümünü açın. Sayfada bir **Etkinleştir** anahtarı ve Hyprland’in `decoration:blur` parametrelerini Hyprland’in kullandığı adlarla gösteren bir **Değerler** listesi vardır:
 
-| Row | Config key | Default | Range | `←/→` step |
+| Satır | Yapılandırma anahtarı | Varsayılan | Menzil | `←/→` adım |
 |---|---|---|---|---|
-| Size | `effects.blur_size` | `6` | 1–64 | 1 |
-| Passes | `effects.blur_passes` | `2` | 1–8 | 1 |
-| Brightness | `effects.blur_brightness` | `1` | 0–2 | 0.05 |
-| Noise | `effects.blur_noise` | `0.00` | 0–1 | 0.01 |
-| Contrast | `effects.blur_contrast` | `0.900000` | 0–2 | 0.05 |
-| Vibrancy | `effects.blur_vibrancy` | `0.100000` | 0–1 | 0.01 |
-| Vibrancy darkness | `effects.blur_vibrancy_darkness` | `0` | 0–1 | 0.01 |
+| Boyut | `effects.blur_size` | `6` | 1–64 | 1 |
+| Geçişler | `effects.blur_passes` | `2` | 1–8 | 1 |
+| Parlaklık | `effects.blur_brightness` | `1` | 0–2 | 0,05 |
+| Gürültü | `effects.blur_noise` | `0.00` | 0–1 | 0.01 |
+| Kontrast | `effects.blur_contrast` | `0.900000` | 0–2 | 0,05 |
+| Canlılık | `effects.blur_vibrancy` | `0.100000` | 0–1 | 0.01 |
+| Canlılık karanlık | `effects.blur_vibrancy_darkness` | `0` | 0–1 | 0.01 |
 
 Taşımak için `↑/↓`, seçili değeri adımıyla değiştirmek için `←/→` (veya `+/-`), ve tam bir değer girmek için `Enter` kullanın; aralık dışındaki değerler reddedilir. Düzenlerken hiçbir şey yazılmaz: anahtar ve değerler, sayfanın altındaki **[ Uygula ]** seçilene kadar taslak olarak kalır. Uygula, değiştirilen tüm değerleri tek bir seferde yazar ve ardından Hyprland’i yeniden yükler. Uygulanmamış bir taslakla sayfadan ayrılmak onay ister.
 
 Değerler Hyprland'e olduğu gibi iletilir; ARGVUS onları bir yüzdeden türetmez. Bir yüzeyin anahtarını değiştirmek değerleri değiştirmez.
 
-## Shadow
+## Gölge
 
 Pencere gölgesi, **Kontrol Merkezi → Hyprland → Kenarlıklar → Gölge** altında bulunan global bir Hyprland ayarıdır. Şeffaflık ve bulanıklıktan bağımsızdır: varsayılan olarak kapalıdır ve bir yüzeyin şeffaflığını açıp kapatmak bunu değiştirmez.
 
-| Row | Config key | Default | Range | `←/→` step |
+| Satır | Yapılandırma anahtarı | Varsayılan | Menzil | `←/→` adım |
 |---|---|---|---|---|
-| Enable | `effects.shadow_enabled` | `false` | — | — |
-| Sharp | `effects.shadow_sharp` | `false` | — | — |
-| Color | `effects.shadow_color` | empty (follows the accent) | empty or `RRGGBBAA` | — |
-| Range | `effects.shadow_range` | `6` | 0–100 | 1 |
-| Render power | `effects.shadow_render_power` | `6` | 1–10 | 1 |
-| Offset X | `effects.shadow_offset_x` | `0` | −100 to 100 | 1 |
-| Offset Y | `effects.shadow_offset_y` | `0` | −100 to 100 | 1 |
-| Scale | `effects.shadow_scale` | `1.00` | 0–1 | 0.05 |
+| Etkinleştir | `effects.shadow_enabled` | `false` | — | — |
+| Keskin | `effects.shadow_sharp` | `false` | — | — |
+| Renk | `effects.shadow_color` | boş (aksanı takip eder) | boş veya `RRGGBBAA` | — |
+| Menzil | `effects.shadow_range` | `6` | 0–100 | 1 |
+| İşleme gücü | `effects.shadow_render_power` | `6` | 1–10 | 1 |
+| Ofset X | `effects.shadow_offset_x` | `0` | −100 ila 100 | 1 |
+| Ofset Y | `effects.shadow_offset_y` | `0` | −100 ila 100 | 1 |
+| Ölçek | `effects.shadow_scale` | `1.00` | 0–1 | 0,05 |
 
-An empty color follows the accent of the active theme with alpha `99`, so the default blue accent gives `3590bd99`. Type eight hex digits (`RRGGBBAA`) to fix the color, or leave the prompt empty to follow the accent again. The color is read when the Hyprland configurationyüklenir, bu nedenle bir tema veya aksan değişikliğinden sonra, bir sonraki yapılandırma yeniden yüklemesinde yeni aksanı alır.
+Etkin temanın vurgusunu alfa `99` ile boş bir renk takip eder, dolayısıyla varsayılan mavi vurgu `3590bd99` değerini verir. Rengi düzeltmek için sekiz onaltılık rakam (`RRGGBBAA`) yazın veya vurguyu tekrar takip etmek için istemi boş bırakın. Renk, Hyprland konfigürasyonu yüklendiğinde okunur, bu nedenle bir tema veya aksan değişikliğinden sonra, bir sonraki işlemi yeniden yüklemede yeni aksanı alır.
 
 Bulanıklaştırma gibi, sayfa da bir taslağı düzenler: **[ Uygula ]** seçilene kadar hiçbir şey yazılmaz ve sayfayı uygulanmamış bir taslakla bırakmak onay ister.
 
@@ -128,7 +128,7 @@ $XDG_CONFIG_HOME/argvus/config.json
 
 Bir yüzeyin Şeffaflık veya Bulanıklık anahtarını devre dışı bırakmak yalnızca o yüzeyi etkiler; kaydedilen sayısal değerler daha sonra yeniden etkinleştirme için saklanır.
 
-## Profiles
+## Profiller
 
 Tema ihracatı, kanonik görünüm/efekt ayarlarını ve aktif temanın yüzey başına efekt projeksiyonunu içerir. Tema uygulandığında oluşturulan Waybar, Quickshell ve Hyprland çalışma zamanı dosyaları yeniden oluşturulur.
 

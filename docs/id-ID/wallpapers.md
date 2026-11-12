@@ -1,5 +1,5 @@
 ---
-title: Wallpapers
+title: Wallpaper
 description: Gunakan wallpaper ARGVUS bawaan dan kustom.
 ---
 

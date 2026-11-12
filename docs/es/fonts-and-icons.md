@@ -15,7 +15,7 @@ Abra **Centro de Control → Fuentes** para configurar objetivos individuales:
 - Panel de Control;
 - interfaz del sistema ARGVUS;
 - aplicaciones;
-- terminal;
+- Terminal;
 - navegador.
 
 Los tamaños predeterminados son específicos de cada objetivo: la barra de tareas, el sistema y el terminal usan `13`; telemetría y Panel de Control usan `14`; las aplicaciones usan `12`; y el navegador usa `10`. Estos valores predeterminados pueden restaurarse desde la página de Fuentes.

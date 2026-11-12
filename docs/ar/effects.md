@@ -1,5 +1,5 @@
 ---
-title: Effects
+title: تأثيرات
 description: قم بتكوين الرسوم المتحركة وطمس Hyprland العالمي والشفافية لكل سطح.
 ---
 
@@ -7,9 +7,9 @@ description: قم بتكوين الرسوم المتحركة وطمس Hyprland �
 
 المفاتيح السطحية مستقلة. تحتوي صفحة تكوين مركز التحكم على قيمة الشفافية الخاصة بها ومفتاح تمكين Blur؛ يستخدم التمويه قيم Blur العالمية.
 
-## 
+##
 
-There are two independent master switches, both applied to 
+هناك نوعان من المفاتيح الرئيسية المستقلة، وكلاهما ينطبق على
 
 ```text
 $XDG_CONFIG_HOME/argvus/config.json
@@ -19,52 +19,58 @@ $XDG_CONFIG_HOME/argvus/config.json
 
 - **Animations** (
 
-) controls everything that moves: workspace, window, fade, border and layer animations.
+) يتحكم في كل ما يتحرك: مساحة العمل، والنافذة، والتلاشي، والحدود، والرسوم المتحركة للطبقات.
 - **Effects** is a shortcut for blur (
 
-) and the transparency of Terminal, Launcher, Widget Telemetry, Control Panel and Taskbar (`[colors-dark] alpha` /effects/transparency_<surface>_enabled  /effects/blur_global_enabled  /effects/animations  /effects  hyprland.lua  `[colors-dark] blur` ). Turning it on or off writes all of them (and the Control Center transparency too). Each surface keeps its own transparency page, so Effects reads as **on when at least one of them is on** and as off only when every one is off.
+) وشفافية الوحدة الطرفية والمشغل وقياس عناصر واجهة المستخدم ولوحة التحكم وشريط المهام (`[colors-dark] alpha` /effects/transparency_<surface>_enabled /effects/blur_global_enabled /effects/animations /المؤثرات hyprland.lua `[colors-dark] blur` ). يؤدي تشغيله أو إيقاف تشغيله إلى كتابتها جميعًا (وشفافية مركز التحكم أيضًا). يحتفظ كل سطح بصفحة الشفافية الخاصة به، بحيث تتم قراءة التأثيرات على أنها **مفعّلة عندما يكون واحد منها على الأقل قيد التشغيل** وتكون متوقفة عن التشغيل فقط عندما يكون كل سطح متوقفًا عن التشغيل.
 
 استخدم  `hyprland.lua`  `/effects`  `/effects/animations`  `/effects/blur_global_enabled`  `/effects/transparency_<surface>_enabled` `argvus effects-toggle animations status|enable|disable|toggle` و`argvus effects-toggle effects status|enable|disable|toggle`. تعرض بطاقة مظهر لوحة التحكم مفتاحًا واحدًا لكل منها. يؤدي إيقاف تشغيل المفتاح الرئيسي إلى الحفاظ على كل الإعدادات الدقيقة لصفحات **الرسوم المتحركة** و**التمويه** (السرعات والمنحنيات ومفاتيح التبديل لكل ورقة وحجم التمويه والتمريرات)، لذا فإن تشغيله مرة أخرى يؤدي إلى استعادة المظهر نفسه. يقوم `effects status` بطباعة `enabled` عند التمويه أو عندتم تمكين واحد على الأقل من أسطح الشفافية هذه. يؤدي إيقاف شفافية السطح إلى جعل سطح Waybar بأكمله معتمًا: إلى جانب الخلفية، تصبح الحدود الشفافة لشريط المهام وقياس عناصر واجهة المستخدم عن بُعد هي اللون الصلب الذي تظهره على خلفية السمة. يتم تمكين كل تأثير افتراضيًا عند التثبيت الجديد، بما في ذلك الأجهزة الافتراضية and low-power sessions; only an explicit setting turns one off.
 
-## 
+##
 
 `argvus effects-toggle`                    :ﺎًﻌﻣ ﺔﻴﻓﺎﻔﺸﻟﺍﻭ ﺶﻳﻮﺸﺘﻟﺍﻭ ﺔﻛﺮﺤﺘﻤﻟﺍ ﻡﻮﺳﺮﻟﺍ ﻰﻠﻋ ﻞﻤﻌﻳ ﻥّﻮﻜﻣ ﻥﻭﺪﺑ`status` prints `enabled`                                            ،ﻢﻬﻌﻴﻤﺟ ﺔﺛﻼ﻿ﺜﻟﺍ ﻦﻴﻜﻤﺗ ﻢﺘﻳ ﺎﻣﺪﻨﻋ ﻂﻘﻓ`enable` and `disable`                                                           ﻭ ،ﺎًﻌﻴﻤﺟ ﺔﺛﻼ﻿ﺜﻟﺍ ﻝّﺪﺑ`toggle`                                                             ﺎﻣﺪﻨﻋ ءﻲﺷ ﻞﻛ ﺊﻔﻄﻳ`status` is `enabled` :ﺎﻬّﻤﺳ ،ﺓﺪﺣﺍﻭ ﺔﻋﻮﻤﺠﻣ ﻰﻠﻋ ﻑﺮﺼﺘﻠﻟ .ﻞﻳﺪﺒﺘﻟﺍ ﺍﺬﻫ ﻞّﻐﺸﻳ **SUPER + F6** .ﻚﻟﺫ ﻑﻼ﻿ﺧ ﻰﻠﻋﻭ`argvus effects-toggle animations|effects|blur|transparency status|enable|disable|toggle`.ﻂﻘﻓ ﺔﻛﺮﺤﺘﻤﻟﺍ ﻡﻮﺳﺮﻟﺍ ﺮﻴﻐﻳ **ﻦﻴﻜﻤﺗ** ﺡﺎﺘﻔﻣ ﻞﻈﻳ ﻚﻟﺬﻟ ،ﻥﻮﻜﻣ ﻞﻜﺑ ﺹﺎﺨﻟﺍ ﺝﺫﻮﻤﻨﻟﺍ ﻢﻜﺤ
 
-## Transparency
+## الشفافية
 
 
 
-The **Appearance → Launchers** page controls the official Rofi-based launcher and picker flows: the main launcher, emoji picker, calculator, clipboard picker, cheatsheets and Rofi removable-device menus. Its Transparency value is the final background alpha, so 
+تتحكم صفحة **المظهر → Launchers** في المشغل الرسمي القائم على Rofi وتدفقات المنتقي: المشغل الرئيسي ومنتقي الرموز التعبيرية والآلة الحاسبة ومنتقي الحافظة وأوراق الغش وRofi قوائم الأجهزة القابلة للإزالة. قيمة الشفافية الخاصة بها هي ألفا الخلفية النهائية، لذلك
 
- means an effective background opacity of approximately `50`; text, icons and selected rows remain opaque. With Transparency turned off, the launcher uses the active theme's own background color, fully opaque. Its Blur switch opts the `0.50` Esc  Tab  -  +  ↓  ↑  -  +  100%  0%  `rofi`  layer into the global Blur settings.
-
-
+يعني عتامة خلفية فعالة تبلغ تقريبًا `50`؛ يظل النص والأيقونات والصفوف المحددة غير شفافة. مع إيقاف تشغيل الشفافية، يستخدم المشغل لون الخلفية الخاص بالسمة النشطة، وهو معتم تمامًا. يقوم مفتاح Blur الخاص به باختيار طبقة `0.50` Esc Tab - + ↓ ↑ - + 100% 0% `rofi` في إعدادات Blur العامة.
 
 
 
-## Animations
 
-Open **Control Center → Hyprland → Animations**. The page has an **Enable** switch and an **Options** list with **Custom curves** and five categories. Each category lists its animations, and each animation has its own page with **Style**, **Speed**, **Curve** and, for window opening and closing, **Pop-in percentage**. Animations that Hyprland can switch offلديك أيضًا صف **تمكين**.تنتمي كل قيمة في هذه الصفحات إلى مسودة واحدة مشتركة بين شجرة الرسوم المتحركة بأكملها. لا يتم كتابة أي شيء حتى يتم تحديد **[ Apply ]** أسفل أي منها. التنقل بين الصفحات يحافظ على المسودة؛ ترك صفحة الرسوم المتحركة مع عدم تطبيقها draft asks for confirmation. Apply writes the changed values in one call and reloads Hyprland. The **Enable** switch at the top is the global animation state ( `0%`  `100%`  `+`  `-`  `↑`  `↓`  `+`  `-`  `Tab`  `Esc` `effects.animations`): when it is off, every animation is disabled, whatever its own switchيقول.عناصر التحكم: `↑/↓` يتحرك بين الصفوف؛ يقوم `←/→` (أو `+/-`) بتغيير القيمة والدورات المحددة **النمط** و**المنحنى**؛ يقوم `Enter` بكتابة **Speed** أو **نسبة مئوية منبثقة** أو معلمة منحنى (يتم رفض القيم خارج النطاق)، ودورات **Style** و **Curve** للأمام.
 
-### الفئات والرسوم المتحركة| Category | Animation | Key (`effects.animation_<key>_*`) | Style (default) | Speed | Enable |
+## الرسوم المتحركة
+
+افتح **مركز التحكم → Hyprland → الرسوم المتحركة**. تضم الصفحة مفتاح **تمكين** وقائمة **الخيارات**، ومنها **منحنيات مخصصة** وخمس فئات. تعرض كل فئة رسومها المتحركة، ولكل رسم صفحة إعدادات تتضمن **النمط** و**السرعة** و**المنحنى**، إضافة إلى **نسبة الظهور التدريجي** عند فتح النوافذ وإغلاقها. أما الرسوم التي يستطيع Hyprland إيقافها فتتضمن صف **تمكين**.
+
+تندرج كل القيم في هذه الصفحات ضمن مسودة واحدة مشتركة لجميع إعدادات الرسوم المتحركة. لا تُحفظ التغييرات حتى تختار **[تطبيق]** أسفل إحدى الصفحات. وتظل المسودة محفوظة عند التنقل بين الصفحات؛ أما مغادرة صفحة الرسوم المتحركة قبل تطبيق التغييرات فتطلب تأكيدًا. يحفظ زر **تطبيق** القيم المعدلة في عملية واحدة، ثم يعيد تحميل Hyprland. ويتحكم مفتاح **تمكين** أعلى الصفحة بالحالة العامة (`effects.animations`): عند إيقافه تتوقف جميع الرسوم، بصرف النظر عن حالة مفاتيحها الفردية.
+
+عناصر التحكم: ينقلك `↑/↓` بين الصفوف؛ ويغيّر `←/→` (أو `+/-`) القيمة المحددة، ويتنقل بين **النمط** و**المنحنى**. يتيح `Enter` إدخال **السرعة** أو **نسبة الظهور التدريجي** أو أحد معاملات المنحنى بدقة (وتُرفض القيم خارج النطاق)، كما ينتقل إلى **النمط** و**المنحنى** التاليين.
+
+### الفئات والرسوم المتحركة
+
+| الفئة | الرسوم المتحركة | المفتاح (`effects.animation_<key>_*`) | النمط (الافتراضي) | السرعة | التمكين |
 |---|---|---|---|---|---|
-| Windows | Opening of windows | `opening` | `popin`, pop-in 87% | 4.1 | — |
-| Windows | Closing of windows | `closing` | `popin`, pop-in 87% | 1.49 | — |
-| Windows | Moving windows | `moving` | — | 4.79 | yes |
-| Workspaces | Switching workspaces | `switching` | `fade` | 1.94 | — |
-| Workspaces | Workspace entrance | `workspace_in` | `fade` | 1.21 | — |
-| Workspaces | Workspace exit | `workspace_out` | `fade` | 1.94 | — |
-| Workspaces | Special workspaces | `special_workspace` | `slide` | 5 | — |
-| Layers & popups | Layer surfaces | `layers` | — | 3.81 | yes |
-| Layers & popups | Layer entrance | `layers_in` | `fade` | 4 | — |
-| Layers & popups | Layer exit | `layers_out` | `fade` | 1.5 | — |
-| Layers & popups | Fade | `fade` | — | 3.03 | yes |
-| Layers & popups | Fade in | `fade_in` | — | 1.73 | yes |
-| Layers & popups | Fade out | `fade_out` | — | 1.46 | yes |
-| Borders & effects | Border color | `border` | — | 5.39 | yes |
-| Borders & effects | Border gradient angle | `border_angle` | — | 5 | yes |
-| Other animations | Zoom factor | `zoom` | — | 7 | yes |
-| Other animations | Monitor added | `monitor_added` | — | 5 | yes |
+| ويندوز | فتح النوافذ | `opening` | `popin`، النوافذ المنبثقة 87% | 4.1 | — |
+| ويندوز | غلق النوافذ | `closing` | `popin`، النوافذ المنبثقة 87% | 1.49 | — |
+| ويندوز | نوافذ متحركة | `moving` | — | 4.79 | نعم |
+| مساحات العمل | تبديل مساحات العمل | `switching` | `fade` | 1.94 | — |
+| مساحات العمل | مدخل مساحة العمل | `workspace_in` | `fade` | 1.21 | — |
+| مساحات العمل | خروج مساحة العمل | `workspace_out` | `fade` | 1.94 | — |
+| مساحات العمل | مساحات عمل خاصة | `special_workspace` | `slide` | 5 | — |
+| الطبقات والنوافذ المنبثقة | أسطح الطبقات | `layers` | — | 3.81 | نعم |
+| الطبقات والنوافذ المنبثقة | مدخل الطبقة | `layers_in` | `fade` | 4 | — |
+| الطبقات والنوافذ المنبثقة | خروج الطبقة | `layers_out` | `fade` | 1.5 | — |
+| الطبقات والنوافذ المنبثقة | تتلاشى | `fade` | — | 3.03 | نعم |
+| الطبقات والنوافذ المنبثقة | تتلاشى في | `fade_in` | — | 1.73 | نعم |
+| الطبقات والنوافذ المنبثقة | تتلاشى | `fade_out` | — | 1.46 | نعم |
+| الحدود والآثار | لون الحدود | `border` | — | 5.39 | نعم |
+| الحدود والآثار | زاوية التدرج الحدودي | `border_angle` | — | 5 | نعم |
+| رسوم متحركة أخرى | عامل التكبير | `zoom` | — | 7 | نعم |
+| رسوم متحركة أخرى | تمت إضافة مراقب | `monitor_added` | — | 5 | نعم |
 
 
 
@@ -84,27 +90,27 @@ Open **Control Center → Hyprland → Animations**. The page has an **Enable** 
 
 
 
-## Blur
+## طمس
 
 Hyprland:
 
 | Row | Config key | Default | Range |  `decoration:blur` `←/→` step |
 |---|---|---|---|---|
-| Size | `effects.blur_size` | `6` | 1–64 | 1 |
-| Passes | `effects.blur_passes` | `2` | 1–8 | 1 |
-| Brightness | `effects.blur_brightness` | `1` | 0–2 | 0.05 |
-| Noise | `effects.blur_noise` | `0.00` | 0–1 | 0.01 |
-| Contrast | `effects.blur_contrast` | `0.900000` | 0–2 | 0.05 |
-| Vibrancy | `effects.blur_vibrancy` | `0.100000` | 0–1 | 0.01 |
-| Vibrancy darkness | `effects.blur_vibrancy_darkness` | `0` | 0–1 | 0.01 |
+| الحجم | `effects.blur_size` | `6` | 1–64 | 1 |
+| يمر | `effects.blur_passes` | `2` | 1–8 | 1 |
+| السطوع | `effects.blur_brightness` | `1` | 0–2 | 0.05 |
+| الضوضاء | `effects.blur_noise` | `0.00` | 0–1 | 0.01 |
+| التباين | `effects.blur_contrast` | `0.900000` | 0–2 | 0.05 |
+| حيوية | `effects.blur_vibrancy` | `0.100000` | 0–1 | 0.01 |
+| حيوية الظلام | `effects.blur_vibrancy_darkness` | `0` | 0–1 | 0.01 |
 
-Use 
+Use
 
- to move, `↑/↓` (or `←/→`) to change the selected value by its step, and `+/-` `Enter`  to type an exact value; values outside the range are refused. Nothing is written while you edit: the switch and the values stay in the draft until **[ Apply ]** at the bottom of the page is selected. Apply writes every changed value in one call, and reloads Hyprland after it. Leaving the page with an unapplied draft asks for confirmation.
+للتنقل، `↑/↓` (أو `←/→`) لتغيير القيمة المحددة بخطوتها، و`+/-` `Enter` لكتابة قيمة دقيقة؛ يتم رفض القيم خارج النطاق. لا تتم كتابة أي شيء أثناء التحرير: يظل المفتاح والقيم في المسودة حتى يتم تحديد **[ Apply ]** في أسفل الصفحة. تطبيق يكتب كل قيمة تم تغييرها في مكالمة واحدة، ويعيد تحميل Hyprland بعد ذلك. يؤدي ترك الصفحة مع مسودة غير مطبقة إلى المطالبة بالتأكيد.
 
 .ﻢﻴﻘﻟﺍ ﺮﻴﻐﻳ ﻻ﻿ ﺪﺣﺍﻭ ﺢﻄﺳ ﺡﺎﺘﻔﻣ ﺮﻴﻴﻐﺗ .ﺔﻳﻮﺌﻤﻟﺍ ﺔﺒﺴﻨﻟﺍ ﻦﻣ ﺎﻬﺼﻠﺨﺘﺴ
 
-## Shadow
+## الظل
 
 ظل النافذة هو إعداد Hyprland عالمي، ضمن **Control Center → Hyprland → Borders → Shadow**. إنها مستقلة عن الشفافية والتمويه: فهي متوقفة عن التشغيل بشكل افتراضي، وتشغيل أو إيقاف شفافية السطح لا يغيرها.
 
@@ -116,7 +122,7 @@ Use
 | النطاق | `effects.shadow_range` | `6` | 0–100 | 1 |
 | تقديم القوة | `effects.shadow_render_power` | `6` | 1–10 | 1 |
 | إزاحة X | `effects.shadow_offset_x` | `0` | −100 إلى 100 | 1 || Offset Y | `effects.shadow_offset_y` | `0` | −100 to 100 | 1 |
-| Scale | `effects.shadow_scale` | `1.00` | 0–1 | 0.05 |
+| مقياس | `effects.shadow_scale` | `1.00` | 0–1 | 0.05 |
 
 يتبع اللون الفارغ تمييز السمة النشطة بألفا `99`، وبالتالي فإن التمييز الأزرق الافتراضي يعطي `3590bd99`. اكتب ثمانية أرقام سداسية عشرية (`RRGGBBAA`) لإصلاح اللون، أو اترك المطالبة فارغة لمتابعة التمييز مرة أخرى. تتم قراءة اللون عند تكوين Hyprland loads, so after a theme or accent change it takes the new accent on the next configuration reload.
 
@@ -124,11 +130,11 @@ Use
 
 ##                                       ﺔﻴﺟﺫﻮﻤﻨﻟﺍ ﻖﻓﺍﻮﺘﻠﻟ ﺔﻴﻠﺑﺎﻘﻟﺍﻭ ﺔﻟﺎﺤﻟﺍ ﺕﺎﻔﻠﻣ
 
- effects.blur_global_value  argvus-config  0–100  effects.transparency_control-center_value  effects.blur_control-center_enabled  effects.blur_*  effects.blur_global_enabled  effects.animation_*  effects.animations  `$XDG_CONFIG_HOME/argvus/config.json`  `effects.animations`  `effects.animation_*`  `effects.blur_global_enabled`  `effects.blur_*`  `effects.blur_control-center_enabled`  `effects.transparency_control-center_value`  `0–100`  `argvus-config`  `effects.blur_global_value` `data/generated/effects/<active-theme>.conf`                                                    ﻂﻘﻓ ﻪﺒﺘﻛ ،ﺕﺍﺮﻴﺛﺄﺘﻟﺍ ﺽﺮﻋ ﻮﻫ`argvus config`; `argvus effects-toggle`                                                                   ﻰﻟﺇ ﻥﻮﺑﻭﺪﻨﻣ`argvus config effects`ﻦﻣ ﺢﻄﺳ ﻞﻜﺑ ﺔﺻﺎﺨﻟﺍ ﻢﻴﻘﻟﺍ ﻚﻟﺫ ﻲﻓ ﺎﻤﺑ ،ﺔﻄﺸﻨﻟﺍ ﺔﻤﺴﻠﻟ ﺭَّﺪﺼُﻤﻟﺍ ﻱﺮﺼﺒﻟﺍ ﻲﺼﺨﺸﻟﺍ ﻒﻠﻤﻟﺍ ﻖﻴ`effects.conf`.ﺮﺧﺁ ﻊﺿﻭ ﻭﺃ ﻯﺮﺧﺃ ﺔﻤﺳ ﻞﻳﺪﺒﺗ ﺪﻌﺑ ﻢﻴﻘﻟﺍ ﻩﺬﻫ ﻰﻘﺒﺗ ﻥﺃ ﺪﻳﺮﺗ ﺖﻨﻛ ﺍﺫﺇ ﺕﺍﺮﻴﺛﺄﺘﻟﺍ ﺮﻴﻴﻐﺗ 
+ effects.blur_global_value  argvus-config  0–100  effects.transparency_control-center_value  effects.blur_control-center_enabled  effects.blur_*  effects.blur_global_enabled  effects.animation_*  effects.animations  `$XDG_CONFIG_HOME/argvus/config.json`  `effects.animations`  `effects.animation_*`  `effects.blur_global_enabled`  `effects.blur_*`  `effects.blur_control-center_enabled`  `effects.transparency_control-center_value`  `0–100`  `argvus-config`  `effects.blur_global_value` `data/generated/effects/<active-theme>.conf`                                                    ﻂﻘﻓ ﻪﺒﺘﻛ ،ﺕﺍﺮﻴﺛﺄﺘﻟﺍ ﺽﺮﻋ ﻮﻫ`argvus config`; `argvus effects-toggle`                                                                   ﻰﻟﺇ ﻥﻮﺑﻭﺪﻨﻣ`argvus config effects`ﻦﻣ ﺢﻄﺳ ﻞﻜﺑ ﺔﺻﺎﺨﻟﺍ ﻢﻴﻘﻟﺍ ﻚﻟﺫ ﻲﻓ ﺎﻤﺑ ،ﺔﻄﺸﻨﻟﺍ ﺔﻤﺴﻠﻟ ﺭَّﺪﺼُﻤﻟﺍ ﻱﺮﺼﺒﻟﺍ ﻲﺼﺨﺸﻟﺍ ﻒﻠﻤﻟﺍ ﻖﻴ`effects.conf`.ﺮﺧﺁ ﻊﺿﻭ ﻭﺃ ﻯﺮﺧﺃ ﺔﻤﺳ ﻞﻳﺪﺒﺗ ﺪﻌﺑ ﻢﻴﻘﻟﺍ ﻩﺬﻫ ﻰﻘﺒﺗ ﻥﺃ ﺪﻳﺮﺗ ﺖﻨﻛ ﺍﺫﺇ ﺕﺍﺮﻴﺛﺄﺘﻟﺍ ﺮﻴﻴﻐﺗ
 
 .ﺎًﻘﺣﻻ﻿ ﻞﻴﻌﻔﺘﻟﺍ ﺓﺩﺎﻋﻹ﻿ ﺔﻇﻮﻔﺤﻤﻟﺍ ﺔﻴﻤﻗﺮﻟﺍ ﻢﻴﻘﻟﺎﺑ ﻅﺎﻔﺘﺣﻻ﻿ﺍ ﻢﺘﻳ ؛ﺢﻄﺴﻟ
 
-## Profiles
+## الملفات الشخصية
 
 .ﻢﻴﺜﻟﺍ ﻖﻴﺒﻄﺗ ﺪﻨﻋ Hyprlandﻭ Quickshellﻭ Waybar ـﻟ ﻞﻴﻐﺸﺘﻟﺍ ﺖﻗﻭ
 
@@ -136,4 +142,4 @@ Use
 
 ## ﻞﻴﻠﻟﺍ ءﻮﺿ
 
-**SUPER + Shift + B** keeps the brightness selector and adds a separate Night Light toggle with effective state/temperature. It calls  argvus-config  `[ Apply ]`  `argvus-config` `argvus config display night-light status|toggle`. Night Light requires Hyprland and a responding Hyprsunset >= 0.4.0, independently of brightness support. The range is 1000–20000 K; configuration is under **Desktop .ﺎًﺌﻴﺷ ﺮﻴﻐﻳ ﻻ﻿ ﺔﻤﺋﺎﻘﻟﺍ ءﺎﻐﻟﺇ .ﺔﻟﻭﺪﺠﻟﺍ ﻊﻣ ﻲﻟﺎﺘﻟﺍ ﻝﺎﻘﺘﻧﻻ﻿ﺍ ﻰﺘﺣ ﺖﻗﺆ
+**SUPER + Shift + B** يحافظ على محدد السطوع ويضيف مفتاح تبديل منفصل للضوء الليلي مع الحالة/درجة الحرارة الفعالة. يستدعي argvus-config `[ Apply ]` `argvus-config` `argvus config display night-light status|toggle`. تتطلب الإضاءة الليلية Hyprland وHyprsunset مستجيبة >= 0.4.0، بشكل مستقل عن دعم السطوع. النطاق هو 1000-20000 كلفن؛ التكوين موجود تحت **سطح المكتب . аًإلكترونيشي ملاحظة﻿ تليفتك ءاكلم المزايا .
