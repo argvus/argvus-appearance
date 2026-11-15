@@ -9,3 +9,5 @@ description: 使用内置和自定义 ARGVUS 壁纸。
 当主题被导出时，如果当前壁纸图像可读取，则会包含该图像。导入会安装该主题；应用它会激活其壁纸。参见 [导入和导出主题](/docs/components/argvus-themes/import-and-export/)。
 
 面向用户的外观控制使用 Hyprland 辅助程序 `hypr-wallpaper-pick.sh`，该程序通过 `argvus config` 提交所选路径，而不是自行存储壁纸状态。请勿直接编辑生成的壁纸配置。
+
+- [可视化主题选择器](./theme-selector.md)

@@ -9,3 +9,5 @@ La primera entrada abre un selector de archivos para una imagen personalizada. U
 Cuando se exporta un tema, la imagen de fondo de pantalla actual se incluye cuando es legible. La importación instala el tema; aplicarlo activa su fondo de pantalla. Vea [Importación y exportación de temas](/docs/components/argvus-themes/import-and-export/).
 
 Los controles de apariencia orientados al usuario utilizan el asistente de Hyprland `hypr-wallpaper-pick.sh`, que confirma la ruta elegida a través de `argvus config` en lugar de almacenar el estado del fondo de pantalla por sí mismo. No edite directamente la configuración del fondo de pantalla generada.
+
+- [Selector visual de temas](./theme-selector.md)

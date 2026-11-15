@@ -7,7 +7,6 @@ import json
 import os
 from pathlib import Path
 import re
-import shlex
 import shutil
 import subprocess
 import tempfile
@@ -39,8 +38,6 @@ if name == "argvus" and os.environ.get("TEST_ARGVUS_BIN") and (
         or (sys.argv[1:2] == ["config"] and not os.environ.get("TEST_VARIANT"))):
     real = os.environ["TEST_ARGVUS_BIN"]
     os.execv(real, [real, *sys.argv[1:]])
-if name == "argvus" and sys.argv[1:2] == ["theme-switch"] and os.environ.get("TEST_THEME_SWITCH_RECORD"):
-    open(os.environ["TEST_THEME_SWITCH_RECORD"], "w").write(sys.argv[2] + "\\n")
 if name == "argvus" and sys.argv[1:] == ["sessionctl", "reload"]:
     sys.exit(int(os.environ.get("TEST_RELOAD_FAIL", "0")))
 if name == "argvus" and sys.argv[1:] == ["sessionctl", "apply-config-runtime"]:
@@ -379,102 +376,16 @@ class ThemeSwitchTests(unittest.TestCase):
                 self.assertIn(f'foreground = "{foreground}"'.casefold(), normalized_config)
                 self.assertIn("[discord]", config)
 
-    def test_theme_menu_enters_dark_category(self):
-        """The hierarchical Rofi menu must not abort on the Dark branch."""
-        rofi_step = self.base / "rofi-step"
-        selected_theme = self.base / "selected-theme"
-        rofi = self.base / "bin" / "rofi"
-        rofi.write_text(
-            "#!/bin/sh\n"
-            f"step_file={shlex.quote(str(rofi_step))}\n"
-            "step=$(cat \"$step_file\" 2>/dev/null || printf '0')\n"
-            "cat >/dev/null\n"
-            "case \"$step\" in\n"
-            "  0) printf '%s\\n' 'Dark >' ;;\n"
-            "  1) printf '%s\\n' 'ARGVUS Dark' ;;\n"
-            "  *) exit 1 ;;\n"
-            "esac\n"
-            "printf '%s\\n' $((step + 1)) >\"$step_file\"\n"
-        )
-        rofi.chmod(0o755)
-
+    def test_empty_theme_opens_independent_selector_without_applying(self):
         result = subprocess.run(
-            ["sh", str(self.system / "appearance/sh/theme-menu.sh")],
-            env=self.env | {"ARGVUS_NO_RUNTIME": "1", "TEST_THEME_SWITCH_RECORD": str(selected_theme)},
-            capture_output=True,
-            text=True,
-            timeout=10,
+            [str(ARGVUS_BIN), "theme-switch"], env=self.env,
+            capture_output=True, text=True, timeout=10,
         )
-
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertEqual(selected_theme.read_text(), "argvus-dark\n")
-        self.assertNotIn("unbound variable", result.stderr)
-
-    def test_theme_menu_left_returns_to_parent_menu(self):
-        """Cancelling a child Rofi menu with Left returns to its parent."""
-        rofi_step = self.base / "rofi-step"
-        selected_theme = self.base / "selected-theme"
-        rofi = self.base / "bin" / "rofi"
-        rofi.write_text(
-            "#!/bin/sh\n"
-            f"step_file={shlex.quote(str(rofi_step))}\n"
-            "step=$(cat \"$step_file\" 2>/dev/null || printf '0')\n"
-            "cat >/dev/null\n"
-            "case \"$step\" in\n"
-            "  0) printf '%s\\n' 'Dark >' ;;\n"
-            "  1) printf '%s\\n' $((step + 1)) >\"$step_file\"; exit 1 ;;\n"
-            "  2) printf '%s\\n' 'Light >' ;;\n"
-            "  3) printf '%s\\n' 'ARGVUS Light' ;;\n"
-            "  *) exit 1 ;;\n"
-            "esac\n"
-            "printf '%s\\n' $((step + 1)) >\"$step_file\"\n"
-        )
-        rofi.chmod(0o755)
-
-        result = subprocess.run(
-            ["sh", str(self.system / "appearance/sh/theme-menu.sh")],
-            env=self.env | {"ARGVUS_NO_RUNTIME": "1", "TEST_THEME_SWITCH_RECORD": str(selected_theme)},
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertEqual(selected_theme.read_text(), "argvus-light\n")
-
-    def test_theme_menu_lists_the_argvus_theme_first(self):
-        """ARGVUS Dark leads the Dark category, then the installed themes."""
-        rofi_input = self.base / "rofi-input"
-        rofi_step = self.base / "rofi-step"
-        rofi = self.base / "bin" / "rofi"
-        rofi.write_text(
-            "#!/bin/sh\n"
-            f"step_file={shlex.quote(str(rofi_step))}\n"
-            "step=$(cat \"$step_file\" 2>/dev/null || printf '0')\n"
-            "case \"$step\" in\n"
-            "  0) cat >/dev/null; printf '%s\\n' 'Dark >' ;;\n"
-            f"  1) cat > {shlex.quote(str(rofi_input))}; "
-            "printf '%s\\n' 2 >\"$step_file\"; exit 1 ;;\n"
-            "  *) cat >/dev/null; exit 1 ;;\n"
-            "esac\n"
-            "printf '%s\\n' $((step + 1)) >\"$step_file\"\n"
-        )
-        rofi.chmod(0o755)
-
-        subprocess.run(
-            ["sh", str(self.system / "appearance/sh/theme-menu.sh")],
-            env=self.env | {"ARGVUS_NO_RUNTIME": "1"},
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-
-        items = rofi_input.read_text().splitlines()
-        self.assertEqual(items[0], "ARGVUS Dark")
-        # Theme packages are listed from their manifests by `argvus theme list`.
-        self.assertIn("One Dark", items)
-        self.assertNotIn("One Light", items)
-        self.assertFalse(any(item.endswith(">") for item in items))
+        self.assertIn(["argvus", "theme-selector"], self.commands())
+        self.assertFalse((self.user / ".active-theme").exists())
+        self.assertFalse((self.user / "generated/theme/current").exists())
+        self.assertFalse(any(command[0] == "rofi" for command in self.commands()))
 
     def test_runtime_switch_covers_nothing_and_stops_nothing(self):
         self.apply("sunset")
@@ -708,25 +619,6 @@ class ThemeSwitchTests(unittest.TestCase):
                     self.assertIn(f"@define-color argvus_bg {background};", contents)
                     if selected.endswith("-spaced"):
                         self.assertIn("border-radius: 4px", contents)
-
-    def test_theme_menu_exposes_category_family_then_model_protocol(self):
-        menu = self.system / "appearance/sh/theme-menu.sh"
-        source = menu.read_text()
-        self.assertIn("theme.category.dark", source)
-        self.assertIn("theme.category.light", source)
-        self.assertIn("argvus theme list", source)
-        self.assertNotIn("argvus-appearance themes list", source)
-        self.assertNotIn("theme.family.dracula", source)
-        self.assertNotIn("theme.model.sticky", source)
-        self.assertIn("-kb-accept-entry 'Return,KP_Enter,Right'", source)
-        self.assertIn("-kb-cancel 'Escape,Left'", source)
-        self.assertIn("exec env ARGVUS_ACCENT_OFFICIAL=1 argvus theme-switch", source)
-
-    def test_theme_menu_releases_rofi_arrow_bindings(self):
-        # The empty theme argument opens theme-menu.sh from the Rust transaction.
-        apply_source = (ROOT / "argvus/crates/argvus-config/src/theme_apply.rs").read_text()
-        self.assertIn("theme-menu.sh", apply_source)
-        self.assertNotIn("-kb-custom-1 Right", apply_source)
 
     def test_theme_switch_is_silent_on_success(self):
         result = self.apply("argvus-dark")

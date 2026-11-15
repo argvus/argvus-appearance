@@ -14,3 +14,5 @@ The user-facing appearance controls use the Hyprland helper  $XDG_CONFIG_HOME/ar
  انسٹال اور صارف کے راستوں کے لیے۔ انسٹال کردہ اور صارف کے راستوں کے لیے۔(/docs/components/argvus-themes/import-and-export/)۔
 
 ﮟﯿﮭﮑﯾﺩ ۔ﮯﮨ ﺎﺗﺎﺟ ﻮﮨ ﻝﺎﻌﻓ ﺮﭙﯿﭘ ﻝﺍﻭ ﺎﮐ ﺱﺍ ﮯﺳ ﮯﻧﺮﮐ ﯽﺋﻼ﻿ﭘﺍ ﮯﺳﺍ ؛ﮯﮨ ﺎﺗﻮﮨ ﻝﺎﭩﺴﻧﺍ ﻢﯿﮭﺗ [                                                      ﺪﻣﺁﺮﺑ ﺭﻭﺍ ﺪﻣﺁﺭﺩ ﯽﮐ ﺰﻤﯿﮭﺗ](/docs/components/argvus-themes/import-and-export/).
+
+- [بصری تھیم منتخب کنندہ](./theme-selector.md)

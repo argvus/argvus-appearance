@@ -53,13 +53,7 @@ The Control Panel launches theme selection through a transient user service, so
 the switch does not depend on the panel process that asked for it. The Control Center
 reads the TUI palette of the build, not the calendar cache.
 
-The `SUPER + Shift + T` Rofi selector is hierarchical: choose the localized
-Dark or Light category, then the theme (ARGVUS first, then the installed themes, the user's included,
-as `argvus theme list` reports them), which applies immediately
-under whichever mode is already active. The Control Center uses the same
-category and family hierarchy; imported custom profiles remain in a separate
-section. In Rofi, Right advances to the selected level, Left returns one
-level, and Escape closes the selector from any level.
+Open `argvus theme-selector`, `argvus theme-switch` without arguments, or `SUPER + Shift + T`. The independent GTK overlay opens on the active monitor, with a central preview and neighboring cards. Search or filter All/Dark/Light; use arrows, the mouse wheel or side cards to browse. Enter or Apply theme confirms; Escape or Close cancels. Browsing never changes the desktop. Installed system and user themes share the existing catalog. A valid manifest `preview` is preferred; otherwise wallpaper and palette produce an illustrative desktop, not an exact rendering of application overrides. Missing images use palette colors. Application uses the existing theme transaction and preserves Sticky/Spaced. Failures remain visible for retry. JXL thumbnails require `djxl` from `libjxl`; derived thumbnails live under the XDG cache in `argvus/theme-selector/v2`.
 
 After applying a highlight color, `argvus config accent` also publishes the
 validated `#RRGGBB` value to the per-UID greeter projection at

@@ -9,3 +9,5 @@ Der erste Eintrag öffnet einen Dateiauswahldialog für ein benutzerdefiniertes 
 Beim Export eines Themas wird das aktuelle Hintergrundbild eingeschlossen, wenn es lesbar ist. Beim Importieren wird das Thema installiert; das Anwenden aktiviert dessen Hintergrundbild. Siehe [Importieren und Exportieren von Themen](/docs/components/argvus-themes/import-and-export/).
 
 Die benutzerseitigen Erscheinungskontrollen verwenden den Hyprland-Helfer `hypr-wallpaper-pick.sh`, der den gewählten Pfad über `argvus config` festschreibt, anstatt den Zustand des Hintergrundbildes selbst zu speichern. Bearbeiten Sie die generierte Hintergrundbildkonfiguration nicht direkt.
+
+- [Visuelle Theme-Auswahl](./theme-selector.md)

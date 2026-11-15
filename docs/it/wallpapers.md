@@ -9,3 +9,5 @@ La prima voce apre un selettore di file per un'immagine personalizzata. Uno sfon
 Quando un tema viene esportato, l'immagine dello sfondo corrente viene inclusa quando è leggibile. L'importazione installa il tema; applicarlo attiva il suo sfondo. Vedi [Importing and exporting themes](/docs/components/argvus-themes/import-and-export/).
 
 I controlli dell'aspetto destinati all'utente utilizzano l'aiutante di Hyprland `hypr-wallpaper-pick.sh`, che conferma il percorso scelto tramite `argvus config` invece di memorizzare direttamente lo stato dello sfondo. Non modificare direttamente la configurazione dello sfondo generata.
+
+- [Selettore visivo dei temi](./theme-selector.md)

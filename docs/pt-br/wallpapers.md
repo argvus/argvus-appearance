@@ -10,3 +10,5 @@ A primeira entrada abre um seletor de arquivos para uma imagem personalizada. Um
 Ao exportar um tema, a imagem do wallpaper atual é incluída quando está legível. Importar instala o tema; aplicá-lo ativa seu wallpaper. Veja [Importando e exportando temas](/pt/docs/components/argvus-themes/import-and-export/).
 
 Os controles de aparência usam o helper Hyprland `hypr-wallpaper-pick.sh`, que registra o caminho escolhido pelo `argvus config` em vez de guardar o estado de wallpaper por conta própria. Não edite diretamente a configuração de wallpaper gerada.
+
+- [Seletor visual de temas](./theme-selector.md)

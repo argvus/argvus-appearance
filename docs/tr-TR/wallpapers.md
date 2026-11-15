@@ -10,3 +10,5 @@ description: Yerleşik ve özel ARGVUS duvar kağıtlarını kullanın.
 Bir tema dışa aktarıldığında, mevcut duvar kağıdı görüntüsü okunabilir durumda ise dahil edilir. İçe aktarma, temayı kurar; bunu uygulamak duvar kağıdını etkinleştirir. Bkz. [Temaları içe ve dışa aktarma](/docs/components/argvus-themes/import-and-export/).
 
 Kullanıcıya yönelik görünüm kontrolleri, seçilen yolu kendisi duvar kağıdı durumunu saklamak yerine `argvus config` üzerinden işleyen Hyprland yardımcısı  `$XDG_CONFIG_HOME/argvus/.wallpaper-custom` `hypr-wallpaper-pick.sh` `argvus config` 'yu kullanır. Oluşturulan duvar kağıdı yapılandırmasını doğrudan düzenlemeyin.
+
+- [Görsel tema seçici](./theme-selector.md)

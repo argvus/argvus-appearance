@@ -10,3 +10,5 @@ Mục nhập đầu tiên mở một trình chọn tệp cho hình ảnh tùy ch
 Khi một chủ đề được xuất, hình nền hiện tại sẽ được bao gồm khi nó có thể đọc được. Việc nhập sẽ cài đặt chủ đề; việc áp dụng nó sẽ kích hoạt hình nền của nó. Xem [Nhập và xuất chủ đề](/docs/components/argvus-themes/import-and-export/).
 
 Các điều khiển giao diện người dùng sử dụng trợ lý Hyprland `hypr-wallpaper-pick.sh`, người này cam kết đường dẫn đã chọn thông qua `argvus config` thay vì lưu trạng thái hình nền trực tiếp. Không chỉnh sửa trực tiếp cấu hình hình nền được tạo.
+
+- [Bộ chọn chủ đề trực quan](./theme-selector.md)

@@ -40,7 +40,7 @@ optdepends=(
   'argvus-widget-telemetry: Waybar widget telemetry theme integration'
   'argvus-removable-devices: removable storage theme integration'
   'ddcutil: external monitor brightness control'
-  'rofi: interactive theme, accent and brightness menus'
+  'rofi: interactive layout, accent and brightness menus'
 )
 source=(
   "${pkgname}-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz"

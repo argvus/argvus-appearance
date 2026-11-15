@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # layout-mode-menu - Rofi picker for the Sticky/Spaced layout mode, independent
-# of theme selection. Same two-pass structure as theme-menu.sh.
+# of theme selection. This layout picker remains a Rofi menu.
 # shellcheck disable=SC1090,SC1091
 
 set -eu

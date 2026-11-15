@@ -13,3 +13,5 @@ description: استخدم خلفيات ARGVUS المضمنة والمخصصة.
                                             .ﻡﺪﺨﺘﺴﻤﻟﺍ ﺕﺍﺭﺎﺴﻣﻭ ﺔﺘﺒﺜﻤﻟﺍ ﺕﺍﺭﺎﺴﻤﻠﻟ for the installed and user paths.(/docs/components/argvus-themes/import-and-export/).
 
 ﺮﻈﻧﺍ .ﻪﺘﻴﻔﻠﺧ ﻞﻴﻌﻔﺘﺑ ﻡﻮﻘﻳ ﻪﻘﻴﺒﻄﺗﻭ ؛ﻉﻮﺿﻮﻤﻟﺍ ﺖﻴﺒﺜﺘﺑ ﻡﻮﻘﻳ ﺖﻴﺒﺜﺘﻟﺍ .ﺓءﺍﺮﻘﻠﻟ ﺔﻠﺑﺎﻗ ﻥ[                                                         ﺕﺎﻤﺴﻟﺍ ﺮﻳﺪﺼﺗﻭ ﺩﺍﺮﻴﺘﺳﺍ](/docs/components/argvus-themes/import-and-export/).
+
+- [اختيار السمات المرئي](./theme-selector.md)

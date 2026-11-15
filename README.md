@@ -23,6 +23,10 @@ It currently ships:
 - Hyprland appearance integration under `/usr/share/argvus/appearance/config/hypr`
 - Toggle, accent and brightness scripts under `/usr/share/argvus/appearance/sh`
 
+The independent visual theme selector is shipped by `argvus`: open
+`argvus theme-selector`, `argvus theme-switch` without an ID, or
+`SUPER + Shift + T`. The selector supports system Dark/Light themes and user-installed Custom themes, live search with `/`, and square Sticky or rounded Spaced corners. See [Visual theme selector](docs/en/theme-selector.md).
+
 Wallpapers and fonts are provided by the separate `argvus-wallpapers` and
 `argvus-fonts` packages.
 

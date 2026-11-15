@@ -9,3 +9,5 @@ description: 내장 및 사용자 지정 ARGVUS 배경화면을 사용하세요.
 테마를 내보낼 때, 현재 배경화면 이미지는 읽을 수 있는 경우 포함됩니다. 가져오기는 테마를 설치하며, 적용 시 해당 배경화면을 활성화합니다. 자세한 내용은 [테마 가져오기 및 내보내기](/docs/components/argvus-themes/import-and-export/)를 참조하십시오.
 
 사용자 인터페이스용 외형 컨트롤은 Hyprland 헬퍼 `hypr-wallpaper-pick.sh`를 사용하며, 자체적으로 배경화면 상태를 저장하는 대신 선택된 경로를 `argvus config`를 통해 커밋합니다. 생성된 배경화면 구성은 직접 편집하지 마십시오.
+
+- [시각적 테마 선택기](./theme-selector.md)

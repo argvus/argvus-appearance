@@ -10,3 +10,5 @@ Entri pertama membuka pemilih berkas untuk gambar kustom. Wallpaper kustom yang 
 Ketika sebuah tema diekspor, gambar wallpaper saat ini disertakan ketika dapat dibaca. Impor menginstal tema; menerapkannya mengaktifkan wallpaper-nya. Lihat [Mengimpor dan mengekspor tema](/docs/components/argvus-themes/import-and-export/).
 
 Kontrol tampilan yang dihadapi pengguna menggunakan pembantu Hyprland `hypr-wallpaper-pick.sh`, yang mengirimkan jalur yang dipilih melalui `argvus config` alih-alih menyimpan status wallpaper itu sendiri. Jangan mengedit konfigurasi wallpaper yang dihasilkan secara langsung.
+
+- [Pemilih tema visual](./theme-selector.md)
