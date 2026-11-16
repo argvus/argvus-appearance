@@ -143,7 +143,8 @@ class ThemeSwitchTests(unittest.TestCase):
         # Every program a theme switch talks to on the desktop is recorded
         # instead: the switch must never reach the session running the tests.
         for name in ("hyprctl", "systemctl", "pgrep", "pkill", "dunstctl", "qs",
-                     "gsettings", "notify-send", "argvus"):
+                     "gsettings", "notify-send", "argvus",
+                     "dbus-update-activation-environment", "wpctl"):
             script = mockbin / name
             script.write_text(MOCK)
             script.chmod(0o755)
@@ -159,7 +160,12 @@ class ThemeSwitchTests(unittest.TestCase):
             "[ -z \"$ready\" ] || printf 'READY\\n' > \"$ready\"\n"
         )
         splash.chmod(0o755)
+        isolated_runtime = self.base / "runtime"
+        isolated_runtime.mkdir()
         self.env = os.environ | {
+            "XDG_RUNTIME_DIR": str(isolated_runtime),
+            # Even an accidentally unmocked D-Bus client must not reach the desktop.
+            "DBUS_SESSION_BUS_ADDRESS": "unix:path=" + str(isolated_runtime / "no-session-bus"),
             "ARGVUS_SYSTEM_CONFIG": str(self.system),
             "ARGVUS_BOOTSTRAP": str(self.system / "session/sh/bootstrap.sh"),
             "ARGVUS_CONFIG_HOME": str(self.config),
@@ -207,6 +213,23 @@ class ThemeSwitchTests(unittest.TestCase):
 
     def commands(self):
         return [json.loads(line) for line in self.log.read_text().splitlines()]
+
+    def test_environment_import_cannot_reach_the_session_bus(self):
+        command = self.base / "bin/dbus-update-activation-environment"
+        result = subprocess.run(
+            [str(command), "--systemd", "ARGVUS_CONFIG_HOME"],
+            env=self.env, capture_output=True, text=True, timeout=5,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(
+            ["dbus-update-activation-environment", "--systemd", "ARGVUS_CONFIG_HOME"],
+            self.commands(),
+        )
+        self.assertEqual(self.env["XDG_RUNTIME_DIR"], str(self.base / "runtime"))
+        self.assertEqual(
+            self.env["DBUS_SESSION_BUS_ADDRESS"],
+            "unix:path=" + str(self.base / "runtime/no-session-bus"),
+        )
 
     def test_all_pairs_float_to_sticky_and_imports(self):
         themes = self.system / "themes"

@@ -19,20 +19,20 @@ target is not restarted.
 Sticky/Spaced is the layout mode (`/layout/variant` in `argvus config`,
 `sticky` or `spaced`) and is independent of the active theme: selecting a
 theme never changes it, and switching the mode never changes the theme. The
-mode is applied with `appearance/sh/layout-mode-switch.sh <sticky|spaced>`,
-triggered either from the `SUPER + Shift + M` Rofi picker
-(`argvus layout-mode-menu`) or from Control Center's
-`Appearance > Mode` screen. Applying Sticky resets taskbar margins, border
-rounding and window gaps to the sticky defaults; applying Spaced resets them to
-the Spaced defaults (see `reset_layout_geometry` in `argvus config`). The
-script writes the mode and runs the theme transaction for the active family.
-Every mode switch reapplies the selected mode's spacing, border and taskbar
-geometry, then restarts `argvus-taskbar.service`,
-`argvus-widget-telemetry.service` and `argvus-hyprland.service`, including when
-the mode was already selected. The mode's geometry takes precedence over
-geometry stored in a theme profile. The session controller may show its loading
-overlay when a surface must be recreated, but it does not restart the whole
-session target. Applying any theme replaces independent visual edits with that
+mode selector (`argvus layout-mode-menu`, `SUPER + Shift + M`) applies the
+complete preset through the Rust coordinator. It prepares the final taskbar
+edge before rendering and skips theme reapplication for position-only or
+Tile/Floating changes. Tab switches groups and arrows navigate within the
+focused group. Progress stays inside the selector; its runtime commands do
+not start a session splash. Failed or pending applications stay visible.
+
+Control Center's `Appearance > Mode` screen retains the compatibility route
+`appearance/sh/layout-mode-switch.sh <sticky|spaced>`. That route reasserts the
+mode defaults and reapplies the active theme family. The preset coordinator
+uses the same configuration and theme transaction directly. Required surface
+restarts are grouped in one systemd transaction. The mode geometry takes
+precedence over geometry stored in a theme profile. Other session flows retain
+their loading overlay when recreating surfaces. Applying any theme replaces independent visual edits with that
 theme's exported profile or the packaged defaults when it has no profile. To
 keep personal visual settings across theme or mode changes, save them through
 Control Center's **Export theme** action. An exported profile includes its
@@ -71,3 +71,8 @@ Sticky/Spaced, Tile/Floating windows, and Top/Bottom primary taskbar. The config
 coordinator applies geometry first, final bar position second, and window policy
 last. Failed theme transactions propagate their status; pending session changes
 remain visible rather than closing the picker as a completed application.
+
+Integration tests mock `dbus-update-activation-environment` and `wpctl` as well
+as systemctl.
+Their runtime directory is temporary and their D-Bus address points to an absent
+socket, so environment imports cannot overwrite the live session manager state.
