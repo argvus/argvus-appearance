@@ -21,7 +21,7 @@ Sticky/Spaced is the layout mode (`/layout/variant` in `argvus config`,
 theme never changes it, and switching the mode never changes the theme. The
 mode is applied with `appearance/sh/layout-mode-switch.sh <sticky|spaced>`,
 triggered either from the `SUPER + Shift + M` Rofi picker
-(`appearance/sh/layout-mode-menu.sh`) or from Control Center's
+(`argvus layout-mode-menu`) or from Control Center's
 `Appearance > Mode` screen. Applying Sticky resets taskbar margins, border
 rounding and window gaps to the sticky defaults; applying Spaced resets them to
 the Spaced defaults (see `reset_layout_geometry` in `argvus config`). The
@@ -65,3 +65,9 @@ For integration checks in an ecosystem checkout, run
 `python tools/test-theme-switch.py` from `argvus-appearance` and
 `python tools/test-paths.py` from `argvus-session`. The tests isolate configuration
 and cache directories and replace runtime commands with recording doubles.
+
+The visual `argvus layout-mode-menu` picker now offers eight complete presets:
+Sticky/Spaced, Tile/Floating windows, and Top/Bottom primary taskbar. The config
+coordinator applies geometry first, final bar position second, and window policy
+last. Failed theme transactions propagate their status; pending session changes
+remain visible rather than closing the picker as a completed application.

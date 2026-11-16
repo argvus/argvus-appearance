@@ -456,6 +456,16 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn(["qs", "-c", "argvus-control-panel", "ipc", "call", "theme", "reload"], commands)
         self.assertNotIn(["argvus", "config", "theme-runtime", "hyprland"], commands)
 
+    def test_layout_mode_switch_propagates_failed_theme_application(self):
+        mock = self.base / "bin/argvus"
+        mock.write_text(MOCK + '\nif name == "argvus" and sys.argv[1:2] == ["theme-switch"]: sys.exit(7)\n')
+        result = subprocess.run(
+            ["sh", str(self.system / "appearance/sh/layout-mode-switch.sh"), "spaced"],
+            env=self.env, capture_output=True, text=True, timeout=60)
+        self.assertEqual(result.returncode, 7, result.stderr)
+        self.assertFalse((self.user / ".active-theme").exists(),
+                         "failed transaction must not write a success marker")
+
     def test_layout_mode_switch_applies_in_place(self):
         # Sticky/Spaced goes through the theme transaction only: no splash, no
         # configuration-service reload and no early Waybar restart.

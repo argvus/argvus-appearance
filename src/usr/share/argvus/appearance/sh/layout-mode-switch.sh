@@ -55,9 +55,14 @@ THEME_FAMILY="${THEME_FAMILY%-float}"
 # transaction reapplies the active theme's non-geometric profile values or defaults
 # after the mode has been selected, while preserving the selected variant.
 exec 9>&-
-if command -v argvus >/dev/null 2>&1 &&
-  ARGVUS_MODE_SWITCH=1 argvus theme-switch "$THEME_FAMILY"; then
-  exit 0
+if command -v argvus >/dev/null 2>&1; then
+  if ARGVUS_MODE_SWITCH=1 argvus theme-switch "$THEME_FAMILY"; then
+    exit 0
+  else
+    # A saved variant is not proof that rendering or session application worked.
+    # Preserve the failure for callers so they can reread state and offer retry.
+    exit "$?"
+  fi
 fi
 
 # Without the transaction, keep the legacy resolved-theme marker on the new mode.
