@@ -25,7 +25,7 @@ Usa `argvus effects-toggle animations status|enable|disable|toggle` e `argvus ef
 
 Ogni superficie ha il proprio sottomenu **Trasparenza** con un interruttore di abilitazione e un valore.
 
-La pagina **Aspetto → Launcher** controlla il launcher ufficiale basato su Rofi e i flussi del selezionatore: il launcher principale, il selezionatore di emoji, la calcolatrice, il selezionatore degli appunti, i cheatsheet e i menu dei dispositivi rimovibili di Rofi. Il suo valore di Trasparenza è l'alpha finale dello sfondo, quindi `50` significa un'opacità effettiva dello sfondo di circa `0.50`; testo, icone e righe selezionate rimangono opachi. Con la Trasparenza disattivata, il launcher utilizza il colore di sfondo del tema attivo, completamente opaco. L'interruttore Sfocatura applica lo strato `rofi` alle impostazioni globali di Sfocatura.
+La pagina **Aspetto → Launcher** controlla il launcher ufficiale basato su Rofi e i flussi del selezionatore: il launcher principale, il selezionatore di emoji, la calcolatrice, il selezionatore degli appunti, i ARGVUS Keybindings e i menu dei dispositivi rimovibili di Rofi. Il suo valore di Trasparenza è l'alpha finale dello sfondo, quindi `50` significa un'opacità effettiva dello sfondo di circa `0.50`; testo, icone e righe selezionate rimangono opachi. Con la Trasparenza disattivata, il launcher utilizza il colore di sfondo del tema attivo, completamente opaco. L'interruttore Sfocatura applica lo strato `rofi` alle impostazioni globali di Sfocatura.
 
 Ogni valore varia da `0%` (opaco) a `100%` (completamente trasparente). Usa `+` e `-` in incrementi del 5%, quindi seleziona **Applica** sulla pagina principale. Uscire dalla pagina annulla una bozza non applicata.
 

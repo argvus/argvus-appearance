@@ -25,7 +25,7 @@ Verwenden Sie `argvus effects-toggle animations status|enable|disable|toggle` un
 
 Jede Oberfläche hat ihr eigenes **Transparenz**-Untermenü mit einem Aktivierungsschalter und einem Wert.
 
-Die Seite **Aussehen → Startprogramme** steuert den offiziellen auf Rofi basierenden Launcher- und Picker-Flow: den Hauptlauncher, Emoji-Picker, Taschenrechner, Zwischenablage-Picker, Cheatsheets und Rofi-Menüs für abnehmbare Geräte. Sein Transparenzwert ist der endgültige Hintergrund-Alpha, sodass `50` eine effektive Hintergrunddeckkraft von ungefähr `0.50` bedeutet; Text, Symbole und ausgewählte Zeilen bleiben undurchsichtig. Mit ausgeschalteter Transparenz verwendet der Launcher die Hintergrundfarbe des aktiven Themas, vollständig undurchsichtig. Der Blur-Schalter legt die `rofi`-Ebene in die globalen Blur-Einstellungen.
+Die Seite **Aussehen → Startprogramme** steuert den offiziellen auf Rofi basierenden Launcher- und Picker-Flow: den Hauptlauncher, Emoji-Picker, Taschenrechner, Zwischenablage-Picker und Rofi-Menüs für abnehmbare Geräte. Sein Transparenzwert ist der endgültige Hintergrund-Alpha, sodass `50` eine effektive Hintergrunddeckkraft von ungefähr `0.50` bedeutet; Text, Symbole und ausgewählte Zeilen bleiben undurchsichtig. Mit ausgeschalteter Transparenz verwendet der Launcher die Hintergrundfarbe des aktiven Themas, vollständig undurchsichtig. Der Blur-Schalter legt die `rofi`-Ebene in die globalen Blur-Einstellungen.
 
 Jeder Wert reicht von `0%` (undurchsichtig) bis `100%` (vollständig transparent). Verwenden Sie `+` und `-` in 5%-Schritten und wählen Sie dann **Anwenden** auf der Oberfläche-Seite. Das Verlassen der Seite verwirft einen nicht angewendeten Entwurf.
 
