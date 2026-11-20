@@ -145,5 +145,5 @@ Use
 **SUPER + Shift + B** يحافظ على محدد السطوع ويضيف مفتاح تبديل منفصل للضوء الليلي مع الحالة/درجة الحرارة الفعالة. يستدعي argvus-config `[ Apply ]` `argvus-config` `argvus config display night-light status|toggle`. تتطلب الإضاءة الليلية Hyprland وHyprsunset مستجيبة >= 0.4.0، بشكل مستقل عن دعم السطوع. النطاق هو 1000-20000 كلفن؛ التكوين موجود تحت **سطح المكتب . аًإلكترونيشي ملاحظة﻿ تليفتك ءاكلم المزايا .
 
 - `Super + Shift + B` / `argvus brightness-switch` · GTK 4 · ±5%, ±10%, 10%, 25%, 50%, 75%, 90%, 100% · Night Light
-- `argvus config accent` · GTK 4 · #RRGGBB
+- `Super + Shift + A` / `argvus config accent` · GTK 4 · لون سداسي عشري (`#RRGGBB`) · درجة اللون · التشبع والقيمة
 - **البحث عن خيارات** · `↑` `↓` · `Enter` (تطبيق) · `Esc`

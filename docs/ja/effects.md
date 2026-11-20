@@ -142,5 +142,5 @@ $XDG_CONFIG_HOME/argvus/config.json
 **SUPER + Shift + B** は明るさセレクターを保持し、実効状態/温度を持つ別のナイトライトトグルを追加します。`argvus config display night-light status|toggle` を呼び出します。ナイトライトは明るさサポートに関係なく、Hyprland と応答する Hyprsunset >= 0.4.0 を必要とします。範囲は 1000–20000 K です。設定はコントロールセンターの **デスクトップと入力 > ディスプレイ > ナイトライト** にあります。トグルはスケジュールなしで永続的に設定することも、スケジュールによる次の変化まで一時的にオーバーライドすることも可能です。メニューをキャンセルしても何も変更されません。
 
 - `Super + Shift + B` / `argvus brightness-switch` · GTK 4 · ±5%, ±10%, 10%, 25%, 50%, 75%, 90%, 100% · Night Light
-- `argvus config accent` · GTK 4 · #RRGGBB
+- `Super + Shift + A` / `argvus config accent` · GTK 4 · 16進数の色 (`#RRGGBB`) · 色相 · 彩度と明度
 - **オプションを検索** · `↑` `↓` · `Enter` (適用) · `Esc`

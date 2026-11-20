@@ -136,5 +136,5 @@ $XDG_CONFIG_HOME/argvus/config.json
 **SUPER + Shift + B** برائٹنس سلیکٹر کو برقرار رکھتا ہے اور موثر حالت/درجہ حرارت کے ساتھ ایک علیحدہ نائٹ لائٹ ٹوگل شامل کرتا ہے۔ یہ argvus-config `[ Apply ]` `argvus-config` `argvus config display night-light status|toggle` کو کال کرتا ہے۔ نائٹ لائٹ کے لیے Hyprland اور جواب دینے والے Hyprsunset >= 0.4.0 کی ضرورت ہوتی ہے، آزادانہ طور پر برائٹنس سپورٹ۔ رینج 1000–20000 K ہے۔ کنفیگریشن **Desktop ۔@ﺎﺗﻟﺪﺑ ﮟﯿﮩﻧ ﮫﭽﮐ ﮯﺳ ﮯﻧﺮﮐ ﺥﻮﺴﻨﻣ ﻮﻨﯿﻣ ۔ﮯﮨ ﺎﺗﻮﮨ ﮉﯿﺋﺍﺭ ﺭﻭﻭﺍ ﯽﺿﺭﺎﻋ کے تحت ہے
 
 - `Super + Shift + B` / `argvus brightness-switch` · GTK 4 · ±5%, ±10%, 10%, 25%, 50%, 75%, 90%, 100% · Night Light
-- `argvus config accent` · GTK 4 · #RRGGBB
+- `Super + Shift + A` / `argvus config accent` · GTK 4 · ہیکس رنگ (`#RRGGBB`) · رنگت · سیرابی اور قدر
 - **اختیارات تلاش کریں** · `↑` `↓` · `Enter` (لاگو کریں) · `Esc`

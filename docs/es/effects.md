@@ -142,5 +142,5 @@ Todas las páginas de superficie aplican sus borradores junto con el botón `[ A
 **SUPER + Shift + B** mantiene el selector de brillo y agrega un interruptor separado de Luz Nocturna con estado/temperatura efectivo. Llama a `argvus config display night-light status|toggle`. La Luz Nocturna requiere Hyprland y un Hyprsunset >= 0.4.0 que responda, independientemente del soporte de brillo. El rango es de 1000–20000 K; la configuración se encuentra en **Escritorio y Entrada > Pantallas > Luz Nocturna** en el Centro de Control. Un interruptor es persistente sin programación, o una anulación volátil hasta la próxima transición con programación. Cancelar el menú no cambia nada.
 
 - `Super + Shift + B` / `argvus brightness-switch` · GTK 4 · ±5%, ±10%, 10%, 25%, 50%, 75%, 90%, 100% · Night Light
-- `argvus config accent` · GTK 4 · #RRGGBB
+- `Super + Shift + A` / `argvus config accent` · GTK 4 · Color hexadecimal (`#RRGGBB`) · Tono · Saturación y valor
 - **Buscar opciones** · `↑` `↓` · `Enter` (Aplicar) · `Esc`

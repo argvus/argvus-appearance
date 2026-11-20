@@ -144,5 +144,5 @@ All surface pages apply their drafts together with the `[ Apply ]` button. Contr
 **SUPER + Shift + B** keeps the brightness selector and adds a separate Night Light toggle with effective state/temperature. It calls `argvus config display night-light status|toggle`. Night Light requires Hyprland and a responding Hyprsunset >= 0.4.0, independently of brightness support. The range is 1000–20000 K; configuration is under **Desktop & Input > Displays > Night Light** in Control Center. A toggle is persistent without scheduling, or a volatile override until the next transition with scheduling. Cancelling the menu changes nothing.
 
 - `Super + Shift + B` / `argvus brightness-switch` · GTK 4 · ±5%, ±10%, 10%, 25%, 50%, 75%, 90%, 100% · Night Light
-- `argvus config accent` · GTK 4 · #RRGGBB
+- `Super + Shift + A` / `argvus config accent` · GTK 4 · Hex color (`#RRGGBB`) · Hue · Saturation and value
 - **Search options** · `↑` `↓` · `Enter` (Apply) · `Esc`

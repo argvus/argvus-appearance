@@ -144,5 +144,5 @@ As páginas de superfície aplicam o rascunho com o botão `[ Aplicar ]`. O Cont
 **SUPER + Shift + B** preserva o seletor de brilho e acrescenta uma ação separada de luz noturna com estado/temperatura efetiva. Usa `argvus config display night-light status|toggle`. Requer Hyprland e Hyprsunset >= 0.4.0 respondendo, independentemente do suporte a brilho. O intervalo é 1000–20000 K; a configuração fica em **Área de trabalho e entrada > Monitores > Luz noturna** na Central de Controle. O toggle é persistente sem programação, ou uma sobreposição volátil até a próxima transição com programação. Cancelar o menu não altera nada.
 
 - `Super + Shift + B` / `argvus brightness-switch` · GTK 4 · ±5%, ±10%, 10%, 25%, 50%, 75%, 90%, 100% · Night Light
-- `argvus config accent` · GTK 4 · #RRGGBB
+- `Super + Shift + A` / `argvus config accent` · GTK 4 · Cor hexadecimal (`#RRGGBB`) · Matiz · Saturação e valor
 - **Buscar opções** · `↑` `↓` · `Enter` (Aplicar) · `Esc`

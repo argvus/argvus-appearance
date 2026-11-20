@@ -28,7 +28,7 @@ The independent visual theme selector is shipped by `argvus`: open
 `SUPER + Shift + T`. The selector supports system Dark/Light themes and user-installed Custom themes, live search with `/`, and square Sticky or rounded Spaced corners. See [Visual theme selector](docs/en/theme-selector.md).
 
 The GTK 4 brightness and Night Light picker opens with `Super + Shift + B`.
-Run `argvus config accent` to open the GTK 4 color palette. Both pickers use
+Press `Super + Shift + A` or run `argvus config accent` to open the GTK 4 accent color picker. Both pickers use
 the GTK integration shipped by the `argvus` package.
 
 Wallpapers and fonts are provided by the separate `argvus-wallpapers` and

@@ -137,5 +137,5 @@ Tất cả các trang bề mặt áp dụng các bản nháp của chúng cùng 
 **SUPER + Shift + B** giữ nguyên bộ chọn độ sáng và thêm nút chuyển đổi Đèn ngủ riêng biệt với trạng thái/nhiệt độ hiệu quả. Nó gọi `argvus config display night-light status|toggle`. Night Light yêu cầu Hyprland và Hyprsunset phản hồi >= 0,4.0, độc lập với hỗ trợ độ sáng. Phạm vi là 1000–20000 K; cấu hình nằm trong **Máy tính để bàn & Đầu vào > Hiển thị > Đèn ngủ** trong Trung tâm điều khiển. Chuyển đổi liên tục mà không cần lên lịch hoặc ghi đè không ổn định until the next transition with scheduling. Cancelling the menu changes nothing.
 
 - `Super + Shift + B` / `argvus brightness-switch` · GTK 4 · ±5%, ±10%, 10%, 25%, 50%, 75%, 90%, 100% · Night Light
-- `argvus config accent` · GTK 4 · #RRGGBB
+- `Super + Shift + A` / `argvus config accent` · GTK 4 · Màu thập lục phân (`#RRGGBB`) · Sắc độ · Độ bão hòa và độ sáng
 - **Tìm tùy chọn** · `↑` `↓` · `Enter` (Áp dụng) · `Esc`
