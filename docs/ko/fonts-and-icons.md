@@ -45,3 +45,5 @@ AI 아이콘 가시성은 /taskbar/icons/ai_agents_enabled(기본값 true)에 �
 헬퍼는 `argvus window-mode-menu`입니다; `argvus window-mode-menu --status`는 Waybar JSON을 출력합니다. 이는 마스터 `argvus` 패키지에 의해 제공됩니다. 기존에 사용자 정의된 작업 표시줄 복사본은 유지됩니다: 패키지된 템플릿에서 `custom/window-mode` 모듈 정의와 그룹 항목을 추가하여 옵트인하거나 제어 센터를 사용하십시오. 외형 프로젝터는 정의가 존재할 경우, 다른 유틸리티 아이콘이 비활성화되더라도 모듈을 유지합니다.
 
 `window-bar` 및 `window-controls` 테마 소비자는 색상을 bg, fg 및 accent에서 가져옵니다. 제목 표시줄 색상은 `argvus windows decorations`를 통해 다시 로드되며, 창 표시줄은 생성된 스타일시트를 관찰합니다. 타일/플로팅은 스티키/스페이스드 외형 지오메트리와 독립적입니다.
+
+클립보드는 기본적으로 활성화되어 있으며 작업 표시줄의 유틸리티 그룹에서 열 수 있습니다. 텍스트와 이미지 기록을 중지하려면 Control Center → Appearance → Taskbar → Icons → Optional modules에서 항목을 해제하고 Apply를 선택하세요. 아이콘이 사라지고 다시 활성화할 때까지 기록을 열 수 없습니다. 저장된 항목은 유지됩니다.

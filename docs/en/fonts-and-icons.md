@@ -48,3 +48,5 @@ The taskbar projector places Update Status in a separate group between Utilities
 The helper is `argvus window-mode-menu`; `argvus window-mode-menu --status` emits Waybar JSON. It is shipped by the master `argvus` package. Existing customized taskbar copies are preserved: add the `custom/window-mode` module definition and group entry from the packaged template to opt in, or use Control Center. The appearance projector preserves the module when its definition is present, even if other utility icons are disabled.
 
 The `window-bar` and `window-controls` theme consumers derive their colors from bg, fg and accent. Title-bar colors reload through `argvus windows decorations`; the window bar observes its generated stylesheet. Tile/Floating is independent of Sticky/Spaced appearance geometry.
+
+Clipboard is enabled by default. Open it from the taskbar utility group. To stop recording text and images, clear the Clipboard option under Control Center → Appearance → Taskbar → Icons → Optional modules and select Apply. This also hides the icon and blocks opening history. Re-enable the option to access previously saved entries.

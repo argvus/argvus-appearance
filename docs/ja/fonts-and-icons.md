@@ -45,3 +45,5 @@ AI アイコンの表示は /taskbar/icons/ai_agents_enabled（デフォルト t
 ヘルパーは `argvus window-mode-menu` です；`argvus window-mode-menu --status` は Waybar JSON を出力します。それはマスター `argvus` パッケージによって提供されます。既存のカスタマイズされたタスクバーのコピーは保持されます：パッケージ化されたテンプレートから `custom/window-mode` モジュール定義とグループエントリを追加して参加するか、またはコントロールセンターを使用します。外観プロジェクターは、他のユーティリティアイコンが無効であっても、定義が存在する場合はモジュールを保持します。
 
 `window-bar`および`window-controls`のテーマコンシューマーは、bg、fg、accentから色を取得します。タイトルバーの色は`argvus windows decorations`を通じて再読み込みされます；ウィンドウバーは生成されたスタイルシートに従います。タイル/フローティングは、スティッキー/スペース付きの外観ジオメトリとは独立しています。
+
+クリップボードは既定で有効で、タスクバーのユーティリティグループから開けます。テキストと画像の記録を停止するには、Control Center → Appearance → Taskbar → Icons → Optional modules で項目のチェックを外し、Apply を選択します。アイコンが非表示になり、再度有効にするまで履歴を開けません。保存済みの項目は保持されます。

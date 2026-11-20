@@ -48,3 +48,5 @@ Görev çubuğu projeksiyonu, `/taskbar/icons/update_status_enabled` doğru oldu
 Yardımcı `argvus window-mode-menu`; `argvus window-mode-menu --status` Waybar JSON yayar. Master `argvus` paketi ile birlikte gönderilir. Mevcut özelleştirilmiş görev çubuğu kopyaları korunur: katılmak için paketlenmiş şablondan `custom/window-mode` modül tanımını ve grup girişini ekleyin veya Kontrol Merkezi'ni kullanın. Görünüm projektörü, tanımı mevcut olduğunda modülü korur, diğer yardımcı simgeler devre dışı olsa bile.
 
 `window-bar` ve `window-controls` tema tüketicileri renklerini bg, fg ve accent'ten alır. Başlık çubuğu renkleri `argvus windows decorations` üzerinden yeniden yüklenir; pencere çubuğu kendi oluşturulan stil sayfasına uyar. Döşeme/Yüzen, Sticky/Aralıklı görünüm geometrisinden bağımsızdır.
+
+Pano varsayılan olarak etkindir ve görev çubuğunun yardımcı araçlar grubundan açılır. Metin ve görüntü kaydını durdurmak için Control Center → Appearance → Taskbar → Icons → Optional modules bölümündeki seçeneğin işaretini kaldırıp Apply seçin. Simge gizlenir ve seçenek yeniden açılana kadar geçmişe erişilemez. Kayıtlı öğeler korunur.

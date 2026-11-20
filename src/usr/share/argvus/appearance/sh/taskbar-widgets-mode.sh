@@ -150,11 +150,11 @@ insert_block_before() {
   _anchor="$1"
   _block="$2"
   _file="$3"
-  awk -v anchor="$_anchor" -v block="$_block" '
+  ARGVUS_INSERT_BLOCK="$_block" awk -v anchor="$_anchor" '
     BEGIN { done = 0 }
     {
       if (!done && index($0, anchor) > 0) {
-        print block
+        print ENVIRON["ARGVUS_INSERT_BLOCK"]
         done = 1
       }
       print
@@ -214,7 +214,7 @@ project_right2_modules() {
   if [ "$(config_bool /taskbar/icons/ai_agents_enabled true)" = true ] && grep -q '"custom/ai":' "$_file"; then
     _modules="$(printf '%s' "$_modules" | jq -c '. + ["custom/ai"]')"
   fi
-  for _module in custom/notifications custom/removable-devices custom/recording custom/bluetooth pulseaudio#input pulseaudio#output custom/keep-awake; do
+  for _module in custom/notifications custom/removable-devices custom/recording custom/bluetooth custom/clipboard pulseaudio#input pulseaudio#output custom/keep-awake; do
     if [ "$1" = true ]; then
       _modules="$(printf '%s' "$_modules" | jq -c --arg module "$_module" '. + [$module]')"
     fi
@@ -286,6 +286,17 @@ apply_mode() {
     "interval": 3600,
     "on-click": "argvus control-center packages updates"
   },' "$_target_config"
+  fi
+
+  if ! grep -q '"custom/clipboard":' "$_target_config"; then
+    _clipboard_block="$(sed -n '/^  "custom\/clipboard": {$/,/^  },$/p' "$_system_config")"
+    if [ -n "$_clipboard_block" ]; then
+      insert_block_before '"custom/icon-window":' "$_clipboard_block" "$_target_config"
+    fi
+  fi
+  _clipboard_enabled=false
+  if grep -q '"custom/clipboard":' "$_target_config"; then
+    _clipboard_enabled="$(config_bool /taskbar/icons/clipboard_enabled true)"
   fi
 
   _audio_player_enabled="$(config_bool /taskbar/icons/audio_player_enabled true)"
@@ -387,7 +398,7 @@ apply_mode() {
   replace_group_modules '"group/right-0":' "$_right0_filtered" "$_target_config"
   project_right2_modules "$_target_config" \
     "$_notifications_enabled" "$_removable_devices_enabled" \
-    "$_recording_enabled" "$_bluetooth_enabled" "$_audio_input_enabled" \
+    "$_recording_enabled" "$_bluetooth_enabled" "$_clipboard_enabled" "$_audio_input_enabled" \
     "$_audio_output_enabled" "$_keep_awake_enabled"
 
   if ! awk '/"hyprland\/workspaces":/{found=1} found && /"workspace-taskbar":/{ok=1} found && /^  },?$/ {found=0} END{exit !ok}' "$_target_config"; then
@@ -457,7 +468,7 @@ apply_mode() {
   if [ "$_notifications_enabled" = true ] || [ "$_removable_devices_enabled" = true ] \
     || [ "$_recording_enabled" = true ] || [ "$_bluetooth_enabled" = true ] \
     || [ "$_audio_input_enabled" = true ] || [ "$_audio_output_enabled" = true ] \
-    || [ "$_keep_awake_enabled" = true ]; then
+    || [ "$_clipboard_enabled" = true ] || [ "$_keep_awake_enabled" = true ]; then
     _right2_present=true
   fi
 

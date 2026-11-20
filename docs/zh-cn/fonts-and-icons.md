@@ -45,3 +45,5 @@ AI 图标的可见性由 /taskbar/icons/ai_agents_enabled 控制（默认值为 
 辅助程序是 `argvus window-mode-menu`；`argvus window-mode-menu --status` 输出 Waybar JSON。它由主 `argvus` 软件包提供。现有的自定义任务栏副本会被保留：从打包的模板中添加 `custom/window-mode` 模块定义和组条目以选择启用，或者使用控制中心。外观投影器在定义存在时会保留该模块，即使其他实用程序图标被禁用。
 
 `window-bar` 和 `window-controls` 主题使用者的颜色来自 bg、fg 和 accent。标题栏颜色通过 `argvus windows decorations` 重新加载；窗口栏遵循其生成的样式表。平铺/浮动与固定/间隔的外观几何独立。
+
+剪贴板默认启用，可从任务栏的实用工具组打开。若要停止记录文本和图像，请在 Control Center → Appearance → Taskbar → Icons → Optional modules 中取消勾选该选项并选择 Apply。图标会隐藏，重新启用前无法打开历史记录。已保存的条目会保留。

@@ -20,15 +20,17 @@ class Projection(unittest.TestCase):
             # Simulate a generated configuration from before Update Status existed.
             old_config = re.sub(r'  "custom/update-status": \{.*?^  \},\n', '', TEMPLATE.read_text(), flags=re.MULTILINE | re.DOTALL)
             old_config = re.sub(r'  "group/update-status": \{.*?^  \},\n', '', old_config, flags=re.MULTILINE | re.DOTALL)
+            old_config = re.sub(r'  "custom/clipboard": \{.*?^  \},\n', '', old_config, flags=re.MULTILINE | re.DOTALL)
+            old_config = old_config.replace('      "custom/clipboard",\n', '')
             target.write_text(old_config)
             bootstrap = root / "bootstrap.sh"
             bootstrap.write_text('paths_system_config() { printf "%s\\n" "$TEMPLATE"; }\npaths_config() { printf "%s\\n" "$TARGET"; }\n')
             binary = root / "argvus"
-            binary.write_text('#!/bin/sh\ncase "$3" in /taskbar/icons/update_status_enabled) printf "%s" "${AI_ENABLED:-true}" ;; /taskbar/icons/ai_agents_enabled) printf "%s" "${AI_ENABLED:-true}" ;; /taskbar/icons/utilities/expanded) printf "%s" "${EXPANDED:-true}" ;; /taskbar/icons/notifications_enabled|/taskbar/icons/removable_devices_enabled|/taskbar/icons/recording_enabled|/taskbar/icons/bluetooth_enabled|/taskbar/icons/audio_input_enabled|/taskbar/icons/audio_output_enabled|/taskbar/icons/keep_awake_enabled) printf "%s" "${UTILITIES:-true}" ;; *) exit 1 ;; esac\n')
+            binary.write_text('#!/bin/sh\ncase "$3" in /taskbar/icons/clipboard_enabled) printf "%s" "$CLIPBOARD_ENABLED" ;; /taskbar/icons/update_status_enabled) printf "%s" "${AI_ENABLED:-true}" ;; /taskbar/icons/ai_agents_enabled) printf "%s" "${AI_ENABLED:-true}" ;; /taskbar/icons/utilities/expanded) printf "%s" "${EXPANDED:-true}" ;; /taskbar/icons/notifications_enabled|/taskbar/icons/removable_devices_enabled|/taskbar/icons/recording_enabled|/taskbar/icons/bluetooth_enabled|/taskbar/icons/audio_input_enabled|/taskbar/icons/audio_output_enabled|/taskbar/icons/keep_awake_enabled) printf "%s" "${UTILITIES:-true}" ;; *) exit 1 ;; esac\n')
             binary.chmod(0o755)
             env = dict(os.environ, ARGVUS_BOOTSTRAP=str(bootstrap), ARGVUS_CONFIG_HOME=directory, TEMPLATE=str(TEMPLATE), TARGET=str(target), PATH=directory + ":/usr/bin:/bin")
             for expanded, utilities, ai in [(e, u, a) for e in ["true", "false"] for u in ["true", "false"] for a in ["true", "false"]]:
-                env.update(EXPANDED=expanded, UTILITIES=utilities, AI_ENABLED=ai)
+                env.update(EXPANDED=expanded, UTILITIES=utilities, AI_ENABLED=ai, CLIPBOARD_ENABLED=ai)
                 for _ in range(2):
                     result = subprocess.run(["sh", str(SCRIPT), "apply"], env=env, capture_output=True, text=True)
                     self.assertEqual(result.returncode, 0, result.stderr)
@@ -46,6 +48,10 @@ class Projection(unittest.TestCase):
                     modules = data["group/right-2"]["modules"]
                     self.assertEqual(modules.count("custom/window-mode"), 1)
                     self.assertEqual(modules.count("custom/ai"), int(ai == "true"))
+                    self.assertEqual(modules.count("custom/clipboard"), int(ai == "true"))
+                    self.assertEqual(data["custom/clipboard"]["on-click"], "argvus clipboard")
+                    if ai == "true" and utilities == "true":
+                        self.assertEqual(modules.index("custom/clipboard") + 1, modules.index("pulseaudio#input"))
                     self.assertEqual("group/right-2" in data["modules-right"], True)
                     self.assertEqual("pulseaudio#input" in modules, utilities == "true")
                     self.assertEqual("pulseaudio#output" in modules, utilities == "true")

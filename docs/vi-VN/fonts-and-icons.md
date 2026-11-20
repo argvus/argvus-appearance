@@ -48,3 +48,5 @@ Máy chiếu thanh tác vụ đặt Trạng thái Cập nhật vào một nhóm 
 Trợ lý là `argvus window-mode-menu`; `argvus window-mode-menu --status` phát JSON của Waybar. Nó được cung cấp bởi gói chính `argvus`. Các bản sao thanh tác vụ tùy chỉnh hiện có được giữ nguyên: thêm định nghĩa mô-đun `custom/window-mode` và mục nhóm từ mẫu gói để tham gia, hoặc sử dụng Trung tâm Kiểm soát. Máy chiếu giao diện giữ lại mô-đun khi định nghĩa của nó có mặt, ngay cả khi các biểu tượng tiện ích khác bị tắt.
 
 Người tiêu dùng theme `window-bar` và `window-controls` lấy màu sắc của họ từ bg, fg và accent. Màu của thanh tiêu đề tải lại qua `argvus windows decorations`; thanh cửa sổ quan sát bảng kiểu được tạo ra của nó. Tile/Floating độc lập với hình thức xuất hiện Sticky/Spaced.
+
+Bảng tạm được bật mặc định và mở từ nhóm tiện ích trên thanh tác vụ. Để dừng ghi lại văn bản và hình ảnh, bỏ chọn mục này trong Control Center → Appearance → Taskbar → Icons → Optional modules rồi chọn Apply. Biểu tượng sẽ ẩn và chỉ có thể mở lại lịch sử sau khi bật lại. Các mục đã lưu vẫn được giữ.
