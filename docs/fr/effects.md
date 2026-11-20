@@ -6,8 +6,6 @@ description: Configurez les animations, le flou global de Hyprland et la transpa
 
 Les interrupteurs de surface sont indépendants. La page de configuration du Centre de Contrôle possède sa propre valeur de Transparence et un interrupteur d'activation du Flou ; son flou utilise les valeurs globales de Flou.
 
-Le Centre de Contrôle est lancé via Foot avec un profil généré dédié à `$XDG_CONFIG_HOME/argvus/data/control-center/foot.ini`. Avec Foot 1.28, la transparence est projetée sur `[colors-dark] alpha` et l'interrupteur de Flou de la surface sur `[colors-dark] blur` ; la configuration normale de Foot et le terminal ARGVUS restent indépendants.
-
 ## Interrupteurs des Animations et Effets
 
 Il y a deux interrupteurs principaux indépendants, tous deux appliqués à `hyprland.lua` via les paramètres canoniques `/effects` :
@@ -24,8 +22,6 @@ Utilisez `argvus effects-toggle animations status|enable|disable|toggle` et `arg
 ## Transparence
 
 Chaque surface dispose de son propre sous-menu **Transparence** avec un interrupteur d'activation et une valeur.
-
-La page **Apparence → Lanceurs** contrôle le lanceur officiel basé sur Rofi et les flux de sélection : le lanceur principal, le sélecteur d'emojis, la calculatrice, le sélecteur de presse-papiers, les feuilles de triche et les menus de périphériques amovibles Rofi. Sa valeur de Transparence correspond à l'alpha final de l'arrière-plan, donc `50` signifie une opacité d'arrière-plan effective d'environ `0.50` ; le texte, les icônes et les lignes sélectionnées restent opaques. Lorsque la Transparence est désactivée, le lanceur utilise la couleur d'arrière-plan du thème actif, totalement opaque. Son option Flou applique la couche `rofi` aux paramètres globaux de flou.
 
 Chaque valeur varie de `0%` (opaque) à `100%` (totalement transparent). Utilisez `+` et `-` par paliers de 5 %, puis sélectionnez **Appliquer** sur la page de surface. Quitter la page supprime les brouillons non appliqués.
 
@@ -122,16 +118,11 @@ Comme Blur, la page édite un brouillon : rien n’est écrit tant que **[ Appli
 
 La préférence logique est stockée dans `$XDG_CONFIG_HOME/argvus/config.json`. L'animation globale utilise `effects.animations` ; les valeurs d'Animations utilisent les clés `effects.animation_*` décrites ci-dessus. L'interrupteur global de Flou est `effects.blur_global_enabled`, et les valeurs de Flou utilisent les clés `effects.blur_*` listées ci-dessus. Les états d'activation des surfaces et les valeurs de transparence utilisent des clés telles que `effects.blur_control-center_enabled` et `effects.transparency_control-center_value`. Les valeurs de transparence sont limitées à `0–100` ; chaque valeur de Flou est limitée à sa propre plage, et `argvus-config` rejette les écritures en dehors de celle-ci. Les états d'activation restent distincts des remplacements manquants.
 
-L'ancien pourcentage `effects.blur_global_value` n'est plus lu. Un profil qui le contient encore garde la clé sur le disque sans effet, et le Flou utilise les valeurs par défaut ci-dessus jusqu'à ce que ses valeurs soient appliquées.
-
 ```text
 $XDG_CONFIG_HOME/argvus/config.json
 ```
-`data/generated/effects/<active-theme>.conf` est la projection des effets, écrite uniquement par `argvus config` ; `argvus effects-toggle` délègue à `argvus config effects`. Un changement de thème ou de mode réapplique le profil visuel exporté du thème actif, y compris les valeurs par surface de `effects.conf` lorsqu'elles sont présentes. Les thèmes sans profil restaurent les valeurs par défaut des effets inclus. Exportez le thème après avoir modifié les effets si vous voulez que ces valeurs survivent à un autre changement de thème ou de mode.
 
 La désactivation de l'interrupteur de Transparence ou de Flou d'une surface n'affecte que cette surface ; les valeurs numériques enregistrées sont conservées pour une réactivation ultérieure.
-
-## Profils
 
 L'exportation d'un thème inclut les paramètres canoniques d'apparence/effets et la projection des effets par surface du thème actif. Les fichiers d'exécution générés pour Waybar, Quickshell et Hyprland sont régénérés lorsque le thème est appliqué.
 

@@ -6,8 +6,6 @@ description: Configura le animazioni, la sfocatura globale di Hyprland e la tras
 
 Gli interruttori delle superfici sono indipendenti. La pagina di Configurazione del Centro di Controllo ha il proprio valore di Trasparenza e l'interruttore per abilitare la Sfocatura; la sua sfocatura utilizza i valori globali di Sfocatura.
 
-Il Centro di Controllo viene lanciato tramite Foot con un profilo generato dedicato su `$XDG_CONFIG_HOME/argvus/data/control-center/foot.ini`. Con Foot 1.28, la trasparenza viene proiettata su `[colors-dark] alpha` e l'interruttore della Sfocatura della superficie su `[colors-dark] blur`; la configurazione normale di Foot e il terminale ARGVUS rimangono indipendenti.
-
 ## Interruttori Animazioni ed Effetti
 
 Ci sono due interruttori principali indipendenti, entrambi applicati a `hyprland.lua` tramite le impostazioni canoniche `/effects`:
@@ -24,8 +22,6 @@ Usa `argvus effects-toggle animations status|enable|disable|toggle` e `argvus ef
 ## Trasparenza
 
 Ogni superficie ha il proprio sottomenu **Trasparenza** con un interruttore di abilitazione e un valore.
-
-La pagina **Aspetto → Launcher** controlla il launcher ufficiale basato su Rofi e i flussi del selezionatore: il launcher principale, il selezionatore di emoji, la calcolatrice, il selezionatore degli appunti, i ARGVUS Keybindings e i menu dei dispositivi rimovibili di Rofi. Il suo valore di Trasparenza è l'alpha finale dello sfondo, quindi `50` significa un'opacità effettiva dello sfondo di circa `0.50`; testo, icone e righe selezionate rimangono opachi. Con la Trasparenza disattivata, il launcher utilizza il colore di sfondo del tema attivo, completamente opaco. L'interruttore Sfocatura applica lo strato `rofi` alle impostazioni globali di Sfocatura.
 
 Ogni valore varia da `0%` (opaco) a `100%` (completamente trasparente). Usa `+` e `-` in incrementi del 5%, quindi seleziona **Applica** sulla pagina principale. Uscire dalla pagina annulla una bozza non applicata.
 
@@ -122,16 +118,11 @@ Come Blur, la pagina modifica una bozza: nulla viene scritto fino a quando non v
 
 La preferenza logica è memorizzata in `$XDG_CONFIG_HOME/argvus/config.json`. L'animazione globale utilizza `effects.animations`; i valori delle Animazioni utilizzano le chiavi `effects.animation_*` descritte sopra. L'interruttore globale Blur è `effects.blur_global_enabled`, e i valori Blur utilizzano le chiavi `effects.blur_*` elencate sopra. Gli stati di abilitazione delle superfici e i valori di trasparenza utilizzano chiavi come `effects.blur_control-center_enabled` e `effects.transparency_control-center_value`. I valori di trasparenza sono limitati a `0–100`; ogni valore Blur è limitato al proprio intervallo, e `argvus-config` rifiuta scritture al di fuori di esso. Gli stati di abilitazione rimangono distinti dagli override mancanti.
 
-La percentuale precedente `effects.blur_global_value` non viene più letta. Un profilo che la contiene ancora mantiene la chiave sul disco senza effetto, e Blur utilizza i valori predefiniti sopra indicati fino a quando i suoi valori vengono applicati.
-
 ```text
 $XDG_CONFIG_HOME/argvus/config.json
 ```
-`data/generated/effects/<active-theme>.conf` è la proiezione degli effetti, scritta solo da `argvus config`; `argvus effects-toggle` delega a `argvus config effects`. Un cambio di tema o di modalità riapplica il profilo visivo esportato del tema attivo, inclusi i valori per superficie da `effects.conf` quando presenti. I temi senza profilo ripristinano i valori predefiniti degli effetti inclusi. Esporta il tema dopo aver modificato gli effetti se desideri che tali valori sopravvivano a un altro cambio di tema o di modalità.
 
 Disabilitare l'interruttore di Trasparenza o Sfocatura di una superficie influisce solo su quella superficie; i valori numerici salvati vengono mantenuti per un successivo riattivamento.
-
-## Profili
 
 L'esportazione del tema include le impostazioni canoniche di aspetto/effetti e la proiezione degli effetti per superficie del tema attivo. I file runtime generati di Waybar, Quickshell e Hyprland vengono rigenerati quando il tema viene applicato.
 

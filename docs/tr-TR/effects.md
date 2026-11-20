@@ -7,8 +7,6 @@ description: Animasyonları, genel Hyprland bulanıklığını ve yüzey başın
 
 Yüzey anahtarları bağımsızdır. Kontrol Merkezi Konfigürasyon sayfasının kendi Şeffaflık değeri ve Bulanıklık etkinleştirme anahtarı vardır; bulanıklığı global Bulanıklık değerlerini kullanır.
 
-Kontrol Merkezi, `$XDG_CONFIG_HOME/argvus/data/control-center/foot.ini`'de özel olarak oluşturulmuş bir profil ile Foot üzerinden başlatılır. Foot 1.28 ile şeffaflık `[colors-dark] alpha`'ye ve yüzey Bulanıklık anahtarı `[colors-dark] blur`'ye yansıtılır; normal Foot yapılandırması ve ARGVUS terminali bağımsız kalır.
-
 ## Animasyonlar ve Efektler anahtarları
 
 Her ikisi de standart /effects ayarları aracılığıyla `hyprland.lua`'ya uygulanan iki bağımsız ana anahtar vardır:- **Animasyonlar** ( `/effects` `/effects/animations`) hareket eden her şeyi kontrol eder: çalışma alanı, pencere, kaybolma, çerçeve ve katman animasyonları.
@@ -25,8 +23,6 @@ Her ikisi de standart /effects ayarları aracılığıyla `hyprland.lua`'ya uygu
 ## Şeffaflık
 
 Her yüzeyin kendi **Şeffaflık** alt menüsü vardır ve etkinleştirme düğmesi ile değeri bulunur.
-
-**Görünüm → Başlatıcılar** sayfası, resmi Rofi köklü başlatıcı ve seçici seçimlerini kontrol eder: başlatıcı, emoji seçimi, hesap makinesi, pano seçimi, hile sayfaları ve Rofi bulunan cihaz menüleri. Şeffaflık değeri son arka plan alfasıdır; dolayısıyla `50`, yaklaşık olarak `0.50` değerinde etkili bir arka plan opaklığı anlamına gelen gelir; metin, simgeler ve seçilen satırlar opak kalır. İle Şeffaflık kapalı, başlatıcı aktif temanın kendi arka plan rengini kullanıyor, tamamen opak. Bulanıklaştırma anahtarı, `rofi` katmanını genel Bulanıklaştırma ayarlarına dahil eder.
 
 Her değer `0%` (opak) ile `100%` (tam şeffaf) arasında değişir. `+` ve `-` değerlerini %5 adımlarla kullanın, ardından yüzey sayfasında **Uygula** seçeneğini tıklayın. Sayfayı terk etmek, uygulanmamış taslağı iptal eder.
 
@@ -118,17 +114,11 @@ Bulanıklaştırma gibi, sayfa da bir taslağı düzenler: **[ Uygula ]** seçil
 ## Kanonik durum ve uyumluluk dosyaları
 Mantıksal tercih `$XDG_CONFIG_HOME/argvus/config.json` içinde saklanır. Küresel animasyon `effects.animations` kullanır; Animations değerleri yukarıda açıklanan `effects.animation_*` anahtarlarını kullanır. Küresel Blur anahtarı `effects.blur_global_enabled` olup, Blur değerleri yukarıda listelenen `effects.blur_*` anahtarlarını kullanır. Yüzey etkinleştirme durumları ve şeffaflık değerleri `effects.blur_control-center_enabled` ve `effects.transparency_control-center_value` gibi anahtarları kullanır. Şeffaflık değerleri `0–100` ile sınırlıdır; her Blur değeri kendi aralığıyla sınırlandırılmıştır ve `argvus-config` buna dışındaki yazımları reddeder. Etkinleştirme durumları, eksik geçersiz kılmalardan ayrı kalır.
 
-Eski `effects.blur_global_value` yüzdesi artık okunmamaktadır. Hâlâ bunu içeren bir profil, anahtarı disk üzerinde etkisiz bir şekilde tutar ve Blur, değerleri uygulanana kadar yukarıdaki varsayılanları kullanır.
-
 ```text
 $XDG_CONFIG_HOME/argvus/config.json
 ```
 
-`data/generated/effects/<active-theme>.conf`, yalnızca `argvus config` tarafından yazılmıştır; `argvus effects-toggle`, `argvus config effects`'ye yetki devreder. Bir tema veya mod değişikliği, mevcut temanın dışa aktarılan görsel profilini yeniden uygular; mevcutsa `effects.conf`'den yüzeye özgü değerler de dahil edilir. Profilsiz temalar paketlenmiş efekt varsayılanlarını geri yükler. Efektleri değiştirdikten sonra temayı dışa aktarın, böylece bu değerler başka bir tema veya mod değişikliğinde korunur.
-
 Bir yüzeyin Şeffaflık veya Bulanıklık anahtarını devre dışı bırakmak yalnızca o yüzeyi etkiler; kaydedilen sayısal değerler daha sonra yeniden etkinleştirme için saklanır.
-
-## Profiller
 
 Tema ihracatı, kanonik görünüm/efekt ayarlarını ve aktif temanın yüzey başına efekt projeksiyonunu içerir. Tema uygulandığında oluşturulan Waybar, Quickshell ve Hyprland çalışma zamanı dosyaları yeniden oluşturulur.
 

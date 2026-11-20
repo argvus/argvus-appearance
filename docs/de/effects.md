@@ -6,8 +6,6 @@ description: Konfigurieren Sie Animationen, die globale Hyprland-Unschärfe und 
 
 Oberflächen-Schalter sind unabhängig. Die Konfigurationsseite des Kontrollzentrums hat ihren eigenen Transparenzwert und Unscharf-Enable-Schalter; ihr Unscharf verwendet die globalen Unscharf-Werte.
 
-Das Kontrollzentrum wird über Foot mit einem dedizierten, generierten Profil bei `$XDG_CONFIG_HOME/argvus/data/control-center/foot.ini` gestartet. Mit Foot 1.28 wird die Transparenz auf `[colors-dark] alpha` projiziert und der Oberflächen-Unscharf-Schalter auf `[colors-dark] blur`; die normale Foot-Konfiguration und das ARGVUS-Terminal bleiben unabhängig.
-
 ## Animationen- und Effekte-Schalter
 
 Es gibt zwei unabhängige Hauptschalter, die beide auf `hyprland.lua` über die kanonischen `/effects`-Einstellungen angewendet werden:
@@ -24,8 +22,6 @@ Verwenden Sie `argvus effects-toggle animations status|enable|disable|toggle` un
 ## Transparenz
 
 Jede Oberfläche hat ihr eigenes **Transparenz**-Untermenü mit einem Aktivierungsschalter und einem Wert.
-
-Die Seite **Aussehen → Startprogramme** steuert den offiziellen auf Rofi basierenden Launcher- und Picker-Flow: den Hauptlauncher, Emoji-Picker, Taschenrechner, Zwischenablage-Picker und Rofi-Menüs für abnehmbare Geräte. Sein Transparenzwert ist der endgültige Hintergrund-Alpha, sodass `50` eine effektive Hintergrunddeckkraft von ungefähr `0.50` bedeutet; Text, Symbole und ausgewählte Zeilen bleiben undurchsichtig. Mit ausgeschalteter Transparenz verwendet der Launcher die Hintergrundfarbe des aktiven Themas, vollständig undurchsichtig. Der Blur-Schalter legt die `rofi`-Ebene in die globalen Blur-Einstellungen.
 
 Jeder Wert reicht von `0%` (undurchsichtig) bis `100%` (vollständig transparent). Verwenden Sie `+` und `-` in 5%-Schritten und wählen Sie dann **Anwenden** auf der Oberfläche-Seite. Das Verlassen der Seite verwirft einen nicht angewendeten Entwurf.
 
@@ -122,16 +118,11 @@ Wie bei Blur bearbeitet die Seite einen Entwurf: Es wird nichts geschrieben, bis
 
 Die logische Präferenz wird in `$XDG_CONFIG_HOME/argvus/config.json` gespeichert. Globale Animation verwendet `effects.animations`; die Animationswerte verwenden die oben beschriebenen `effects.animation_*`-Schlüssel. Der globale Blur-Schalter ist `effects.blur_global_enabled`, und die Blur-Werte verwenden die oben aufgeführten `effects.blur_*`-Schlüssel. Die Aktivierungszustände der Oberfläche und Transparenzwerte verwenden Schlüssel wie `effects.blur_control-center_enabled` und `effects.transparency_control-center_value`. Transparenzwerte sind auf `0–100` begrenzt; jeder Blur-Wert ist auf seinen eigenen Bereich begrenzt, und `argvus-config` lehnt Schreibzugriffe außerhalb dieses Bereichs ab. Aktivierungszustände bleiben von fehlenden Überschreibungen getrennt.
 
-Der frühere `effects.blur_global_value`-Prozentsatz wird nicht mehr gelesen. Ein Profil, das diesen noch enthält, behält den Schlüssel auf der Festplatte ohne Wirkung, und Blur verwendet die oben genannten Standardwerte, bis seine Werte angewendet werden.
-
 ```text
 $XDG_CONFIG_HOME/argvus/config.json
 ```
-`data/generated/effects/<active-theme>.conf` ist die Effektprojektion, die nur von `argvus config` geschrieben wird; `argvus effects-toggle` Delegierte an `argvus config effects`. Ein Theme- oder Moduswechsel wendet das exportierte visuelle Profil des aktiven Themes erneut an, einschließlich der Werte pro Oberfläche aus `effects.conf`, wenn vorhanden. Themes ohne Profil stellen verpackte Effekt-Standardeinstellungen wieder her. Exportiere das Theme nach der Änderung der Effekte, wenn du möchtest, dass diese Werte ein anderes Thema oder einen anderen Moduswechsel überleben. 
 
 Das Deaktivieren des Transparenz- oder Unschärfeschalters einer Oberfläche wirkt sich nur auf diese Oberfläche aus; gespeicherte Zahlenwerte werden für spätere Wiederaktivierung beibehalten. 
-
-## Profile
 
 Der Theme-Export umfasst kanonische Erscheinungs-/Effekteinstellungen sowie die pro-Oberfläche-Effektprojektion des aktiven Themas. Generierte Waybar-, Quickshell- und Hyprland-Laufzeitdateien werden beim Auftragen des Themas neu generiert.
 

@@ -22,8 +22,6 @@ Sử dụng `argvus effects-toggle animations status|enable|disable|toggle` và 
 
 Mỗi bề mặt có menu con **Độ trong suốt** riêng với công tắc bật và giá trị.
 
-Trang **Appearance → Launchers** kiểm soát các luồng khởi chạy và chọn của Rofi chính thức: trình khởi chạy chính, bộ chọn emoji, máy tính, bộ chọn clipboard, bảng mẹo và menu thiết bị gắn ngoài của Rofi. Giá trị Transparency của nó là alpha nền cuối cùng, vì vậy `50` có nghĩa là độ mờ nền hiệu quả khoảng `0.50`; văn bản, biểu tượng và các hàng được chọn vẫn giữ nguyên độ mờ. Khi tắt Transparency, trình khởi chạy sử dụng màu nền của chủ đề đang hoạt động, hoàn toàn không trong suốt. Công tắc Blur của nó chọn lớp `rofi` vào cài đặt Blur toàn cục.
-
 Mỗi giá trị dao động từ `0%` (mờ đục) đến `100%` (hoàn toàn trong suốt). Sử dụng `+` và `-` theo bước 5%, sau đó chọn **Áp dụng** trên trang bề mặt. Rời khỏi trang sẽ loại bỏ bản nháp chưa được áp dụng.
 
 Sử dụng `↑` và `↓` để di chuyển giữa **Bật** và **Giá trị**. Trên hàng **Giá trị**, `+` và `-` điều chỉnh bản nháp mà không thay đổi tiêu điểm. Nhấn `Tab` để mở **Hành động**, sau đó kích hoạt **[ Áp dụng ]**; `Esc` quay lại trang bề mặt cha.

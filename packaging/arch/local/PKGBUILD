@@ -36,7 +36,6 @@ optdepends=(
   'argvus-lock: Hyprlock theme integration'
   'argvus-notifications: Dunst theme integration'
   'argvus-control-panel: Quickshell theme integration'
-  'argvus-launcher: Rofi theme integration'
   'argvus-taskbar: Waybar taskbar theme integration'
   'argvus-widget-telemetry: Waybar widget telemetry theme integration'
   'argvus-removable-devices: removable storage theme integration'

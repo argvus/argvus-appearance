@@ -7,8 +7,6 @@ description: Configure animations, the global Hyprland blur and per-surface tran
 
 Surface switches are independent. The Control Center Configuration page has its own Transparency value and Blur enable switch; its blur uses the global Blur values.
 
-The Control Center is launched through Foot with a dedicated generated profile at `$XDG_CONFIG_HOME/argvus/data/control-center/foot.ini`. With Foot 1.28, transparency is projected to `[colors-dark] alpha` and the surface Blur switch to `[colors-dark] blur`; the normal Foot configuration and ARGVUS terminal remain independent.
-
 ## Animations and Effects switches
 
 There are two independent master switches, both applied to `hyprland.lua` through the canonical `/effects` settings:
@@ -25,8 +23,6 @@ Use `argvus effects-toggle animations status|enable|disable|toggle` and `argvus 
 ## Transparency
 
 Each surface has its own **Transparency** submenu with an enable switch and value.
-
-The **Appearance → Launchers** page controls the official Rofi-based launcher and picker flows: the main launcher, emoji picker, calculator, clipboard picker and Rofi removable-device menus. Its Transparency value is the final background alpha, so `50` means an effective background opacity of approximately `0.50`; text, icons and selected rows remain opaque. With Transparency turned off, the launcher uses the active theme's own background color, fully opaque. Its Blur switch opts the `rofi` layer into the global Blur settings.
 
 Each value ranges from `0%` (opaque) to `100%` (fully transparent). Use `+` and `-` in 5% steps, then select **Apply** on the surface page. Leaving the page discards an un-applied draft.
 
@@ -123,17 +119,11 @@ Like Blur, the page edits a draft: nothing is written until **[ Apply ]** is sel
 
 The logical preference is stored in `$XDG_CONFIG_HOME/argvus/config.json`. Global animation uses `effects.animations`; the Animations values use the `effects.animation_*` keys described above. The global Blur switch is `effects.blur_global_enabled`, and the Blur values use the `effects.blur_*` keys listed above. Surface enable states and transparency values use keys such as `effects.blur_control-center_enabled` and `effects.transparency_control-center_value`. Transparency values are limited to `0–100`; each Blur value is limited to its own range, and `argvus-config` rejects writes outside it. Enable states remain distinct from missing overrides.
 
-The former `effects.blur_global_value` percentage is no longer read. A profile that still contains it keeps the key on disk without effect, and Blur uses the defaults above until its values are applied.
-
 ```text
 $XDG_CONFIG_HOME/argvus/config.json
 ```
 
-`data/generated/effects/<active-theme>.conf` is the effects projection, written only by `argvus config`; `argvus effects-toggle` delegates to `argvus config effects`. A theme or mode switch reapplies the active theme's exported visual profile, including per-surface values from `effects.conf` when present. Themes without a profile restore packaged effect defaults. Export the theme after changing effects if you want those values to survive another theme or mode switch.
-
 Disabling a surface's Transparency or Blur switch affects only that surface; saved numeric values are retained for later re-enabling.
-
-## Profiles
 
 Theme export includes canonical appearance/effects settings and the active theme's per-surface effects projection. Generated Waybar, Quickshell and Hyprland runtime files are regenerated when the theme is applied.
 

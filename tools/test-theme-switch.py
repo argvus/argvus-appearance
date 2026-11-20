@@ -266,8 +266,6 @@ class ThemeSwitchTests(unittest.TestCase):
                     current = self.current_build()
                     build = (current / "build.toml").read_text()
                     self.assertIn(f'theme = "{theme.removesuffix("-spaced")}"', build)
-                    rofi = (self.user / "rofi/theme.rasi").read_text()
-                    self.assertIn(f'@import "{current}/launcher/theme.rasi"', rofi)
                     for version in ("gtk-3.0", "gtk-4.0"):
                         settings = (self.user / version / "settings.ini").read_text()
                         prefer_dark = 0 if self.is_light_theme(theme) else 1
@@ -568,8 +566,6 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn(f'@import url("{current}/taskbar/theme.css");', css)
         telemetry = (self.user / "waybar/argvus-widget-telemetry.css").read_text()
         self.assertIn(f'@import url("{current}/widget-telemetry/theme.css");', telemetry)
-        rofi = (self.user / "rofi/theme.rasi").read_text()
-        self.assertIn(f'@import "{current}/launcher/theme.rasi"', rofi)
         qt6ct = (self.user / "qt6ct/qt6ct.conf").read_text()
         self.assertRegex(qt6ct, rf"color_scheme_path ?= ?{re.escape(str(current))}/qt6ct/colors\.conf")
 
@@ -1201,11 +1197,9 @@ class ThemeSwitchTests(unittest.TestCase):
         self.apply("argvus-dark")
         css = (self.user / "waybar/argvus-taskbar.css").read_text()
         telemetry_css = (self.user / "waybar/argvus-widget-telemetry.css").read_text()
-        rofi = (self.user / "rofi/theme.rasi").read_text()
         self.assertIn("border-radius: 0px;", css)
         self.assertNotIn("border-radius: 10px;", css)
         self.assertIn("border-radius: 0px;", telemetry_css)
-        self.assertIn("border-radius: 0px;", rofi)
         borders_status = subprocess.run(
             ["sh", str(self.system / "hyprland/sh/borders-switch.sh"), "--status"],
             env=self.env, capture_output=True, text=True, check=True,
@@ -1217,11 +1211,9 @@ class ThemeSwitchTests(unittest.TestCase):
         self.apply("argvus-dark-spaced")
         css = (self.user / "waybar/argvus-taskbar.css").read_text()
         telemetry_css = (self.user / "waybar/argvus-widget-telemetry.css").read_text()
-        rofi = (self.user / "rofi/theme.rasi").read_text()
         self.assertIn("border-radius: 4px;", css)
         self.assertNotIn("border-radius: 0px;", css)
         self.assertIn("border-radius: 4px;", telemetry_css)
-        self.assertIn("border-radius: 4px;", rofi)
         borders_status = subprocess.run(
             ["sh", str(self.system / "hyprland/sh/borders-switch.sh"), "--status"],
             env=self.env, capture_output=True, text=True, check=True,

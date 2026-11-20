@@ -25,8 +25,6 @@ Usa `argvus effects-toggle animations status|enable|disable|toggle` y `argvus ef
 
 Cada superficie tiene su propio submenú de **Transparencia** con un interruptor de activación y un valor.
 
-La página **Apariencia → Lanzadores** controla el lanzador oficial basado en Rofi y los flujos de selección: el lanzador principal, el selector de emojis, la calculadora, el selector de portapapeles, hojas de trucos y los menús de dispositivos extraíbles de Rofi. Su valor de Transparencia es el alfa de fondo final, por lo que `50` significa una opacidad de fondo efectiva de aproximadamente `0.50`; el texto, los íconos y las filas seleccionadas permanecen opacos. Con la Transparencia desactivada, el lanzador usa el color de fondo del tema activo, completamente opaco. El interruptor de Desenfoque aplica la capa `rofi` en la configuración global de Desenfoque.
-
 Cada valor varía desde `0%` (opaco) hasta `100%` (totalmente transparente). Usa `+` y `-` en incrementos del 5%, y luego selecciona **Aplicar** en la página de superficie. Salir de la página descarta un borrador no aplicado.
 
 Usa `↑` y `↓` para moverte entre **Activar** y **Valor**. En la fila **Valor**, `+` y `-` ajustan el borrador sin cambiar el enfoque. Presiona `Tab` para abrir **Acciones**, luego activa **[ Aplicar ]**; `Esc` vuelve a la página de superficie principal.

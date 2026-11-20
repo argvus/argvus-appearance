@@ -26,8 +26,6 @@ Use `argvus effects-toggle animations status|enable|disable|toggle` e `argvus ef
 
 Cada superfície possui um submenu **Transparência**, com seu próprio controle de ativação e valor.
 
-A página **Aparência → Inicializadores** controla os fluxos oficiais baseados em Rofi: launcher principal, seletor de emoji, calculadora, clipboard e menus Rofi de dispositivos removíveis. O valor de Transparência é o alpha final do fundo; `50` resulta em opacidade aproximada de `0,50`, enquanto texto, ícones e linhas selecionadas permanecem opacos. Com a Transparência desligada, o launcher usa a cor de fundo do próprio tema ativo, totalmente opaca. O controle de Blur habilita a layer `rofi` usando as definições globais de Blur.
-
 Cada valor vai de `0%` (opaco) a `100%` (totalmente transparente). Use `+` e `-` em passos de 5% e selecione **Aplicar** na página da superfície. Sair do ecrã descarta um rascunho não aplicado.
 
 Use `↑` e `↓` para mover entre **Ativar** e **Valor**. Na linha **Valor**, `+` e `-` ajustam o rascunho sem mudar o foco. Prima `Tab` para abrir **Ações** e ative **\[ Aplicar ]**; `Esc` retorna à página da superfície.

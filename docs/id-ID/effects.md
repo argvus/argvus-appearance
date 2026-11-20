@@ -3,8 +3,6 @@ title: Efek
 description: Konfigurasikan animasi, keburaman Hyprland global, dan transparansi per permukaan.
 ---
 
-Pusat Kontrol diluncurkan melalui Foot dengan profil khusus yang dihasilkan di `$XDG_CONFIG_HOME/argvus/data/control-center/foot.ini`. Dengan Foot 1.28, transparansi diproyeksikan ke `[colors-dark] alpha` dan saklar Blur permukaan ke `[colors-dark] blur`; konfigurasi Foot normal dan terminal ARGVUS tetap independen.
-
 ## Saklar Animasi dan Efek
 
 There are two independent master switches, both applied to
@@ -23,8 +21,6 @@ There are two independent master switches, both applied to
 `argvus effects-toggle` tanpa komponen bertindak pada animasi, blur dan transparansi secara bersamaan: `status` mencetak `enabled` hanya ketika ketiganya diaktifkan, `enable` dan `disable` mengganti ketiganya, dan `toggle` mematikan semuanya ketika `status` adalah `enabled` dan aktif sebaliknya. **SUPER + F6** menjalankan tombol ini. Untuk bertindak dalam satu grup, beri nama: `argvus effects-toggle animations|effects|blur|transparency status|enable|disable|toggle`. Halaman **Animasi** di Pusat Kontrol menggunakan formulir per komponen, sehingga tombol **Aktifkan** tetap hanya mengubah animasi saja.
 
 ## Transparansi
-
-Setiap permukaan memiliki submenu **Transparansi** sendiri dengan tombol dan nilai pengaktifan. Halaman **Penampilan → Peluncur** mengontrol alur peluncur dan pemilih resmi berbasis Rofi: peluncur utama, pemilih emoji, kalkulator, pemilih papan klip, lembar contekan, dan menu perangkat yang dapat dilepas Rofi. Nilai Transparansinya adalah alfa latar belakang akhir, jadi `50` berarti opasitas latar belakang efektif sekitar `0.50`; teks, ikon, dan baris yang dipilih tetap buram. Dengan Transparansi dimatikan, peluncur menggunakan warna latar belakang tema aktif, sepenuhnya buram. Sakelar Blur-nya memilih lapisan `rofi` ke dalam pengaturan Blur global.Setiap nilai berkisar dari `0%` (tidak tembus pandang) hingga `100%` (sepenuhnya tembus pandang). Gunakan `+` dan `-` dalam langkah 5%, kemudian pilih **Terapkan** di halaman permukaan. Meninggalkan halaman akan membatalkan draft yang belum diterapkan.
 
 Gunakan `↑` dan `↓` untuk berpindah antara **Enable** dan **Value**. Pada baris **Value**, `+` dan `-` menyesuaikan draf tanpa mengubah fokus. Tekan `Tab` untuk membuka **Actions**, lalu aktifkan **[ Apply ]**; `Esc` kembali ke halaman permukaan induk.
 
@@ -113,17 +109,11 @@ Seperti Blur, halaman mengedit draft: tidak ada yang ditulis sampai **[ Terapkan
 
 Preferensi logis disimpan di `$XDG_CONFIG_HOME/argvus/config.json`. Animasi global menggunakan `effects.animations`; nilai Animations menggunakan kunci `effects.animation_*` yang dijelaskan di atas. Saklar Blur global adalah `effects.blur_global_enabled`, dan nilai Blur menggunakan kunci `effects.blur_*` yang tercantum di atas. Status enable permukaan dan nilai transparansi menggunakan kunci seperti `effects.blur_control-center_enabled` dan `effects.transparency_control-center_value`. Nilai transparansi dibatasi hingga `0–100`; setiap nilai Blur dibatasi ke jangkauannya sendiri, dan `argvus-config` menolak penulisan di luar itu. Status enable tetap terpisah dari override yang hilang.
 
-Persentase `effects.blur_global_value` sebelumnya tidak lagi dibaca. Profil yang masih mengandungnya menyimpan kunci di disk tanpa efek, dan Blur menggunakan default di atas hingga nilainya diterapkan.
-
 ```text
 $XDG_CONFIG_HOME/argvus/config.json
 ```
 
-`data/generated/effects/<active-theme>.conf` adalah proyeksi efek, ditulis hanya oleh `argvus config`; `argvus effects-toggle` mendelegasikan ke `argvus config effects`. Pergantian tema atau mode menerapkan kembali profil visual tema yang aktif, termasuk nilai per-permukaan dari `effects.conf` bila ada. Tema tanpa profil mengembalikan default efek yang dikemas. Ekspor tema setelah mengubah efek jika Anda ingin nilai-nilai tersebut tetap ada setelah pergantian tema atau mode berikutnya.
-
 Menonaktifkan saklar Transparansi atau Blur pada suatu permukaan hanya memengaruhi permukaan tersebut; nilai numerik yang disimpan tetap tersimpan untuk diaktifkan kembali nanti. Ekspor tema
-
-## Profil
 
 mencakup pengaturan tampilan/efek kanonik dan proyeksi efek per-permukaan dari tema aktif. File runtime Waybar, Quickshell, dan Hyprland yang dihasilkan dibuat ulang saat tema diterapkan.
 
