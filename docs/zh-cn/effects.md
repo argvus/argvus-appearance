@@ -140,3 +140,7 @@ $XDG_CONFIG_HOME/argvus/config.json
 ## 夜间模式
 
 **SUPER + Shift + B** 保持亮度选择器，并添加一个带有效状态/温度的独立夜间模式切换。它调用 `argvus config display night-light status|toggle`。夜间模式需要 Hyprland 并响应 Hyprsunset >= 0.4.0，与亮度支持无关。范围为 1000–20000 K；配置位于控制中心的 **桌面与输入 > 显示器 > 夜间模式**。切换操作是持久的，无需调度，或者是直到下次调度过渡的临时覆盖。取消菜单不会改变任何内容。
+
+- `Super + Shift + B` / `argvus brightness-switch` · GTK 4 · ±5%, ±10%, 10%, 25%, 50%, 75%, 90%, 100% · Night Light
+- `argvus config accent` · GTK 4 · #RRGGBB
+- **搜索选项** · `↑` `↓` · `Enter` (应用) · `Esc`

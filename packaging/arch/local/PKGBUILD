@@ -22,6 +22,7 @@ depends=(
   'hyprpaper'
   'hyprpicker'
   'imagemagick'
+  'jq'
   'procps-ng'
   'qt6ct'
   'swaybg'
@@ -40,7 +41,6 @@ optdepends=(
   'argvus-widget-telemetry: Waybar widget telemetry theme integration'
   'argvus-removable-devices: removable storage theme integration'
   'ddcutil: external monitor brightness control'
-  'rofi: interactive accent and brightness menus'
 )
 source=("${pkgname}-${pkgver}.tar.gz")
 sha256sums=()

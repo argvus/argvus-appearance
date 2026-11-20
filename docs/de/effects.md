@@ -140,3 +140,7 @@ Alle Oberflächenseiten wenden ihre Entwürfe zusammen mit der `[ Apply ]`-Taste
 ## Nachtlicht
 
 **SUPER + Shift + B** behält den Helligkeitsregler bei und fügt einen separaten Nachtlicht-Umschalter mit effektivem Zustand/Temperatur hinzu. Es ruft `argvus config display night-light status|toggle` auf. Nachtlicht erfordert Hyprland und ein reagierendes Hyprsunset >= 0.4.0, unabhängig von der Helligkeitsunterstützung. Der Bereich liegt bei 1000–20000 K; die Konfiguration befindet sich unter **Desktop & Eingabe > Anzeigen > Nachtlicht** im Kontrollzentrum. Ein Umschalter ist persistent ohne Zeitplan oder ein flüchtiger Überschreibungswert bis zur nächsten Übergangszeit mit Zeitplan. Das Abbrechen des Menüs ändert nichts.
+
+- `Super + Shift + B` / `argvus brightness-switch` · GTK 4 · ±5%, ±10%, 10%, 25%, 50%, 75%, 90%, 100% · Night Light
+- `argvus config accent` · GTK 4 · #RRGGBB
+- **Optionen suchen** · `↑` `↓` · `Enter` (Anwenden) · `Esc`

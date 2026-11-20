@@ -132,3 +132,7 @@ Semua halaman permukaan menerapkan draf mereka bersama dengan tombol `[ Apply ]`
 ## Cahaya Malam
 
 **SUPER + Shift + B** mempertahankan pemilih kecerahan dan menambahkan tombol Lampu Malam terpisah dengan status/suhu efektif. Itu memanggil `argvus config display night-light status|toggle`. Cahaya Malam memerlukan Hyprland dan Hyprsunset >= 0.4.0 yang merespons, terlepas dari dukungan kecerahan. Kisarannya adalah 1000–20000 K; konfigurasi ada di **Desktop & Input > Tampilan > Lampu Malam** di Pusat Kontrol. Peralihan bersifat persisten tanpa penjadwalan, atau penggantian yang mudah berubah until the next transition with scheduling. Cancelling the menu changes nothing.
+
+- `Super + Shift + B` / `argvus brightness-switch` · GTK 4 · ±5%, ±10%, 10%, 25%, 50%, 75%, 90%, 100% · Night Light
+- `argvus config accent` · GTK 4 · #RRGGBB
+- **Cari opsi** · `↑` `↓` · `Enter` (Terapkan) · `Esc`

@@ -137,3 +137,7 @@ Tüm yüzey sayfaları taslaklarını `[ Apply ]` düğmesi ile birlikte uygular
 ## Gece Lambası
 
 **SUPER + Shift + B** parlaklık seçiciyi korur ve etkili durum/sıcaklık ile ayrı bir Gece Işığı anahtarı ekler. `argvus config display night-light status|toggle` çağrılır. Gece Işığı, parlaklık desteğinden bağımsız olarak Hyprland ve yanıt veren Hyprsunset >= 0.4.0 gerektirir. Aralık 1000–20000 K'dir; yapılandırma Kontrol Merkezi'nde **Masaüstü ve Girdi > Ekranlar > Gece Işığı** altında bulunur. Bir anahtar, zamanlama olmadan kalıcıdır veya zamanlamayla bir sonraki geçişe kadar geçici bir geçersiz kılma sağlar. Menüden iptal etmek hiçbir şeyi değiştirmez.
+
+- `Super + Shift + B` / `argvus brightness-switch` · GTK 4 · ±5%, ±10%, 10%, 25%, 50%, 75%, 90%, 100% · Night Light
+- `argvus config accent` · GTK 4 · #RRGGBB
+- **Seçenekleri ara** · `↑` `↓` · `Enter` (Uygula) · `Esc`

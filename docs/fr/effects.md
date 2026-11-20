@@ -140,3 +140,7 @@ Toutes les pages de surface appliquent leurs brouillons avec le bouton `[ Apply 
 ## Lumière nocturne
 
 **SUPER + Shift + B** conserve le sélecteur de luminosité et ajoute un interrupteur de Lumière nocturne séparé avec état/température effectif. Il appelle `argvus config display night-light status|toggle`. La Lumière nocturne nécessite Hyprland et un Hyprsunset répondant >= 0.4.0, indépendamment de la prise en charge de la luminosité. La plage est de 1000 à 20000 K ; la configuration se trouve sous **Bureau & Entrée > Écrans > Lumière nocturne** dans le Centre de Contrôle. Un interrupteur est persistant sans programmation, ou un dépassement volatil jusqu’à la prochaine transition avec programmation. Annuler le menu ne change rien.
+
+- `Super + Shift + B` / `argvus brightness-switch` · GTK 4 · ±5%, ±10%, 10%, 25%, 50%, 75%, 90%, 100% · Night Light
+- `argvus config accent` · GTK 4 · #RRGGBB
+- **Rechercher une option** · `↑` `↓` · `Enter` (Appliquer) · `Esc`

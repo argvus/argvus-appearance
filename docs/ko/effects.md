@@ -139,3 +139,7 @@ $XDG_CONFIG_HOME/argvus/config.json
 ## 야간 조명
 
 **SUPER + Shift + B**는 밝기 선택기를 유지하면서 효과 상태/온도가 적용된 별도의 야간 조명 토글을 추가합니다. 이는 `argvus config display night-light status|toggle`를 호출합니다. 야간 조명은 밝기 지원과 관계없이 Hyprland와 응답 가능한 Hyprsunset >= 0.4.0이 필요합니다. 범위는 1000–20000 K이며, 구성은 제어 센터의 **Desktop & Input > Displays > Night Light**에서 설정할 수 있습니다. 토글은 스케줄 없이도 지속되거나, 스케줄 설정 시 다음 전환까지 임시로 적용됩니다. 메뉴를 취소하면 아무 것도 변경되지 않습니다.
+
+- `Super + Shift + B` / `argvus brightness-switch` · GTK 4 · ±5%, ±10%, 10%, 25%, 50%, 75%, 90%, 100% · Night Light
+- `argvus config accent` · GTK 4 · #RRGGBB
+- **옵션 검색** · `↑` `↓` · `Enter` (적용) · `Esc`

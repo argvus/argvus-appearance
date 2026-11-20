@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # Control display brightness via brightnessctl (laptop backlight) or
-# ddcutil (desktop monitors with DDC/CI), with a rofi menu.
+# ddcutil (desktop monitors with DDC/CI), with a GTK menu.
 # Usage: brightness-switch.sh [--status|--get|--up|--down|--set <percent>|--menu|PERCENT]
 # shellcheck disable=SC1090,SC1091
 
@@ -88,58 +88,36 @@ apply() {
         "$(argvus_tr appearance brightness.unavailable)"
       return 1
       ;;
-    brightnessctl) apply_brightnessctl "$_value" ;;
-    ddcutil) apply_ddcutil "$_value" ;;
+    brightnessctl) apply_brightnessctl "$_value" || return 1 ;;
+    ddcutil) apply_ddcutil "$_value" || return 1 ;;
   esac
   _current="$(read_brightness)"
   notify_send "$(argvus_tr appearance brightness.title_short)" "${_current}%"
 }
 
 select_menu() {
-  _current="$(read_brightness)"
-  _prompt="$(argvus_tr appearance brightness.title "percent=$_current")"
-  _inc="$(argvus_tr appearance brightness.increase)"
-  _dec="$(argvus_tr appearance brightness.decrease)"
-
-  _night_row=""
-  if _night_status=$(argvus config display night-light status 2>/dev/null) &&
-      printf '%s' "$_night_status" | jq -e '.available == true' >/dev/null 2>&1; then
-    if printf '%s' "$_night_status" | jq -e '.active == true' >/dev/null 2>&1; then
-      _temperature=$(printf '%s' "$_night_status" | jq -r '.effective_temperature')
-      _night_row="11 - $(argvus_tr appearance brightness.night_light_on "temperature=$_temperature")"
-    else
-      _night_row="11 - $(argvus_tr appearance brightness.night_light_off)"
-    fi
+  _backlight=false
+  _current=""
+  if [ "$BACKEND" != "none" ]; then
+    _backlight=true
+    _current="$(read_brightness)"
   fi
-  if [ "$BACKEND" = "none" ] && [ -z "$_night_row" ]; then
-    notify_error "$(argvus_tr appearance brightness.title_short)" "$(argvus_tr appearance brightness.unavailable)"
+  if _night_status=$(argvus config display night-light status 2>/dev/null); then
+    _night_status=$(printf '%s' "$_night_status" | jq -ce 'objects') || _night_status=null
+  else
+    _night_status=null
+  fi
+  _state=$(jq -nc --argjson backlight "$_backlight" --arg current "$_current" \
+    --argjson night_light "$_night_status" \
+    '{backlight: $backlight, percent: ($current | tonumber? // null), night_light: $night_light}') ||
     return 1
-  fi
-  _selection=$(
-    {
-      if [ "$BACKEND" != "none" ]; then
-        printf '%s\n' "01 - $_inc +10%" "02 - $_inc +5%" "03 - $_dec -5%" "04 - $_dec -10%" \
-          "05 - 10%" "06 - 25%" "07 - 50%" "08 - 75%" "09 - 90%" "10 - 100%"
-      fi
-      if [ -n "$_night_row" ]; then printf '%s\n' "$_night_row"; fi
-    } | rofi -config "$(paths_config launcher/config/config.rasi)" -dmenu -p "$_prompt" -i -theme-str 'listview {lines: 11;}'
-  )
-  [ -z "$_selection" ] && return 1
-
-  # Numeric action IDs stay stable across translations.
-  case "${_selection%% *}" in
-    01) apply "+10%" ;;
-    02) apply "+5%" ;;
-    03) apply "5%-" ;;
-    04) apply "10%-" ;;
-    05) apply "10%" ;;
-    06) apply "25%" ;;
-    07) apply "50%" ;;
-    08) apply "75%" ;;
-    09) apply "90%" ;;
-    10) apply "100%" ;;
-    11)
-      [ -n "$_night_row" ] || return 1
+  _selection=$(printf '%s' "$_state" | argvus appearance-picker brightness) || return 1
+  case "$_selection" in
+    "") return 1 ;;
+    "+10%"|"+5%"|"5%-"|"10%-"|"10%"|"25%"|"50%"|"75%"|"90%"|"100%")
+      apply "$_selection"
+      ;;
+    night-light)
       if ! argvus config display night-light toggle; then
         notify_error "$(argvus_tr appearance brightness.title_short)" "$(argvus_tr appearance brightness.night_light_failed)"
         return 1
