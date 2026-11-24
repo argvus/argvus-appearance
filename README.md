@@ -38,7 +38,7 @@ Wallpapers and fonts are provided by the separate `argvus-wallpapers` and
 
 ```text
 src/usr/share/argvus/appearance/
-  config/{gtk-3.0,gtk-4.0,qt6ct,hypr,waybar}/
+  config/{gtk-3.0,gtk-4.0,qt6ct,hypr,taskbar}/
   sh/
   docs/
 ```

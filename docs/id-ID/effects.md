@@ -14,7 +14,7 @@ There are two independent master switches, both applied to
 ) controls everything that moves: workspace, window, fade, border and layer animations.
 - **Efek** adalah pintasan untuk blur ( `/effects/animations` `/effects/blur_global_enabled`) dan transparansi Terminal, Peluncur, Telemetri Widget, Panel Kontrol, dan Bilah Tugas (`/effects/transparency_<surface>_enabled`). Menghidupkan atau mematikannya akan menulis semuanya (dan transparansi Pusat Kontrol juga). Setiap permukaan menyimpan halaman transparansinya sendiri, sehingga Efek dibaca sebagai **aktif ketika setidaknya salah satu dari mereka aktif** dan mati hanya ketika semuanya mati.Use
 
- dan `argvus effects-toggle animations status|enable|disable|toggle`. Kartu Tampilan Panel Kontrol menunjukkan satu tombol untuk masing-masing tombol. Mematikan tombol master akan menjaga setiap pengaturan halus pada halaman **Animasi** dan **Blur** (kecepatan, kurva, peralihan per daun, ukuran blur, dan lintasan), jadi menyalakannya kembali akan mengembalikan tampilan yang sama. `argvus effects-toggle effects status|enable|disable|toggle` mencetak `effects status` `enabled` ketika buram atau setidaknya salah satu permukaan transparansi tersebut diaktifkan. Menonaktifkan transparansi permukaan akan membuat seluruh permukaan Waybar menjadi buram: selain latar belakang, batas transparan bilah tugas dan Telemetri Widget menjadi warna solid yang ditampilkan di atas latar belakang tema. Setiap efek diaktifkan secara default pada instalasi baru, termasuk pada mesin virtual dan sesi berdaya rendah; hanya pengaturan eksplisit yang mematikannya.
+ dan `argvus effects-toggle animations status|enable|disable|toggle`. Kartu Tampilan Panel Kontrol menunjukkan satu tombol untuk masing-masing tombol. Mematikan tombol master akan menjaga setiap pengaturan halus pada halaman **Animasi** dan **Blur** (kecepatan, kurva, peralihan per daun, ukuran blur, dan lintasan), jadi menyalakannya kembali akan mengembalikan tampilan yang sama. `argvus effects-toggle effects status|enable|disable|toggle` mencetak `effects status` `enabled` ketika buram atau setidaknya salah satu permukaan transparansi tersebut diaktifkan. Menonaktifkan transparansi permukaan akan membuat seluruh permukaan Taskbar menjadi buram: selain latar belakang, batas transparan bilah tugas dan Telemetri Widget menjadi warna solid yang ditampilkan di atas latar belakang tema. Setiap efek diaktifkan secara default pada instalasi baru, termasuk pada mesin virtual dan sesi berdaya rendah; hanya pengaturan eksplisit yang mematikannya.
 
 ## Semua efek sekaligus
 
@@ -115,7 +115,7 @@ $XDG_CONFIG_HOME/argvus/config.json
 
 Menonaktifkan saklar Transparansi atau Blur pada suatu permukaan hanya memengaruhi permukaan tersebut; nilai numerik yang disimpan tetap tersimpan untuk diaktifkan kembali nanti. Ekspor tema
 
-mencakup pengaturan tampilan/efek kanonik dan proyeksi efek per-permukaan dari tema aktif. File runtime Waybar, Quickshell, dan Hyprland yang dihasilkan dibuat ulang saat tema diterapkan.
+mencakup pengaturan tampilan/efek kanonik dan proyeksi efek per-permukaan dari tema aktif. File runtime Taskbar, Quickshell, dan Hyprland yang dihasilkan dibuat ulang saat tema diterapkan.
 
 Semua halaman permukaan menerapkan draf mereka bersama dengan tombol `[ Apply ]`. Pusat Kontrol menulis dokumen kanonik melalui pembantu efek, membiarkan `argvus-config` memproyeksikan pohon efek, memuat ulang konsumen yang terpengaruh dan membaca kembali nilai efektif. File yang dihasilkan dibuat ulang alih-alih diimpor sebagai status otoritatif.
 

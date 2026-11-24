@@ -14,7 +14,7 @@ Her ikisi de standart /effects ayarları aracılığıyla `hyprland.lua`'ya uygu
 
 ) ve Terminal, Başlatıcı, Widget Telemetrisi, Kontrol Paneli ve Görev Çubuğunun (`/effects/blur_global_enabled` `/effects/transparency_<surface>_enabled`) şeffaflığı. Açmak veya kapatmak, hepsini (ve Kontrol Merkezi şeffaflığını da) yazar. Her yüzey kendi şeffaflık sayfasını tutar; böylece Efektler, en az biri açık olduğunda **açık** olarak ve yalnızca her biri kapalı olduğunda kapalı olarak görünür.
 
-`argvus effects-toggle animations status|enable|disable|toggle` ve `argvus effects-toggle effects status|enable|disable|toggle` kullanın. Kontrol Paneli Görünümü kartında her biri için bir anahtar gösterilir. Ana anahtarın kapatılması, **Animasyonlar** ve **Bulanıklaştırma** sayfalarının tüm ince ayarlarının (hızlar, eğriler, yaprak başına anahtarlar, bulanıklaştırma boyutu ve geçişler) korunmasını sağlar; böylece tekrar açıldığında aynı görünüm geri yüklenir. Bulanıklaştırma veya bu şeffaflık yüzeylerinden en az biri etkinleştirildiğinde `effects status` `enabled` yazdırır. Bir yüzeyin şeffaflığını kapatmak, tüm Waybar yüzeyini opak hale getirir: arka planın yanı sıra, görev çubuğunun yarı saydam kenarları ve Widget Telemetrisi, tema arka planı üzerinde gösterdikleri düz renk haline gelir. Sanal makineler ve düşük güçlü oturumlar da dahil olmak üzere her efekt, yeni kurulumda varsayılan olarak etkinleştirilir; yalnızca açık bir ayar birini kapatır.
+`argvus effects-toggle animations status|enable|disable|toggle` ve `argvus effects-toggle effects status|enable|disable|toggle` kullanın. Kontrol Paneli Görünümü kartında her biri için bir anahtar gösterilir. Ana anahtarın kapatılması, **Animasyonlar** ve **Bulanıklaştırma** sayfalarının tüm ince ayarlarının (hızlar, eğriler, yaprak başına anahtarlar, bulanıklaştırma boyutu ve geçişler) korunmasını sağlar; böylece tekrar açıldığında aynı görünüm geri yüklenir. Bulanıklaştırma veya bu şeffaflık yüzeylerinden en az biri etkinleştirildiğinde `effects status` `enabled` yazdırır. Bir yüzeyin şeffaflığını kapatmak, tüm Taskbar yüzeyini opak hale getirir: arka planın yanı sıra, görev çubuğunun yarı saydam kenarları ve Widget Telemetrisi, tema arka planı üzerinde gösterdikleri düz renk haline gelir. Sanal makineler ve düşük güçlü oturumlar da dahil olmak üzere her efekt, yeni kurulumda varsayılan olarak etkinleştirilir; yalnızca açık bir ayar birini kapatır.
 
 ## Tüm efektler bir kerede
 
@@ -120,7 +120,7 @@ $XDG_CONFIG_HOME/argvus/config.json
 
 Bir yüzeyin Şeffaflık veya Bulanıklık anahtarını devre dışı bırakmak yalnızca o yüzeyi etkiler; kaydedilen sayısal değerler daha sonra yeniden etkinleştirme için saklanır.
 
-Tema ihracatı, kanonik görünüm/efekt ayarlarını ve aktif temanın yüzey başına efekt projeksiyonunu içerir. Tema uygulandığında oluşturulan Waybar, Quickshell ve Hyprland çalışma zamanı dosyaları yeniden oluşturulur.
+Tema ihracatı, kanonik görünüm/efekt ayarlarını ve aktif temanın yüzey başına efekt projeksiyonunu içerir. Tema uygulandığında oluşturulan Taskbar, Quickshell ve Hyprland çalışma zamanı dosyaları yeniden oluşturulur.
 
 Tüm yüzey sayfaları taslaklarını `[ Apply ]` düğmesi ile birlikte uygular. Kontrol Merkezi etkiler yardımcısı aracılığıyla kanonik belgeyi yazar, `argvus-config`'nin etkiler ağacını projelendirmesine izin verir, etkilenen tüketicileri yeniden yükler ve etkin değeri geri okur. Oluşturulan dosyalar yetkili durum olarak içe aktarılmak yerine yeniden oluşturulur.
 

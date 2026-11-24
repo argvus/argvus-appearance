@@ -14,7 +14,7 @@ There are two independent master switches, both applied to `hyprland.lua` throug
 - **Animations** (`/effects/animations`) controls everything that moves: workspace, window, fade, border and layer animations.
 - **Effects** is a shortcut for blur (`/effects/blur_global_enabled`) and the transparency of Terminal, Launcher, Widget Telemetry, Control Panel and Taskbar (`/effects/transparency_<surface>_enabled`). Turning it on or off writes all of them (and the Control Center transparency too). Each surface keeps its own transparency page, so Effects reads as **on when at least one of them is on** and as off only when every one is off.
 
-Use `argvus effects-toggle animations status|enable|disable|toggle` and `argvus effects-toggle effects status|enable|disable|toggle`. The Control Panel Appearance card shows one switch for each. Turning a master switch off keeps every fine setting of the **Animations** and **Blur** pages (speeds, curves, per-leaf switches, blur size and passes), so turning it on again restores the same look. `effects status` prints `enabled` when blur or at least one of those transparency surfaces is enabled. Turning a surface's transparency off makes the whole Waybar surface opaque: besides the background, the translucent borders of the taskbar and the Widget Telemetry become the solid color they show over the theme background. Every effect is enabled by default on a fresh install, including on virtual machines and low-power sessions; only an explicit setting turns one off.
+Use `argvus effects-toggle animations status|enable|disable|toggle` and `argvus effects-toggle effects status|enable|disable|toggle`. The Control Panel Appearance card shows one switch for each. Turning a master switch off keeps every fine setting of the **Animations** and **Blur** pages (speeds, curves, per-leaf switches, blur size and passes), so turning it on again restores the same look. `effects status` prints `enabled` when blur or at least one of those transparency surfaces is enabled. Turning a surface's transparency off makes the whole Taskbar surface opaque: besides the background, the translucent borders of the taskbar and the Widget Telemetry become the solid color they show over the theme background. Every effect is enabled by default on a fresh install, including on virtual machines and low-power sessions; only an explicit setting turns one off.
 
 ## All effects at once
 
@@ -125,7 +125,7 @@ $XDG_CONFIG_HOME/argvus/config.json
 
 Disabling a surface's Transparency or Blur switch affects only that surface; saved numeric values are retained for later re-enabling.
 
-Theme export includes canonical appearance/effects settings and the active theme's per-surface effects projection. Generated Waybar, Quickshell and Hyprland runtime files are regenerated when the theme is applied.
+Theme export includes canonical appearance/effects settings and the active theme's per-surface effects projection. Generated Taskbar, Quickshell and Hyprland runtime files are regenerated when the theme is applied.
 
 All surface pages apply their drafts together with the `[ Apply ]` button. Control Center writes the canonical document through the effects helper, lets `argvus-config` project the effects tree, reloads affected consumers and reads the effective value back. Generated files are recreated rather than imported as authoritative state.
 

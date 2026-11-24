@@ -24,7 +24,7 @@ $XDG_CONFIG_HOME/argvus/config.json
 
 ) وشفافية الوحدة الطرفية والمشغل وقياس عناصر واجهة المستخدم ولوحة التحكم وشريط المهام (`[colors-dark] alpha` /effects/transparency_<surface>_enabled /effects/blur_global_enabled /effects/animations /المؤثرات hyprland.lua `[colors-dark] blur` ). يؤدي تشغيله أو إيقاف تشغيله إلى كتابتها جميعًا (وشفافية مركز التحكم أيضًا). يحتفظ كل سطح بصفحة الشفافية الخاصة به، بحيث تتم قراءة التأثيرات على أنها **مفعّلة عندما يكون واحد منها على الأقل قيد التشغيل** وتكون متوقفة عن التشغيل فقط عندما يكون كل سطح متوقفًا عن التشغيل.
 
-استخدم  `hyprland.lua`  `/effects`  `/effects/animations`  `/effects/blur_global_enabled`  `/effects/transparency_<surface>_enabled` `argvus effects-toggle animations status|enable|disable|toggle` و`argvus effects-toggle effects status|enable|disable|toggle`. تعرض بطاقة مظهر لوحة التحكم مفتاحًا واحدًا لكل منها. يؤدي إيقاف تشغيل المفتاح الرئيسي إلى الحفاظ على كل الإعدادات الدقيقة لصفحات **الرسوم المتحركة** و**التمويه** (السرعات والمنحنيات ومفاتيح التبديل لكل ورقة وحجم التمويه والتمريرات)، لذا فإن تشغيله مرة أخرى يؤدي إلى استعادة المظهر نفسه. يقوم `effects status` بطباعة `enabled` عند التمويه أو عندتم تمكين واحد على الأقل من أسطح الشفافية هذه. يؤدي إيقاف شفافية السطح إلى جعل سطح Waybar بأكمله معتمًا: إلى جانب الخلفية، تصبح الحدود الشفافة لشريط المهام وقياس عناصر واجهة المستخدم عن بُعد هي اللون الصلب الذي تظهره على خلفية السمة. يتم تمكين كل تأثير افتراضيًا عند التثبيت الجديد، بما في ذلك الأجهزة الافتراضية and low-power sessions; only an explicit setting turns one off.
+استخدم  `hyprland.lua`  `/effects`  `/effects/animations`  `/effects/blur_global_enabled`  `/effects/transparency_<surface>_enabled` `argvus effects-toggle animations status|enable|disable|toggle` و`argvus effects-toggle effects status|enable|disable|toggle`. تعرض بطاقة مظهر لوحة التحكم مفتاحًا واحدًا لكل منها. يؤدي إيقاف تشغيل المفتاح الرئيسي إلى الحفاظ على كل الإعدادات الدقيقة لصفحات **الرسوم المتحركة** و**التمويه** (السرعات والمنحنيات ومفاتيح التبديل لكل ورقة وحجم التمويه والتمريرات)، لذا فإن تشغيله مرة أخرى يؤدي إلى استعادة المظهر نفسه. يقوم `effects status` بطباعة `enabled` عند التمويه أو عندتم تمكين واحد على الأقل من أسطح الشفافية هذه. يؤدي إيقاف شفافية السطح إلى جعل سطح Taskbar بأكمله معتمًا: إلى جانب الخلفية، تصبح الحدود الشفافة لشريط المهام وقياس عناصر واجهة المستخدم عن بُعد هي اللون الصلب الذي تظهره على خلفية السمة. يتم تمكين كل تأثير افتراضيًا عند التثبيت الجديد، بما في ذلك الأجهزة الافتراضية and low-power sessions; only an explicit setting turns one off.
 
 ##
 
@@ -128,7 +128,7 @@ Use
 
 ## الملفات الشخصية
 
-.ﻢﻴﺜﻟﺍ ﻖﻴﺒﻄﺗ ﺪﻨﻋ Hyprlandﻭ Quickshellﻭ Waybar ـﻟ ﻞﻴﻐﺸﺘﻟﺍ ﺖﻗﻭ
+.ﻢﻴﺜﻟﺍ ﻖﻴﺒﻄﺗ ﺪﻨﻋ Hyprlandﻭ Quickshellﻭ Taskbar ـﻟ ﻞﻴﻐﺸﺘﻟﺍ ﺖﻗﻭ
 
 .ﺔﻗﻮﺛﻮﻣ ﺔﻟﺎﺤﻛ ﺎﻫﺩﺍﺮﻴﺘﺳﺍ ﻦﻣ ًﻻ﻿ﺪﺑ ﺓﺪﻟ
 

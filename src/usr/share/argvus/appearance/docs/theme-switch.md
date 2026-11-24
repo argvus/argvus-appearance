@@ -6,7 +6,7 @@ switch transaction in Rust and serializes concurrent switches with `flock`,
 waiting at most 60 seconds for the lock. The switch renders the theme build,
 points `generated/theme/current` at it and reloads the running consumers in
 place, as the theme registry (`/usr/share/argvus/theme/consumers.d`) declares:
-the Waybar bars re-read their stylesheet, the Control Panel re-reads its
+the Taskbar bars re-read their stylesheet, the Control Panel re-reads its
 `Theme.qml`, Hyprland evaluates the new colours, hyprpaper shows the theme's
 wallpaper, and Dunst, btop and kitty reload their configuration. The projection
 manifest drives the session controller's targeted runtime actions. Applying a

@@ -16,7 +16,7 @@ Existem duas chaves mestras independentes, ambas aplicadas ao `hyprland.lua` pel
 - **Animações** (`/effects/animations`) controla tudo que se move: animações de workspace, janela, fade, borda e layers.
 - **Efeitos** é um atalho para o blur (`/effects/blur_global_enabled`) e a transparência de Terminal, Launcher, Widget Telemetry, Control Panel e Taskbar (`/effects/transparency_<superfície>_enabled`). Ligar ou desligar grava todas elas (e também a transparência do Control Center). Cada superfície mantém a sua própria página de transparência, então Efeitos aparece como **ativo quando pelo menos uma delas está ativa** e só como inativo quando todas estão desligadas.
 
-Use `argvus effects-toggle animations status|enable|disable|toggle` e `argvus effects-toggle effects status|enable|disable|toggle`. O card de Aparência do Control Panel mostra um interruptor para cada. Desligar uma chave mestra preserva todos os ajustes finos das páginas **Animações** e **Blur** (velocidades, curvas, chaves por item, tamanho e passes do blur), então ligar de novo restaura o mesmo visual. `effects status` imprime `enabled` quando o blur ou pelo menos uma dessas superfícies de transparência está ativa. Desligar a transparência de uma superfície deixa toda a superfície do Waybar opaca: além do fundo, as bordas translúcidas da taskbar e do Widget Telemetry viram a cor sólida que apareceria sobre o fundo do tema. Todos os efeitos vêm ativados por padrão em uma instalação nova, inclusive em máquinas virtuais e sessões de baixo consumo; apenas uma configuração explícita desliga algum.
+Use `argvus effects-toggle animations status|enable|disable|toggle` e `argvus effects-toggle effects status|enable|disable|toggle`. O card de Aparência do Control Panel mostra um interruptor para cada. Desligar uma chave mestra preserva todos os ajustes finos das páginas **Animações** e **Blur** (velocidades, curvas, chaves por item, tamanho e passes do blur), então ligar de novo restaura o mesmo visual. `effects status` imprime `enabled` quando o blur ou pelo menos uma dessas superfícies de transparência está ativa. Desligar a transparência de uma superfície deixa toda a superfície do Taskbar opaca: além do fundo, as bordas translúcidas da taskbar e do Widget Telemetry viram a cor sólida que apareceria sobre o fundo do tema. Todos os efeitos vêm ativados por padrão em uma instalação nova, inclusive em máquinas virtuais e sessões de baixo consumo; apenas uma configuração explícita desliga algum.
 
 ## Todos os efeitos de uma vez
 
@@ -133,7 +133,7 @@ Desativar Transparência ou Blur em uma superfície afeta somente aquela superf�
 
 ## Perfis
 
-A exportação de tema inclui configurações canônicas de aparência/efeitos e a projeção de efeitos por superfície do tema ativo. Os arquivos gerados do Waybar, Quickshell e Hyprland são recriados quando o tema é aplicado.
+A exportação de tema inclui configurações canônicas de aparência/efeitos e a projeção de efeitos por superfície do tema ativo. Os arquivos gerados do Taskbar, Quickshell e Hyprland são recriados quando o tema é aplicado.
 
 As páginas de superfície aplicam o rascunho com o botão `[ Aplicar ]`. O Control Center grava o documento canônico pelo helper de efeitos, deixa o `argvus-config` projetar a árvore de efeitos, recarrega os consumidores afetados e lê novamente o valor efetivo. Arquivos gerados são recriados, não importados como fonte de verdade.
 

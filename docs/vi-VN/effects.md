@@ -12,7 +12,7 @@ Có hai công tắc chính độc lập, cả hai đều được áp dụng cho
 - **Hoạt hình** (`/effects/animations`) điều khiển mọi thứ chuyển động: không gian làm việc, cửa sổ, mờ dần, viền và các hoạt hình lớp.
 - **Hiệu ứng** là một phím tắt cho hiệu ứng mờ (`/effects/blur_global_enabled`) và độ trong suốt của Terminal, Launcher, Widget Telemetry, Bảng điều khiển và Thanh tác vụ (`/effects/transparency_<surface>_enabled`). Bật hoặc tắt nó sẽ ghi tất cả chúng (và cả độ trong suốt của Trung tâm Điều khiển). Mỗi bề mặt giữ trang độ trong suốt riêng của nó, vì vậy Hiệu ứng sẽ được coi là **bật khi ít nhất một trong số chúng được bật** và sẽ tắt chỉ khi tất cả đều tắt.
 
-Sử dụng `argvus effects-toggle animations status|enable|disable|toggle` và `argvus effects-toggle effects status|enable|disable|toggle`. Bảng điều khiển Giao diện Thẻ hiển thị một quy tắc cho mỗi nút. Việc tắt công tắc chính sẽ giữ nguyên mọi cài đặt tốt của các trang ** Hoạt hình** và **Blur** (tốc độ, đường cong, công tắc trên mỗi lá, kích thước làm mờ và đường sóc), do đó, hãy bật lại công tắc này sẽ khôi phục lại giao diện tương tự. `effects status` trong `enabled` khi bị mờ hoặc có ít nhất một trong các bề mặt trong suốt đó được bật. Việc tắt độ trong suốt của một bề mặt sẽ làm cho toàn bộ bề mặt Waybar mờ đục: ngoài nền, các đường viền mờ của thanh tác vụ và Widget Telemetry trở thành màu đồng nhất mà chúng hiển thị trên nền chủ đề. Theo mặc định, mọi hiệu ứng đều được bật trên bản cài đặt mới, bao gồm cả trên máy ảo và các phiên sử dụng năng lượng thấp; chỉ có một cài đặt rõ ràng sẽ tắt một cái.
+Sử dụng `argvus effects-toggle animations status|enable|disable|toggle` và `argvus effects-toggle effects status|enable|disable|toggle`. Bảng điều khiển Giao diện Thẻ hiển thị một quy tắc cho mỗi nút. Việc tắt công tắc chính sẽ giữ nguyên mọi cài đặt tốt của các trang ** Hoạt hình** và **Blur** (tốc độ, đường cong, công tắc trên mỗi lá, kích thước làm mờ và đường sóc), do đó, hãy bật lại công tắc này sẽ khôi phục lại giao diện tương tự. `effects status` trong `enabled` khi bị mờ hoặc có ít nhất một trong các bề mặt trong suốt đó được bật. Việc tắt độ trong suốt của một bề mặt sẽ làm cho toàn bộ bề mặt Taskbar mờ đục: ngoài nền, các đường viền mờ của thanh tác vụ và Widget Telemetry trở thành màu đồng nhất mà chúng hiển thị trên nền chủ đề. Theo mặc định, mọi hiệu ứng đều được bật trên bản cài đặt mới, bao gồm cả trên máy ảo và các phiên sử dụng năng lượng thấp; chỉ có một cài đặt rõ ràng sẽ tắt một cái.
 
 ## Tất cả các hiệu ứng cùng lúc
 
@@ -126,7 +126,7 @@ Vô hiệu hóa công tắc Độ trong suốt hoặc Làm mờ của một bề
 
 ## Hồ sơ
 
-bao gồm các cài đặt giao diện/hiệu ứng chuẩn và chiếu hiệu ứng từng bề mặt của chủ đề đang hoạt động. Các tệp chạy thời gian của Waybar, Quickshell và Hyprland được tạo lại khi áp dụng chủ đề.
+bao gồm các cài đặt giao diện/hiệu ứng chuẩn và chiếu hiệu ứng từng bề mặt của chủ đề đang hoạt động. Các tệp chạy thời gian của Taskbar, Quickshell và Hyprland được tạo lại khi áp dụng chủ đề.
 
 Tất cả các trang bề mặt áp dụng các bản nháp của chúng cùng với nút `[ Apply ]`. Trung tâm điều khiển ghi tài liệu chuẩn thông qua trợ giúp hiệu ứng, cho phép `argvus-config` tạo cây hiệu ứng, tải lại các người tiêu dùng bị ảnh hưởng và đọc lại giá trị hiệu quả. Các tệp được tạo ra được tạo lại thay vì nhập như trạng thái chính thức.
 

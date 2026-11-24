@@ -32,7 +32,7 @@ ARGVUS 默认的主要字体是 **IBM Plex Mono**，使用 `Regular` 样式。�
 
 主题在 `/usr/share/icons`、`$XDG_DATA_HOME/icons` 和 `~/.icons` 中查找。未安装的已配置主题，或包含 `/` 或为 `..` 的值，将回退到相同模式的默认设置并记录一条消息，因此桌面永远不会指向缺失的主题。主题或模式切换时，如果存在，会使用导出主题配置文件中的图标选择，否则将恢复打包模式的默认设置。导出主题以在切换时保留自定义图标选择。
 
-在控制中心使用字体控制。在`config.json`中，字体偏好是规范的，在`fonts.targets.<target>`中用于字体系列、样式和大小，加上`fonts.rendering`用于抗锯齿、提示、子像素顺序和DPI。控制中心通过`argvus-config`保持它们；它本身不写消费者文件。`argvus-config` 然后投射`data/generated/fonts.conf`，并重写`data/waybar/argvus-taskbar.css`和`data/waybar/argvus-widget-telemetry.css`中的定界字体块，因此这些块外的字体编辑在更改字体后仍然存在。终端和GTK的fontconfig规则仍然是本地适配器目标。该软件包在安装过程中运行字体缓存更新。
+在控制中心使用字体控制。在`config.json`中，字体偏好是规范的，在`fonts.targets.<target>`中用于字体系列、样式和大小，加上`fonts.rendering`用于抗锯齿、提示、子像素顺序和DPI。控制中心通过`argvus-config`保持它们；它本身不写消费者文件。`argvus-config` 然后投射`data/generated/fonts.conf`，并重写`data/taskbar/argvus-taskbar.css`和`data/taskbar/argvus-widget-telemetry.css`中的定界字体块，因此这些块外的字体编辑在更改字体后仍然存在。终端和GTK的fontconfig规则仍然是本地适配器目标。该软件包在安装过程中运行字体缓存更新。
 
 任务栏模块生成在发布之前会验证生成的 JSONC。实用程序模块列表根据已启用的偏好重新构建，包括仅在悬停模式下的抽屉展开器。工作区图标模式会同时渲染 `{windows}` 和 `{name}`。系统托盘可见性仅影响后台应用程序图标。
 
@@ -42,7 +42,7 @@ AI 图标的可见性由 /taskbar/icons/ai_agents_enabled 控制（默认值为 
 
 任务栏投影器在 `/taskbar/icons/update_status_enabled` 为 true 时，会将更新状态放置在实用程序组和网络/性能组之间的单独组中。它还会用模块定义升级较早生成的配置。
 
-辅助程序是 `argvus window-mode-menu`；`argvus window-mode-menu --status` 输出 Waybar JSON。它由主 `argvus` 软件包提供。现有的自定义任务栏副本会被保留：从打包的模板中添加 `custom/window-mode` 模块定义和组条目以选择启用，或者使用控制中心。外观投影器在定义存在时会保留该模块，即使其他实用程序图标被禁用。
+辅助程序是 `argvus window-mode-menu`；`argvus window-mode-menu --status` 输出 Taskbar JSON。它由主 `argvus` 软件包提供。现有的自定义任务栏副本会被保留：从打包的模板中添加 `custom/window-mode` 模块定义和组条目以选择启用，或者使用控制中心。外观投影器在定义存在时会保留该模块，即使其他实用程序图标被禁用。
 
 `window-bar` 和 `window-controls` 主题使用者的颜色来自 bg、fg 和 accent。标题栏颜色通过 `argvus windows decorations` 重新加载；窗口栏遵循其生成的样式表。平铺/浮动与固定/间隔的外观几何独立。
 

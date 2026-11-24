@@ -15,7 +15,7 @@ description: 配置动画，全局 Hyprland 模糊和每个表面的透明度。
 - **动画** ( `/effects` `/effects/animations`) 控制所有移动的内容：工作区、窗口、淡入淡出、边框和图层动画。
 - **效果** 是模糊 (`/effects/blur_global_enabled`) 以及终端、启动器、小部件遥测、控制面板和任务栏 (`/effects/transparency_<surface>_enabled`) 透明度的快捷方式。开启或关闭它会写入所有这些（以及控制中心的透明度）。每个界面都保留自己的透明度页面，因此当至少有一个开启时，效果会显示为 **开启**，只有当所有界面都关闭时才显示为关闭。
 
-使用 `argvus effects-toggle animations status|enable|disable|toggle` 和 `argvus effects-toggle effects status|enable|disable|toggle`。控制面板外观卡显示每个选项的一个开关。关闭主开关会保留**动画**和**模糊**页面的所有细节设置（速度、曲线、每叶开关、模糊大小和次数），因此再次打开时会恢复相同的效果。当模糊或至少一个透明表面启用时，`effects status` 打印 `enabled`。关闭表面的透明度会使整个 Waybar 表面变为不透明：除了背景，任务栏和小部件遥测的半透明边框会变为在主题背景上显示的纯色。新安装时，所有效果默认启用，包括在虚拟机和低功耗会话中；只有显式设置才会关闭某个效果。
+使用 `argvus effects-toggle animations status|enable|disable|toggle` 和 `argvus effects-toggle effects status|enable|disable|toggle`。控制面板外观卡显示每个选项的一个开关。关闭主开关会保留**动画**和**模糊**页面的所有细节设置（速度、曲线、每叶开关、模糊大小和次数），因此再次打开时会恢复相同的效果。当模糊或至少一个透明表面启用时，`effects status` 打印 `enabled`。关闭表面的透明度会使整个 Taskbar 表面变为不透明：除了背景，任务栏和小部件遥测的半透明边框会变为在主题背景上显示的纯色。新安装时，所有效果默认启用，包括在虚拟机和低功耗会话中；只有显式设置才会关闭某个效果。
 
 ## 同时启用所有效果
 
@@ -39,7 +39,7 @@ description: 配置动画，全局 Hyprland 模糊和每个表面的透明度。
 
 ### 分类和动画
 
-| 分类 | 动画 | 键 (`effects.animation_<key>_*`) | 风格（默认） | 速度 | 启用 | 
+| 分类 | 动画 | 键 (`effects.animation_<key>_*`) | 风格（默认） | 速度 | 启用 |
 |---|---|---|---|---|---|
 |窗户|打开窗户 | `opening` | `popin`，弹出 87% | 4.1 | — |
 |窗户|关闭窗户 | `closing` | `popin`，弹出 87% | 1.49 | 1.49 — |
@@ -131,7 +131,7 @@ $XDG_CONFIG_HOME/argvus/config.json
 
 ## 配置文件
 
-主题导出包括规范的外观/效果设置以及活动主题的每个表面效果投影。在应用主题时，会重新生成生成的 Waybar、Quickshell 和 Hyprland 运行时文件。
+主题导出包括规范的外观/效果设置以及活动主题的每个表面效果投影。在应用主题时，会重新生成生成的 Taskbar、Quickshell 和 Hyprland 运行时文件。
 
 所有表面页面都会应用它们的草稿以及 `[ Apply ]` 按钮。控制中心通过效果助手写入规范文档，让 `argvus-config` 投影效果树，重新加载受影响的消费者，并将有效值读取回来。生成的文件会被重新创建，而不是作为权威状态导入。
 

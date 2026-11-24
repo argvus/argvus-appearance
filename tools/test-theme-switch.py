@@ -241,17 +241,17 @@ class ThemeSwitchTests(unittest.TestCase):
                     # Sticky reserves the taskbar's two-pixel bottom gap;
                     # Spaced uses the eighteen-pixel baseline.
                     bottom_margin = 18 if theme.endswith("-spaced") else 2
-                    bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
+                    bar = (self.user / "taskbar/argvus-taskbar.jsonc").read_text()
                     for edge in ("top", "left", "right"):
                         self.assertIn(f'"margin-{edge}": {margin}', bar)
                     self.assertIn(f'"margin-bottom": {bottom_margin}', bar)
-                    widget = (self.user / "waybar/argvus-widget-telemetry.jsonc").read_text()
+                    widget = (self.user / "taskbar/argvus-widget-telemetry.jsonc").read_text()
                     effective_left = 18 if theme.endswith("-spaced") else 0
                     effective_bottom = 18 if theme.endswith("-spaced") else 0
                     self.assertIn('"margin-top": 0', widget)
                     self.assertIn(f'"margin-left": {effective_left}', widget)
                     self.assertIn(f'"margin-bottom": {effective_bottom}', widget)
-                    for css in (self.user / "waybar").glob("*.css"):
+                    for css in (self.user / "taskbar").glob("*.css"):
                         for ref in re.findall(r'@import url\("([^"]+)"\)', css.read_text()):
                             self.assertTrue((css.parent / ref).is_file(), (theme, css, ref))
                     telemetry_file = self.current_build() / "widget-telemetry/theme.css"
@@ -320,8 +320,8 @@ class ThemeSwitchTests(unittest.TestCase):
         self.apply("one-light")
 
         effects = self.cmd_bin / "argvus"
-        taskbar_css = self.user / "waybar/argvus-taskbar.css"
-        telemetry_css = self.user / "waybar/argvus-widget-telemetry.css"
+        taskbar_css = self.user / "taskbar/argvus-taskbar.css"
+        telemetry_css = self.user / "taskbar/argvus-widget-telemetry.css"
         self.assertIn(
             "@define-color th-background-effective alpha(@th-background, 0.50);",
             taskbar_css.read_text(),
@@ -435,7 +435,7 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertTrue(any(c[0] == "pkill" and "kitty" in c and "SIGUSR1" in c for c in commands))
         self.assertTrue(any(c[0] == "pkill" and "btop" in c and "SIGUSR2" in c for c in commands))
         build = os.readlink(self.current_build())
-        for css in ("waybar/argvus-taskbar.css", "waybar/argvus-widget-telemetry.css"):
+        for css in ("taskbar/argvus-taskbar.css", "taskbar/argvus-widget-telemetry.css"):
             first_line = (self.user / css).read_text().splitlines()[0]
             self.assertEqual(first_line, f"/* argvus theme build: {Path(build).name} */")
 
@@ -489,7 +489,7 @@ class ThemeSwitchTests(unittest.TestCase):
 
     def test_layout_mode_switch_applies_in_place(self):
         # Sticky/Spaced goes through the theme transaction only: no splash, no
-        # configuration-service reload and no early Waybar restart.
+        # configuration-service reload and no early Taskbar restart.
         self.apply("sunset")
         self.log.write_text("")
         result = subprocess.run(
@@ -499,7 +499,7 @@ class ThemeSwitchTests(unittest.TestCase):
         commands = self.commands()
         self.assertIn(["argvus", "theme-switch", "sunset"], commands)
         self.assertNotIn(["systemctl", "--user", "reload", "argvus-config.service"], commands)
-        self.assertNotIn(["argvus", "sessionctl", "restart", "waybar"], commands)
+        self.assertNotIn(["argvus", "sessionctl", "restart", "taskbar"], commands)
         self.assertFalse(self.splash_args.exists(), "no overlay is shown")
         # The transaction compares the marker with the new mode to see the layout change.
         self.assertEqual((self.user / ".active-theme").read_text().strip(), "sunset")
@@ -517,13 +517,13 @@ class ThemeSwitchTests(unittest.TestCase):
         result = self.apply("argvus-dark", runtime=True, expected_status=1)
         self.assertNotIn("applied.", result.stdout)
 
-    def test_runtime_switch_leaves_waybar_restart_to_the_transaction(self):
+    def test_runtime_switch_leaves_taskbar_restart_to_the_transaction(self):
         # The switch stops the bars and restarts the recorded units itself; the
-        # geometry helpers must not start Waybar early in the middle of it.
+        # geometry helpers must not start Taskbar early in the middle of it.
         self.log.write_text("")
         self.apply("argvus-dark", runtime=True)
         commands = self.commands()
-        self.assertNotIn(["argvus", "sessionctl", "restart", "waybar"], commands)
+        self.assertNotIn(["argvus", "sessionctl", "restart", "taskbar"], commands)
         self.assertTrue(any(c[:2] == ["hyprctl", "eval"] and "gaps_out" in c[2]
                             for c in commands if len(c) > 2))
 
@@ -548,8 +548,8 @@ class ThemeSwitchTests(unittest.TestCase):
 
     def test_theme_switch_border_follows_the_theme_until_set(self):
         self.apply("slate-dark")
-        css = (self.user / "waybar/argvus-taskbar.css").read_text()
-        window_block = css[css.index("window#waybar {"):]
+        css = (self.user / "taskbar/argvus-taskbar.css").read_text()
+        window_block = css[css.index("window#taskbar {"):]
         self.assertIn("border: none", window_block[:window_block.index("}")])
 
     def current_build(self):
@@ -562,9 +562,9 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn('theme = "sunset"', build)
         self.assertIn('variant = "spaced"', build)
 
-        css = (self.user / "waybar/argvus-taskbar.css").read_text()
+        css = (self.user / "taskbar/argvus-taskbar.css").read_text()
         self.assertIn(f'@import url("{current}/taskbar/theme.css");', css)
-        telemetry = (self.user / "waybar/argvus-widget-telemetry.css").read_text()
+        telemetry = (self.user / "taskbar/argvus-widget-telemetry.css").read_text()
         self.assertIn(f'@import url("{current}/widget-telemetry/theme.css");', telemetry)
         qt6ct = (self.user / "qt6ct/qt6ct.conf").read_text()
         self.assertRegex(qt6ct, rf"color_scheme_path ?= ?{re.escape(str(current))}/qt6ct/colors\.conf")
@@ -590,12 +590,12 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertEqual((self.user / ".active-theme").read_text().strip(), "sunset")
 
     def test_per_theme_copies_of_older_switches_move_to_a_backup_once(self):
-        old = self.user / "waybar/themes/sunset/theme.css"
+        old = self.user / "taskbar/themes/sunset/theme.css"
         old.parent.mkdir(parents=True)
         old.write_text("/* edited */\n")
         self.apply("sunset")
         self.assertFalse(old.exists())
-        backups = list((self.user / "backups").glob("theme-copies-*/waybar/themes/sunset/theme.css"))
+        backups = list((self.user / "backups").glob("theme-copies-*/taskbar/themes/sunset/theme.css"))
         self.assertEqual([path.read_text() for path in backups], ["/* edited */\n"])
         old.parent.mkdir(parents=True)
         old.write_text("again\n")
@@ -804,8 +804,8 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn("gaps_in=10", spaces)
         self.assertIn("gaps_out_top=18", spaces)
         self.assertIn("gaps_out_bottom=18", spaces)
-        self.assertIn("waybar_top=18", spaces)
-        self.assertIn("waybar_bottom=18", spaces)
+        self.assertIn("taskbar_top=18", spaces)
+        self.assertIn("taskbar_bottom=18", spaces)
 
         borders = subprocess.run(
             ["sh", str(self.system / "hyprland/sh/borders-switch.sh"), "--status"],
@@ -826,7 +826,7 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertRegex(taskbar_contents, r"@define-color th-background-rgba +rgba\(34, 31, 34, 0\.92\);")
         self.assertNotIn("@import", taskbar_contents)
 
-        telemetry_css = self.user / "waybar/argvus-widget-telemetry.css"
+        telemetry_css = self.user / "taskbar/argvus-widget-telemetry.css"
         effects = self.cmd_bin / "argvus"
         self.assertIn("@define-color th-window-bg-effective alpha(@th-window-bg, 0.50);", telemetry_css.read_text())
 
@@ -892,7 +892,7 @@ class ThemeSwitchTests(unittest.TestCase):
             env=self.env, capture_output=True, text=True, check=True,
         ).stdout.strip()
         self.assertEqual(expanded, "true")
-        taskbar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
+        taskbar = (self.user / "taskbar/argvus-taskbar.jsonc").read_text()
         self.assertIn('"custom/removable-devices"', taskbar)
         self.assertNotIn('"custom/storage"', taskbar)
         auto_drawer = taskbar.split("ARGVUS_RIGHT_2_AUTO_BEGIN", 1)[1].split(
@@ -900,14 +900,14 @@ class ThemeSwitchTests(unittest.TestCase):
         )[0]
         self.assertNotIn('"drawer": {', auto_drawer)
         self.assertIn('"on-click": "/usr/share/argvus/removable-devices/sh/removable-devices-menu.sh --root {x} {y}"', taskbar)
-        css = (self.user / "waybar/argvus-taskbar.css").read_text()
+        css = (self.user / "taskbar/argvus-taskbar.css").read_text()
         self.assertIn("#custom-removable-devices", css)
         self.assertNotIn("#custom-storage", css)
         self.assertIn(["argvus", "widget-telemetry-toggle", "blocks", "apply"], self.commands())
 
     def test_taskbar_module_preferences_project_without_losing_drawer_markers(self):
         self.apply("argvus-dark")
-        taskbar_path = self.user / "waybar/argvus-taskbar.jsonc"
+        taskbar_path = self.user / "taskbar/argvus-taskbar.jsonc"
         old_taskbar = taskbar_path.read_text()
         old_taskbar = re.sub(
             r'    "workspace-taskbar": \{\n.*?\n    \},\n',
@@ -958,12 +958,12 @@ class ThemeSwitchTests(unittest.TestCase):
 
     def test_theme_switch_resets_spacing_to_mode_defaults(self):
         (self.user / ".spaces").write_text(
-            "waybar_top=7\nwaybar_left=8\nwaybar_right=9\nwaybar_bottom=10\n"
-            "waybar_pos=bottom\ngaps_out_top=0\ngaps_out_left=0\n"
+            "taskbar_top=7\ntaskbar_left=8\ntaskbar_right=9\ntaskbar_bottom=10\n"
+            "taskbar_pos=bottom\ngaps_out_top=0\ngaps_out_left=0\n"
             "gaps_out_right=0\ngaps_out_bottom=0\n"
         )
         self.apply("argvus-light")
-        bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
+        bar = (self.user / "taskbar/argvus-taskbar.jsonc").read_text()
         self.assertIn('"position": "top"', bar)
         for edge in ("top", "left", "right"):
             self.assertIn(f'"margin-{edge}": 0', bar)
@@ -973,12 +973,12 @@ class ThemeSwitchTests(unittest.TestCase):
             env=self.env, capture_output=True, text=True, check=True,
         ).stdout
         self.assertIn("gaps_in=2", spaces_status)
-        self.assertIn("waybar_bottom=2", spaces_status)
+        self.assertIn("taskbar_bottom=2", spaces_status)
         for edge in ("top", "left", "right", "bottom"):
             self.assertIn(f"gaps_out_{edge}=0", spaces_status)
 
         self.apply("argvus-light-spaced")
-        bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
+        bar = (self.user / "taskbar/argvus-taskbar.jsonc").read_text()
         for edge in ("top", "left", "right", "bottom"):
             self.assertIn(f'"margin-{edge}": 18', bar)
         float_spaces_status = subprocess.run(
@@ -990,8 +990,8 @@ class ThemeSwitchTests(unittest.TestCase):
             self.assertIn(f"gaps_out_{edge}=18", float_spaces_status)
 
         (self.user / ".spaces").write_text(
-            "waybar_top=2\nwaybar_left=4\nwaybar_right=5\nwaybar_bottom=7\n"
-            "waybar_pos=top\ngaps_out_top=2\ngaps_out_left=4\n"
+            "taskbar_top=2\ntaskbar_left=4\ntaskbar_right=5\ntaskbar_bottom=7\n"
+            "taskbar_pos=top\ngaps_out_top=2\ngaps_out_left=4\n"
             "gaps_out_right=5\ngaps_out_bottom=7\n"
         )
         subprocess.run(
@@ -999,20 +999,20 @@ class ThemeSwitchTests(unittest.TestCase):
             env=self.env | {"ARGVUS_NO_RUNTIME": "0"},
             capture_output=True, text=True, check=True,
         )
-        bar = (self.user / "waybar/argvus-taskbar.jsonc").read_text()
+        bar = (self.user / "taskbar/argvus-taskbar.jsonc").read_text()
         self.assertIn('"margin-bottom": 7', bar)
         # The effective geometry complements the taskbar reservation instead of
         # adding the requested gaps_out value a second time.
         self.assertIn(
             "top = 0, right = 5, bottom = 7, left = 4", self.last_gaps_eval())
-        telemetry = (self.user / "waybar/argvus-widget-telemetry.jsonc").read_text()
+        telemetry = (self.user / "taskbar/argvus-widget-telemetry.jsonc").read_text()
         self.assertIn('"margin-top": 0', telemetry)
         self.assertIn('"margin-left": 4', telemetry)
         self.assertIn('"margin-bottom": 7', telemetry)
 
         (self.user / ".spaces").write_text(
-            "waybar_top=6\nwaybar_left=4\nwaybar_right=5\nwaybar_bottom=7\n"
-            "waybar_pos=bottom\ngaps_out_top=2\ngaps_out_left=4\n"
+            "taskbar_top=6\ntaskbar_left=4\ntaskbar_right=5\ntaskbar_bottom=7\n"
+            "taskbar_pos=bottom\ngaps_out_top=2\ngaps_out_left=4\n"
             "gaps_out_right=5\ngaps_out_bottom=3\n"
         )
         subprocess.run(
@@ -1035,8 +1035,8 @@ class ThemeSwitchTests(unittest.TestCase):
     def test_effective_geometry_constraints_preserve_requested_state(self):
         script = self.system / "hyprland/sh/spaces-switch.sh"
         lua = (self.system / "hyprland/config/hyprland.lua").read_text()
-        self.assertIn("math.max(0, _spaces_gaps_out_top - _spaces_waybar_bottom)", lua)
-        self.assertIn("math.max(0, _spaces_gaps_out_bottom - _spaces_waybar_top)", lua)
+        self.assertIn("math.max(0, _spaces_gaps_out_top - _spaces_taskbar_bottom)", lua)
+        self.assertIn("math.max(0, _spaces_gaps_out_bottom - _spaces_taskbar_top)", lua)
         cases = (
             ("top", "15", "15", "0", "15"),
             ("top", "5", "15", "10", "15"),
@@ -1052,8 +1052,8 @@ class ThemeSwitchTests(unittest.TestCase):
                 top_margin = facing if position == "bottom" else 0
                 bottom_margin = facing if position == "top" else 0
                 (self.user / ".spaces").write_text(
-                    f"waybar_top={top_margin}\nwaybar_left=3\nwaybar_right=4\n"
-                    f"waybar_bottom={bottom_margin}\nwaybar_pos={position}\n"
+                    f"taskbar_top={top_margin}\ntaskbar_left=3\ntaskbar_right=4\n"
+                    f"taskbar_bottom={bottom_margin}\ntaskbar_pos={position}\n"
                     f"gaps_in=2\ngaps_out_top=15\ngaps_out_left=6\n"
                     f"gaps_out_right=7\ngaps_out_bottom=15\n"
                 )
@@ -1063,7 +1063,7 @@ class ThemeSwitchTests(unittest.TestCase):
                     capture_output=True, text=True, check=True,
                 )
                 state = (self.user / ".spaces").read_text()
-                self.assertIn(f"waybar_pos={position}", state)
+                self.assertIn(f"taskbar_pos={position}", state)
                 self.assertIn(f"gaps_out_top={requested}", state)
                 self.assertIn("gaps_out_bottom=15", state)
                 status = subprocess.run(
@@ -1195,8 +1195,8 @@ class ThemeSwitchTests(unittest.TestCase):
     def test_theme_switch_resets_borders_to_mode_defaults(self):
         (self.user / ".borders").write_text("rounded=1\nrounding=10\n")
         self.apply("argvus-dark")
-        css = (self.user / "waybar/argvus-taskbar.css").read_text()
-        telemetry_css = (self.user / "waybar/argvus-widget-telemetry.css").read_text()
+        css = (self.user / "taskbar/argvus-taskbar.css").read_text()
+        telemetry_css = (self.user / "taskbar/argvus-widget-telemetry.css").read_text()
         self.assertIn("border-radius: 0px;", css)
         self.assertNotIn("border-radius: 10px;", css)
         self.assertIn("border-radius: 0px;", telemetry_css)
@@ -1209,8 +1209,8 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertIn("thickness=1", borders_status)
 
         self.apply("argvus-dark-spaced")
-        css = (self.user / "waybar/argvus-taskbar.css").read_text()
-        telemetry_css = (self.user / "waybar/argvus-widget-telemetry.css").read_text()
+        css = (self.user / "taskbar/argvus-taskbar.css").read_text()
+        telemetry_css = (self.user / "taskbar/argvus-widget-telemetry.css").read_text()
         self.assertIn("border-radius: 4px;", css)
         self.assertNotIn("border-radius: 0px;", css)
         self.assertIn("border-radius: 4px;", telemetry_css)
@@ -1227,8 +1227,8 @@ class ThemeSwitchTests(unittest.TestCase):
             ["sh", str(borders_script), "--set-persist", "thickness", "7"],
             env=self.env, capture_output=True, text=True, check=True,
         )
-        before = (self.user / "waybar/argvus-taskbar.css").read_text()
-        telemetry_before = (self.user / "waybar/argvus-widget-telemetry.css").read_text()
+        before = (self.user / "taskbar/argvus-taskbar.css").read_text()
+        telemetry_before = (self.user / "taskbar/argvus-widget-telemetry.css").read_text()
         subprocess.run(
             ["sh", str(borders_script), "--apply"],
             env=self.env | {"ARGVUS_NO_RUNTIME": "0"},
@@ -1242,8 +1242,8 @@ class ThemeSwitchTests(unittest.TestCase):
         self.assertTrue(border_evals, "borders-switch.sh sent no hyprctl eval")
         self.assertIn("border_size = 7", border_evals[-1])
         self.assertFalse(any(command[:2] == ["hyprctl", "keyword"] for command in self.commands()))
-        self.assertEqual(before, (self.user / "waybar/argvus-taskbar.css").read_text())
-        self.assertEqual(telemetry_before, (self.user / "waybar/argvus-widget-telemetry.css").read_text())
+        self.assertEqual(before, (self.user / "taskbar/argvus-taskbar.css").read_text())
+        self.assertEqual(telemetry_before, (self.user / "taskbar/argvus-widget-telemetry.css").read_text())
 
 
 if __name__ == "__main__":

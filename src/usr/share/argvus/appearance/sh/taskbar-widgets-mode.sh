@@ -2,7 +2,7 @@
 # Project the canonical `taskbar.icons`/`taskbar.date`/`taskbar.time` config
 # into the generated argvus-taskbar.jsonc (module visibility, date format,
 # clock format). The config.json document is the single source of truth;
-# this script only re-derives the generated Waybar config from it.
+# this script only re-derives the generated Taskbar config from it.
 # Usage: taskbar-widgets-mode.sh {status|apply}
 # shellcheck shell=sh disable=SC1090,SC1091,SC2034
 
@@ -280,7 +280,7 @@ apply_mode() {
   fi
   if ! grep -q '"custom/update-status":' "$_target_config"; then
     insert_block_before '"custom/icon-window":' '  "custom/update-status": {
-    "exec": "/usr/share/argvus/taskbar/sh/waybar-update-status.sh",
+    "exec": "/usr/share/argvus/taskbar/sh/taskbar-update-status.sh",
     "return-type": "json",
     "format": "<span font_family='\''Symbols Nerd Font Mono'\''>󰚰</span> {}",
     "interval": 3600,
@@ -444,7 +444,7 @@ apply_mode() {
   replace_group_modules '"group/focus":' "$_focus_filtered" "$_target_config"
 
   # A group whose "modules" array ended up empty still renders as a visible
-  # empty box in Waybar unless its own key is also dropped from the
+  # empty box in Taskbar unless its own key is also dropped from the
   # modules-left/modules-right array that references it. Always recompute
   # from the system (unfiltered) arrays, same rationale as the per-group
   # filtering above: re-adding a previously hidden group must work too.
@@ -517,7 +517,7 @@ apply_mode() {
     "$_target_config"
 
   replace_in_block '"custom/date":' '"exec":' \
-    "    \"exec\": \"/usr/share/argvus/taskbar/sh/waybar-date.sh ${_date_format}\"," \
+    "    \"exec\": \"/usr/share/argvus/taskbar/sh/taskbar-date.sh ${_date_format}\"," \
     "$_target_config"
 
   case "${_time_format}:${_time_seconds_enabled}" in
@@ -545,7 +545,7 @@ apply_mode() {
   replace_in_block '"clock#time":' '"format":' \
     "    \"format\": \"<span font_family='Symbols Nerd Font Mono'>󰅐</span> {:L${_clock_strftime}}\"," \
     "$_target_config"
-  # Waybar's "clock" module defaults to a 60s refresh interval, so seconds
+  # Taskbar's "clock" module defaults to a 60s refresh interval, so seconds
   # shown in the format string would appear to freeze for up to a minute at
   # a time unless the interval is tightened to 1s whenever seconds are on.
   replace_in_block '"clock#time":' '"interval":' \

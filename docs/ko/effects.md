@@ -15,7 +15,7 @@ description: 애니메이션, 전역 Hyprland 흐림 및 개별 표면 투명도
 - **애니메이션** ( `/effects` `/effects/animations`)은 작업 공간, 창, 페이드, 테두리 및 레이어 애니메이션 등 움직이는 모든 것을 제어합니다.
 - **효과**는 터미널, 런처, 위젯 텔레메트리, 제어판 및 작업 표시줄의 블러(`/effects/blur_global_enabled`)와 투명도(`/effects/transparency_<surface>_enabled`)에 대한 바로 가기입니다. 켜거나 끄면 이들 모두(및 제어 센터 투명도도)가 적용됩니다. 각 표면은 자체 투명도 페이지를 유지하므로, 효과는 최소한 하나가 켜져 있을 때는 **켜짐**으로 읽히고 모든 것이 꺼져 있을 때만 꺼짐으로 표시됩니다.
 
-`argvus effects-toggle animations status|enable|disable|toggle`와 `argvus effects-toggle effects status|enable|disable|toggle`를 사용하세요. 제어판 모양 카드에는 각각 하나의 스위치가 표시됩니다. 마스터 스위치를 끄면 **Animations** 및 **Blur** 페이지의 모든 세부 설정(속도, 곡선, 개별 스위치, 블러 크기와 패스)이 유지되므로, 다시 켜면 동일한 모양이 복원됩니다. `effects status`는 블러 또는 최소한 하나의 투명 표면이 활성화되어 있을 때 `enabled`를 출력합니다. 표면의 투명도를 끄면 전체 Waybar 표면이 불투명해집니다. 배경뿐만 아니라 작업 표시줄과 Widget Telemetry의 반투명 테두리도 테마 배경 위에 나타나는 단색으로 바뀝니다. 모든 효과는 새 설치 시 기본적으로 활성화되어 있으며, 가상 머신과 저전력 세션에서도 마찬가지이며, 명시적으로 설정해야만 비활성화할 수 있습니다.
+`argvus effects-toggle animations status|enable|disable|toggle`와 `argvus effects-toggle effects status|enable|disable|toggle`를 사용하세요. 제어판 모양 카드에는 각각 하나의 스위치가 표시됩니다. 마스터 스위치를 끄면 **Animations** 및 **Blur** 페이지의 모든 세부 설정(속도, 곡선, 개별 스위치, 블러 크기와 패스)이 유지되므로, 다시 켜면 동일한 모양이 복원됩니다. `effects status`는 블러 또는 최소한 하나의 투명 표면이 활성화되어 있을 때 `enabled`를 출력합니다. 표면의 투명도를 끄면 전체 Taskbar 표면이 불투명해집니다. 배경뿐만 아니라 작업 표시줄과 Widget Telemetry의 반투명 테두리도 테마 배경 위에 나타나는 단색으로 바뀝니다. 모든 효과는 새 설치 시 기본적으로 활성화되어 있으며, 가상 머신과 저전력 세션에서도 마찬가지이며, 명시적으로 설정해야만 비활성화할 수 있습니다.
 
 ## 모든 효과 동시에
 
@@ -130,7 +130,7 @@ $XDG_CONFIG_HOME/argvus/config.json
 
 ## 프로필
 
-테마 내보내기에는 표준 외관/효과 설정 및 활성 테마의 표면별 효과 투영이 포함됩니다. 테마가 적용될 때 생성된 Waybar, Quickshell 및 Hyprland 런타임 파일이 다시 생성됩니다.
+테마 내보내기에는 표준 외관/효과 설정 및 활성 테마의 표면별 효과 투영이 포함됩니다. 테마가 적용될 때 생성된 Taskbar, Quickshell 및 Hyprland 런타임 파일이 다시 생성됩니다.
 
 모든 표면 페이지는 `[ Apply ]` 버튼과 함께 자신들의 초안을 적용합니다. 제어 센터는 효과 도우미를 통해 정식 문서를 작성하고, `argvus-config`가 효과 트리를 투사하도록 하며, 영향을 받은 소비자를 다시 로드하고 유효 값을 다시 읽습니다. 생성된 파일은 권위 있는 상태로 가져오는 대신 재생성됩니다.
 
