@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 PROJECT = Path(__file__).resolve().parents[1]
-TEMPLATE = PROJECT.parent / "argvus-taskbar/src/usr/share/argvus/taskbar/config/argvus-taskbar.jsonc"
+TEMPLATE = PROJECT.parent / "argvus-panels/src/usr/share/argvus/taskbar/config/argvus-taskbar.jsonc"
 SCRIPT = PROJECT / "src/usr/share/argvus/appearance/sh/taskbar-widgets-mode.sh"
 
 class Projection(unittest.TestCase):
