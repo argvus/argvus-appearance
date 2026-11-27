@@ -66,16 +66,16 @@ if name == "argvus" and sys.argv[1:4] == ["config", "get", "/layout/variant"]:
 
 def source_roots():
     """Every sibling filesystem root: `<repo>/src`, plus the `argvus` workspace,
-    whose packaged files live under packaging/archlinux/src. When Panels exists,
+    whose packaged files live under packaging/archlinux/src. When Shell exists,
     its source tree replaces the two historical panel repositories so fixture
     precedence cannot select stale theme consumers from the original checkouts."""
-    panels_repo = ROOT / "argvus-panels"
+    shell_repo = ROOT / "argvus-shell"
     roots = [
         repo / "src"
         for repo in ROOT.glob("argvus*")
         if (repo / "src").is_dir()
         and not (
-            panels_repo.is_dir()
+            shell_repo.is_dir()
             and repo.name in {"argvus-taskbar", "argvus-control-panel"}
         )
     ]
@@ -442,7 +442,7 @@ class ThemeSwitchTests(unittest.TestCase):
             ["dunstctl", "reload", str(self.user / "dunst/dunstrc")] in commands
             or ["argvus", "notifications", "theme", "reload", str(self.user / "dunst/dunstrc")] in commands
         )
-        self.assertIn(["qs", "-p", "/usr/share/argvus/panels/qml/shell.qml", "ipc", "call", "theme", "reload"], commands)
+        self.assertIn(["qs", "-p", "/usr/share/argvus/shell/qml/shell.qml", "ipc", "call", "theme", "reload"], commands)
         self.assertTrue(any(c[0] == "pkill" and "kitty" in c and "SIGUSR1" in c for c in commands))
         self.assertTrue(any(c[0] == "pkill" and "btop" in c and "SIGUSR2" in c for c in commands))
         build = os.readlink(self.current_build())
@@ -485,7 +485,7 @@ class ThemeSwitchTests(unittest.TestCase):
         commands = self.commands()
         restarts = [c for c in commands if c[:3] == ["systemctl", "--user", "try-restart"]]
         self.assertEqual(restarts, [["systemctl", "--user", "try-restart", "argvus-taskbar.service"]])
-        self.assertIn(["qs", "-p", "/usr/share/argvus/panels/qml/shell.qml", "ipc", "call", "theme", "reload"], commands)
+        self.assertIn(["qs", "-p", "/usr/share/argvus/shell/qml/shell.qml", "ipc", "call", "theme", "reload"], commands)
         self.assertNotIn(["argvus", "config", "theme-runtime", "hyprland"], commands)
 
     def test_layout_mode_switch_propagates_failed_theme_application(self):

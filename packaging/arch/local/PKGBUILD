@@ -35,7 +35,7 @@ optdepends=(
   'argvus-taskbar-calendar: calendar theme integration'
   'argvus-lock: Hyprlock theme integration'
   'argvus-notifications: Dunst theme integration'
-  'argvus-panels: Taskbar and Control Panel theme integration'
+  'argvus-shell: Taskbar and Control Panel theme integration'
   'argvus-widget-telemetry: Taskbar widget telemetry theme integration'
   'argvus-removable-devices: removable storage theme integration'
   'ddcutil: external monitor brightness control'
